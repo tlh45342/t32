@@ -3,8 +3,8 @@ ASMFLAGS ?= -f bin
 
 EMU ?= t32-run.exe
 
-ASM := movi.asm
-BIN := movi.bin
+ASM := mov.asm
+BIN := mov.bin
 
 all: $(BIN)
 
