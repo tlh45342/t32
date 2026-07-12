@@ -1,0 +1,8 @@
+O:\Foundry\t32\smoke-test-1>cat test1.asm
+movi r0, 42
+halt
+O:\Foundry\t32\smoke-test-1>t32-asm test1.asm test.o
+assembled test1.asm -> test.o
+
+O:\Foundry\t32\smoke-test-1>hexdump test.o
+00000000: 00 00 00 02 2a 00 00 00  00 00 00 00              |....*.......    |
