@@ -4,6 +4,7 @@ T32 is built to integrate with Foundry or for standalone testing.
 Each of these environments has there own feature set.
 
 ```
+https://github.com/tlh45342/t32
 https://github.com/tlh45342/foundry
 https://github.com/tlh45342/t32-asm
 https://github.com/tlh45342/vmctl
