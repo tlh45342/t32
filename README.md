@@ -1,23 +1,33 @@
-#t32 Repository for unit/smoke test
+# t32 — Instruction Set Test Suite
 
-T32 is built to integrate with Foundry or for standalone testing.
-Each of these environments has there own feature set.
+T32 is a small, custom instruction set used as a lightweight stand-in
+for real architectures (ARM, x86) while validating the surrounding
+orchestration and tooling layer. This repo holds the canonical
+unit/smoke tests for T32 — used by the T32 toolchain directly, and
+by Foundry-based integration testing.
 
-```
-https://github.com/tlh45342/t32
-https://github.com/tlh45342/t32-asm
-https://github.com/tlh45342/t32-cc
-https://github.com/tlh45342/t32-run
-https://github.com/tlh45342/t32-node
-https://github.com/tlh45342/t32-ld
+See `example.md` for a walkthrough, and `Docs/` for architecture notes.
 
-https://github.com/tlh45342/foundry
-https://github.com/tlh45342/vmctl
-https://github.com/tlh45342/guppy
-https://github.com/tlh45342/switchyard
-https://github.com/tlh45342/vconsole
-```
+## T32 toolchain
+- [t32-asm](https://github.com/tlh45342/t32-asm) — assembler
+- [t32-cc](https://github.com/tlh45342/t32-cc) — C compiler shim
+- [t32-ld](https://github.com/tlh45342/t32-ld) — linker
+- [t32-node](https://github.com/tlh45342/t32-node) — emulator/execution node
+- [t32-run](https://github.com/tlh45342/t32-run) — runner
 
-T32 is used for testing larger more enterprise elements such as
-https://github.com/tlh45342/x64-vm - A x86 implementation
-https://github.com/tlh45342/libvm - A simple ARMv7-A implementation
+## Orchestration ecosystem (Foundry)
+- [foundry](https://github.com/tlh45342/foundry) — VM orchestrator
+- [vmctl](https://github.com/tlh45342/vmctl) — CLI client
+- [guppy](https://github.com/tlh45342/guppy) — disk/image tooling
+- [switchyard](https://github.com/tlh45342/switchyard) — virtual network fabric
+- [vconsole](https://github.com/tlh45342/vconsole) — console access
+
+## Why T32 exists
+T32's simplicity lets the orchestration layer above (Foundry, vmctl,
+switchyard, guppy) be built and hardened quickly, before pointing the
+same tooling at real architectures:
+- [x64-vm](https://github.com/tlh45342/x64-vm) — x86 (real-mode) implementation
+- [libvm](https://github.com/tlh45342/libvm) — ARMv7-A implementation
+
+## Status
+Early stage — test suite and toolchain are both under active development.
