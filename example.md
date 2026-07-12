@@ -214,27 +214,3 @@ T32/
     t32-cc.md
     t32-node.md
 ```
-
-This gives you a **real architecture** without locking you into anything prematurely.
-
-# 🎁 Want a full “T32 ISA Spec Draft”?
-
-If you want, I can generate:
-
-- a complete **ISA reference**
-- a **calling convention**
-- a **register map**
-- a **memory model**
-- a **device model**
-- a **sample program suite**
-
-Just tell me:
-
-Choose one:
-
-- ISA spec draft
-- MMIO spec draft
-- Instruction reference
-- Example program suite
-
-I can build out the whole universe with you.
