@@ -1,0 +1,18 @@
+# T32 ADD instruction test
+
+logfile add.log
+version
+
+reset
+load add.bin 0x1000
+e 0x1000 12
+
+logfile off
+load add.bin 0x1000
+set r0 20
+set r1 22
+set pc 0x1000
+set run steps 2
+run
+regs
+status
