@@ -5,11 +5,12 @@ import sys
 VM = "t32-run.exe"
 
 TEST_NAME = "add"
-
 CHECKS = [
-    ("binary loaded", "loaded movi.bin at 0x00001000"),
-    ("r0 immediate value", "r0 =0x0000002a"),
-    ("program counter", "pc =0x0000100c"),
+    ("binary loaded", "loaded add.bin at 0x00001000"),
+    ("r0 preserved", "r0 =0x00000014"),
+    ("r1 preserved", "r1 =0x00000016"),
+    ("r2 result", "r2 =0x0000002a"),
+    ("program counter", "pc =0x00001008"),
     ("halted state", "state=halted"),
     ("instruction count", "instructions=2"),
     ("carry clear", "carry=0"),

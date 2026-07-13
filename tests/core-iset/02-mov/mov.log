@@ -1,5 +1,5 @@
 logging to mov.log
-t32-run version 0.0.2
+t32-run version 0.0.3
 machine reset
 loaded mov.bin at 0x00001000
 0x00001000: 00 00 10 01 00 00 00 00 00 00 00 00
