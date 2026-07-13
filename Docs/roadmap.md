@@ -1,3 +1,6 @@
+Completed ✓ HALT ✓ MOVI ✓ MOV ✓ ADD Next ADDI SUB SUBI Memory LDB STB Control Flow JMP JZ JNZ Assembler labels expressions macros Object Files -f obj Linker t32-ld Compiler t32-cc Runtime startup code Operating System monitor boot ROM
+
+
 0.0.1
 
 ✓ HALT
