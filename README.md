@@ -9,11 +9,11 @@ by Foundry-based integration testing.
 See `example.md` for a walkthrough, and `Docs/` for architecture notes.
 
 ## T32 toolchain
-- [t32-asm](https://github.com/tlh45342/t32-asm) — assembler
-- [t32-cc](https://github.com/tlh45342/t32-cc) — C compiler shim
-- [t32-ld](https://github.com/tlh45342/t32-ld) — linker
+- [t32-asm](https://github.com/tlh45342/t32-asm) — assembler (0.0.2 - 2026/7/12)
+- [t32-cc](https://github.com/tlh45342/t32-cc) — C compiler [shim]
+- [t32-ld](https://github.com/tlh45342/t32-ld) — linker [shim]
 - [t32-node](https://github.com/tlh45342/t32-node) — emulator/execution node
-- [t32-run](https://github.com/tlh45342/t32-run) — runner
+- [t32-run](https://github.com/tlh45342/t32-run) — runner (0.0.3 - 2026/7/12)
 
 ## Orchestration ecosystem (Foundry)
 - [foundry](https://github.com/tlh45342/foundry) — VM orchestrator
