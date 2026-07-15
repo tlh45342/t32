@@ -1,17 +1,11 @@
-# T32 MOVI instruction test
-
-logfile movi.log
+logfile jnz.log
 version
-
 reset
-load movi.bin 0x1000
-e 0x1000 12
-
+load jnz.bin 0x1000
+e 0x1000 32
 set pc 0x1000
-set run steps 2
-
+set run steps 4
 run
 regs
 status
-
 logfile off

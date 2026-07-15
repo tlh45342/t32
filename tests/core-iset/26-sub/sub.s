@@ -1,11 +1,5 @@
-; SUB instruction test
-;
-; Expected:
-;   r0 = 42
-;   r1 = 20
-;   r2 = 22
-
+.org 0x1000
 movi r0, 42
 movi r1, 20
-sub  r2, r0, r1
+sub r2, r0, r1
 halt

@@ -1,0 +1,11 @@
+logfile shr.log
+version
+reset
+load shr.bin 0x1000
+e 0x1000 24
+set pc 0x1000
+set run steps 4
+run
+regs
+status
+logfile off

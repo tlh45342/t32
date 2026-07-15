@@ -2,7 +2,7 @@ logging to movi.log
 t32-run version 0.0.3
 machine reset
 loaded movi.bin at 0x00001000
-0x00001000: 00 00 00 02 2a 00 00 00 00 00 00 00
+0x00001000: 00 00 00 09 2a 00 00 00 00 00 00 00
 pc <= 0x00001000
 run steps <= 2
 r0 =0x0000002a  r1 =0x00000000  r2 =0x00000000  r3 =0x00000000

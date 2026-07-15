@@ -1,20 +1,19 @@
-AS :== t32-asm
-ASMFLAGS ?= -f bin
+ASM ?= t32-asm
+PYTHON ?= python
+NAME := stb
+SOURCE := $(NAME).s
+BINARY := $(NAME).bin
+LOG := $(NAME).log
 
-EMU ?= t32-run.exe
+all: $(BINARY)
 
-ASM := movi.asm
-BIN := movi.bin
+$(BINARY): $(SOURCE)
+	$(ASM) -f bin $(SOURCE) -o $(BINARY)
 
-all: $(BIN)
-
-$(BIN): $(ASM)
-	$(AS) $(ASMFLAGS) $< -o $@
-
-test: $(BIN)
-	python run_tests.py
+test: $(BINARY)
+	$(PYTHON) run_tests.py
 
 clean:
-	-del /q $(BIN) 2>nul || exit 0
+	-$(RM) $(BINARY) $(LOG)
 
 .PHONY: all test clean

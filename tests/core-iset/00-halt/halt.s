@@ -1,4 +1,2 @@
-; HALT basic test
-; Expected: machine enters halted state.
-
+.org 0x1000
 halt

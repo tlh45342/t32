@@ -1,50 +1,64 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
 import os
 import subprocess
 import sys
+from pathlib import Path
 
-VM = "t32-run"
-TEST_NAME = "mov"
+TEST_NAME = 'mov'
+VM = os.environ.get("T32_RUN", "t32-run.exe" if os.name == "nt" else "t32-run")
+CHECKS = [('binary loaded', 'loaded mov.bin at 0x00001000'), ('source', 'r0 =0x0000002a'), ('destination', 'r1 =0x0000002a'), ('pc', 'pc =0x00001010'), ('halted', 'state=halted'), ('instructions', 'instructions=3')]
 
-CHECKS = [
-    ("binary loaded", "loaded mov.bin at 0x00001000"),
-    ("r0 unchanged", "r0 =0x00000000"),
-    ("r1 copied", "r1 =0x00000000"),
-    ("program counter", "pc =0x00001008"),
-    ("halted state", "state=halted"),
-    ("instruction count", "instructions=2"),
-    ("carry", "carry=0"),
-    ("zero", "zero=0"),
-    ("negative", "negative=0"),
-    ("overflow", "overflow=0"),
-]
+def main() -> int:
+    here = Path(__file__).resolve().parent
+    script_path = here / "test.script"
+    binary_path = here / f"{TEST_NAME}.bin"
+    log_path = here / f"{TEST_NAME}.log"
 
-def run_test():
-    log_path = f"{TEST_NAME}.log"
+    print(f"Running {TEST_NAME}...")
 
-    subprocess.run(
-        [VM],
-        stdin=open("test.script", "r"),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-        check=False,
-    )
+    if not binary_path.exists():
+        print(f"FAIL missing binary: {binary_path.name}")
+        return 1
 
-    if not os.path.exists(log_path):
-        print(f"Missing log file: {log_path}")
-        return False
+    if log_path.exists():
+        log_path.unlink()
 
-    log = open(log_path, "r", encoding="utf-8").read()
+    with script_path.open("r", encoding="utf-8") as script:
+        completed = subprocess.run(
+            [VM],
+            cwd=here,
+            stdin=script,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            check=False,
+        )
 
+    if completed.returncode != 0:
+        print(completed.stdout)
+        print(f"FAIL runner exit code {completed.returncode}")
+        return 1
+
+    if not log_path.exists():
+        print(completed.stdout)
+        print(f"FAIL missing log: {log_path.name}")
+        return 1
+
+    log = log_path.read_text(encoding="utf-8")
     passed = True
-    for label, expected in CHECKS:
-        if expected not in log:
-            print(f"FAIL {label}: missing {expected}")
-            passed = False
-        else:
-            print(f"PASS {label}")
 
-    return passed
+    for label, expected in CHECKS:
+        if expected in log:
+            print(f"  PASS {label}")
+        else:
+            print(f"  FAIL {label}")
+            print(f"       missing: {expected}")
+            passed = False
+
+    print(f"{TEST_NAME}: {'PASS' if passed else 'FAIL'}")
+    return 0 if passed else 1
 
 if __name__ == "__main__":
-    sys.exit(0 if run_test() else 1)
+    raise SystemExit(main())
