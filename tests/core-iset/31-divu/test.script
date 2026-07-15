@@ -1,0 +1,17 @@
+# T32 MOVI instruction test
+
+logfile diveu.log
+version
+
+reset
+load divu.bin 0x1000
+e 0x1000 12
+
+set pc 0x1000
+set run steps 2
+
+run
+regs
+status
+
+logfile off

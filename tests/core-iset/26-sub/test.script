@@ -1,0 +1,17 @@
+# T32 ADD instruction test
+
+logfile sub.log
+version
+
+reset
+load sub.bin 0x1000
+e 0x1000 12
+
+load sub.bin 0x1000
+set pc 0x1000
+set run steps 4
+run
+regs
+status
+
+logfile off
