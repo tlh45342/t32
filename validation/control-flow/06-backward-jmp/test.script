@@ -1,0 +1,10 @@
+logfile backward-jmp.log
+version
+reset
+load backward-jmp.bin 0x1000
+set pc 0x1000
+set run steps 15
+run
+regs
+status
+logfile off

@@ -1,19 +1,16 @@
-ASM ?= t32-asm
+ASSEMBLER ?= t32-as
 PYTHON ?= python
-NAME := ldw
-SOURCE := $(NAME).s
-BINARY := $(NAME).bin
-LOG := $(NAME).log
+BINARIES := ldw_roundtrip.bin ldw_little_endian_bytes.bin ldw_unaligned.bin ldw_overwrite.bin ldw_zero.bin ldw_flags_preserved.bin
 
-all: $(BINARY)
+all: $(BINARIES)
 
-$(BINARY): $(SOURCE)
-	$(ASM) -f bin $(SOURCE) -o $(BINARY)
+%.bin: %.s
+	$(ASSEMBLER) -f bin $< -o $@
 
-test: $(BINARY)
+test: all
 	$(PYTHON) run_tests.py
 
 clean:
-	-$(RM) $(BINARY) $(LOG)
+	$(RM) $(BINARIES) ldw_*.log
 
 .PHONY: all test clean

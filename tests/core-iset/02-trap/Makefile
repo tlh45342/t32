@@ -1,4 +1,4 @@
-ASM ?= t32-asm
+ASM ?= t32-as
 PYTHON ?= python
 NAME := trap
 SOURCE := $(NAME).s

@@ -1,19 +1,19 @@
-ASM ?= t32-asm
+ASM ?= t32-as
 PYTHON ?= python
 NAME := sub
-SOURCE := $(NAME).s
-BINARY := $(NAME).bin
-LOG := $(NAME).log
+SOURCES := sub_normal.s sub_equal.s sub_borrow.s sub_underflow.s sub_overflow.s sub_alias.s
+BINARIES := $(SOURCES:.s=.bin)
+LOGS := $(SOURCES:.s=.log)
 
-all: $(BINARY)
+all: $(BINARIES)
 
-$(BINARY): $(SOURCE)
-	$(ASM) -f bin $(SOURCE) -o $(BINARY)
+%.bin: %.s
+	$(ASM) -f bin $< -o $@
 
-test: $(BINARY)
+test: $(BINARIES)
 	$(PYTHON) run_tests.py
 
 clean:
-	-$(RM) $(BINARY) $(LOG)
+	-$(RM) $(BINARIES) $(LOGS)
 
 .PHONY: all test clean

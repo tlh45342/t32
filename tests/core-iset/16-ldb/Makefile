@@ -1,19 +1,16 @@
-ASM ?= t32-asm
+ASSEMBLER ?= t32-as
 PYTHON ?= python
-NAME := ldb
-SOURCE := $(NAME).s
-BINARY := $(NAME).bin
-LOG := $(NAME).log
+BINARIES := ldb_zero_extend_ff.bin ldb_offset_bytes.bin ldb_overwrite.bin ldb_source_preserved.bin ldb_flags_preserved.bin ldb_unaligned_from_word.bin
 
-all: $(BINARY)
+all: $(BINARIES)
 
-$(BINARY): $(SOURCE)
-	$(ASM) -f bin $(SOURCE) -o $(BINARY)
+%.bin: %.s
+	$(ASSEMBLER) -f bin $< -o $@
 
-test: $(BINARY)
+test: all
 	$(PYTHON) run_tests.py
 
 clean:
-	-$(RM) $(BINARY) $(LOG)
+	$(RM) $(BINARIES) ldb_*.log
 
 .PHONY: all test clean

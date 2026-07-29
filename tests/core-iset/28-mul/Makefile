@@ -1,19 +1,19 @@
-ASM ?= t32-asm
+ASM ?= t32-as
 PYTHON ?= python
 NAME := mul
-SOURCE := $(NAME).s
-BINARY := $(NAME).bin
-LOG := $(NAME).log
+SOURCES := mul_normal.s mul_zero.s mul_identity.s mul_negative_positive.s mul_negative_negative.s mul_wrap_low32.s mul_alias.s
+BINARIES := $(SOURCES:.s=.bin)
+LOGS := $(SOURCES:.s=.log)
 
-all: $(BINARY)
+all: $(BINARIES)
 
-$(BINARY): $(SOURCE)
-	$(ASM) -f bin $(SOURCE) -o $(BINARY)
+%.bin: %.s
+	$(ASM) -f bin $< -o $@
 
-test: $(BINARY)
+test: $(BINARIES)
 	$(PYTHON) run_tests.py
 
 clean:
-	-$(RM) $(BINARY) $(LOG)
+	-$(RM) $(BINARIES) $(LOGS)
 
 .PHONY: all test clean

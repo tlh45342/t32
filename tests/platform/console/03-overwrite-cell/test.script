@@ -1,0 +1,9 @@
+logfile overwrite-cell.log
+version
+reset
+load overwrite-cell.bin 0x00008000
+set pc 0x00008000
+run
+display
+status
+logfile off

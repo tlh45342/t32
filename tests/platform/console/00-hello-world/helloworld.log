@@ -1,0 +1,14 @@
+logging to helloworld.log
+t32-run version 0.0.5
+machine reset
+loaded helloworld.bin at 0x00008000
+pc <= 0x00008000
+state=halted
+instructions=34
+carry=0
+zero=0
+negative=0
+overflow=0
+reason=HALT instruction
+HELLO WORLD
+logging disabled

@@ -1,19 +1,18 @@
-ASM ?= t32-asm
+ASM ?= t32-as
 PYTHON ?= python
-NAME := jnz
-SOURCE := $(NAME).s
-BINARY := $(NAME).bin
-LOG := $(NAME).log
+SOURCES := jnz_taken_positive.s jnz_not_taken_zero.s jnz_taken_negative.s jnz_over_multiword.s jnz_source_preserved.s jnz_backward_loop.s
+BINARIES := $(SOURCES:.s=.bin)
+LOGS := $(SOURCES:.s=.log)
 
-all: $(BINARY)
+all: $(BINARIES)
 
-$(BINARY): $(SOURCE)
-	$(ASM) -f bin $(SOURCE) -o $(BINARY)
+%.bin: %.s
+	$(ASM) -f bin $< -o $@
 
-test: $(BINARY)
+test: $(BINARIES)
 	$(PYTHON) run_tests.py
 
 clean:
-	-$(RM) $(BINARY) $(LOG)
+	-$(RM) $(BINARIES) $(LOGS)
 
 .PHONY: all test clean

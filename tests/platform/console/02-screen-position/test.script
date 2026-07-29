@@ -1,0 +1,9 @@
+logfile screen-position.log
+version
+reset
+load screen-position.bin 0x00008000
+set pc 0x00008000
+run
+display
+status
+logfile off

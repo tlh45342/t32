@@ -55,3 +55,11 @@ clean:
 	@echo "T32 test artifacts removed."
 
 .PHONY: all test tests list-tests clean $(TEST_DIRS)
+
+validation:
+	$(MAKE) -C validation test
+
+clean-validation:
+	$(MAKE) -C validation clean
+
+.PHONY: validation clean-validation

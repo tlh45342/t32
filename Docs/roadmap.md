@@ -1,48 +1,102 @@
-Completed ✓ HALT ✓ MOVI ✓ MOV ✓ ADD Next ADDI SUB SUBI Memory LDB STB Control Flow JMP JZ JNZ Assembler labels expressions macros Object Files -f obj Linker t32-ld Compiler t32-cc Runtime startup code Operating System monitor boot ROM
+# T32 Roadmap
 
+## Current position
 
-0.0.1
+The present core instruction inventory has assembler support, runtime execution, and smoke tests across 36 instructions. Six arithmetic/compare instructions have expanded conformance tests.
 
-✓ HALT
-✓ MOVI
-✓ libt32
-✓ t32-run
-✓ regression framework
+## Phase 1 — Core ISA conformance
 
-0.0.2
+### Completed
 
-MOV
-LOAD
-STORE
+- Core instruction directory structure
+- Assembler/runtime smoke tests for the current 36-instruction set
+- Expanded validation for ADD, ADDI, SUB, SUBI, CMP, and CMPI
+- C/Z/N/V verification for expanded arithmetic and comparison cases
+- Exact encoding checks in expanded arithmetic/compare suites
 
-0.0.3
+### Next: logic, shifts, multiplication, and division
 
-ADD
-SUB
-CMP
+Expand in this order:
 
-0.0.4
+1. AND, OR, XOR, NOT
+2. SHL, SHR, SAR
+3. MUL, MULU
+4. DIV, DIVU
 
-JMP
-JZ
-JNZ
+Goals:
 
-0.1
+- exact encodings;
+- ordinary and boundary results;
+- source preservation;
+- destination aliasing;
+- all applicable flags;
+- explicit exceptional behavior.
 
-t32-cc
+### Following: remaining core groups
 
-0.2
+- MOV and MOVI boundaries/flags
+- memory width, byte order, alignment, and faults
+- taken/not-taken and backward control flow
+- stack contents, nesting, underflow, and interrupt frames
+- system-instruction fault and identity behavior
 
-t32-ld
+## Phase 2 — Test infrastructure
 
-0.3
+- Top-level Python conformance runner
+- Live console output plus timestamped logs
+- Final test/case totals
+- `latest` log artifact
+- Run one instruction or one family
+- Machine-readable summary for CI
+- Optional generated implementation-status data
 
-t32-node
+## Phase 3 — Formal ISA specification
 
-0.4
+- Freeze register roles and aliases
+- Freeze instruction encoding formats
+- Define all flag effects
+- Define shift and division edge behavior
+- Define endianness and alignment
+- Define trap/interrupt model
+- Assign an ISA version number
 
-Foundry integration
+## Phase 4 — Toolchain
 
-1.0
+- Object-file format
+- `t32-ld` linker
+- relocations and symbols
+- runtime startup code
+- assembler expressions/macros as needed
+- `t32-cc` compiler path
 
-Bootable T32 machine
+## Phase 5 — Machine environment
+
+- Boot/reset model
+- Timer and interrupts
+- memory-mapped text console
+- RTC and basic devices
+- disk/storage interface
+- small operational validation programs
+
+## Phase 6 — Foundry integration
+
+- `t32-node` release and debug builds
+- VM registration and lifecycle
+- console attachment
+- image upload/storage
+- scheduling through Foundry
+
+## Completion criterion for the core ISA
+
+The core ISA is complete only when every instruction has:
+
+```text
+documented semantics
+assembler implementation
+runtime implementation
+exact encoding test
+normal-result test
+boundary/exception tests
+complete applicable flag tests
+alias/source-preservation tests
+```

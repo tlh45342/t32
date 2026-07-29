@@ -1,0 +1,9 @@
+logfile helloworld.log
+version
+reset
+load helloworld.bin 0x8000
+set pc 0x8000
+run
+status
+display
+logfile off

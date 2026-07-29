@@ -1,19 +1,19 @@
-ASM ?= t32-asm
+ASM ?= t32-as
 PYTHON ?= python
 NAME := shr
-SOURCE := $(NAME).s
-BINARY := $(NAME).bin
-LOG := $(NAME).log
+SOURCES := shr_normal.s shr_zero_count.s shr_by_31.s shr_carry_out.s shr_logical_fill.s shr_zero_result.s shr_alias.s
+BINARIES := $(SOURCES:.s=.bin)
+LOGS := $(SOURCES:.s=.log)
 
-all: $(BINARY)
+all: $(BINARIES)
 
-$(BINARY): $(SOURCE)
-	$(ASM) -f bin $(SOURCE) -o $(BINARY)
+%.bin: %.s
+	$(ASM) -f bin $< -o $@
 
-test: $(BINARY)
+test: $(BINARIES)
 	$(PYTHON) run_tests.py
 
 clean:
-	-$(RM) $(BINARY) $(LOG)
+	-$(RM) $(BINARIES) $(LOGS)
 
 .PHONY: all test clean

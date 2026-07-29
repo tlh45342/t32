@@ -1,0 +1,22 @@
+logfile simple-call.log
+version
+reset
+load simple-call.bin 0x1000
+set pc 0x1000
+step 2
+regs
+status
+step
+regs
+status
+e 0x2ffc 4
+step
+regs
+status
+step
+regs
+status
+step
+regs
+status
+logfile off

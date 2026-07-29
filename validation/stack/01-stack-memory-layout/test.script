@@ -1,0 +1,18 @@
+logfile stack-memory-layout.log
+version
+reset
+load stack-memory-layout.bin 0x1000
+set pc 0x1000
+step 3
+regs
+status
+step
+regs
+e 0x2ffc 4
+step
+regs
+e 0x2ff8 8
+step
+regs
+status
+logfile off

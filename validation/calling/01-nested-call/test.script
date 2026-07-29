@@ -1,0 +1,29 @@
+logfile nested-call.log
+version
+reset
+load nested-call.bin 0x1000
+set pc 0x1000
+step 2
+regs
+step
+regs
+e 0x2ffc 4
+step
+regs
+step
+regs
+e 0x2ff8 8
+step
+regs
+step
+regs
+step
+regs
+step
+regs
+step
+regs
+step
+regs
+status
+logfile off

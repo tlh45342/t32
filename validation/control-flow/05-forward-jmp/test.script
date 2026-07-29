@@ -1,0 +1,18 @@
+logfile forward-jmp.log
+version
+reset
+load forward-jmp.bin 0x1000
+set pc 0x1000
+step
+regs
+status
+step
+regs
+status
+step
+regs
+status
+step
+regs
+status
+logfile off

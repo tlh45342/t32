@@ -1,0 +1,18 @@
+logfile jz-taken.log
+version
+reset
+load jz-taken.bin 0x1000
+set pc 0x1000
+step
+regs
+status
+step
+regs
+status
+step
+regs
+status
+step
+regs
+status
+logfile off

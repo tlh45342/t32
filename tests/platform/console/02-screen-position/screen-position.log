@@ -1,0 +1,16 @@
+logging to screen-position.log
+t32-run version 0.0.5
+machine reset
+loaded screen-position.bin at 0x00008000
+pc <= 0x00008000
+HELLO
+
+          WORLD
+state=halted
+instructions=31
+carry=0
+zero=0
+negative=0
+overflow=0
+reason=HALT instruction
+logging disabled

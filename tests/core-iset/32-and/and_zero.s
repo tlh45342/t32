@@ -1,0 +1,5 @@
+.org 0x1000
+movi r0, 0xffffffff
+movi r1, 0x00000000
+and r2, r0, r1
+halt

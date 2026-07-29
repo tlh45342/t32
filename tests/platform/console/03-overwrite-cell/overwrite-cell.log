@@ -1,0 +1,14 @@
+logging to overwrite-cell.log
+t32-run version 0.0.5
+machine reset
+loaded overwrite-cell.bin at 0x00008000
+pc <= 0x00008000
+HALLO
+state=halted
+instructions=19
+carry=0
+zero=0
+negative=0
+overflow=0
+reason=HALT instruction
+logging disabled

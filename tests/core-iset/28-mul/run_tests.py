@@ -1,64 +1,39 @@
 #!/usr/bin/env python3
 from __future__ import annotations
-
-import os
-import subprocess
-import sys
+import os, subprocess
 from pathlib import Path
-
 TEST_NAME = 'mul'
 VM = os.environ.get("T32_RUN", "t32-run.exe" if os.name == "nt" else "t32-run")
-CHECKS = [('binary loaded', 'loaded mul.bin at 0x00001000'), ('result', 'r2 =0x0000002a'), ('halted', 'state=halted'), ('instructions', 'instructions=4')]
+CASES = [{'name': 'normal', 'steps': 4, 'encoding_offset': 16, 'encoding_hex': '0010201c', 'checks': ['r0 =0x00000006', 'r1 =0x00000007', 'r2 =0x0000002a', 'carry=0', 'zero=0', 'negative=0', 'overflow=0']}, {'name': 'zero', 'steps': 4, 'encoding_offset': 16, 'encoding_hex': '0010201c', 'checks': ['r2 =0x00000000', 'zero=1', 'negative=0', 'carry=0', 'overflow=0']}, {'name': 'identity', 'steps': 4, 'encoding_offset': 16, 'encoding_hex': '0010201c', 'checks': ['r2 =0xffffffd6', 'zero=0', 'negative=1', 'carry=0', 'overflow=0']}, {'name': 'negative_positive', 'steps': 4, 'encoding_offset': 16, 'encoding_hex': '0010201c', 'checks': ['r2 =0xffffffd6', 'negative=1', 'zero=0', 'carry=0', 'overflow=0']}, {'name': 'negative_negative', 'steps': 4, 'encoding_offset': 16, 'encoding_hex': '0010201c', 'checks': ['r2 =0x0000002a', 'negative=0', 'zero=0', 'carry=0', 'overflow=0']}, {'name': 'wrap_low32', 'steps': 4, 'encoding_offset': 16, 'encoding_hex': '0010201c', 'checks': ['r2 =0x00000000', 'zero=1', 'negative=0']}, {'name': 'alias', 'steps': 4, 'encoding_offset': 16, 'encoding_hex': '0010001c', 'checks': ['r0 =0x0000002a', 'r1 =0x00000007']}]
 
-def main() -> int:
-    here = Path(__file__).resolve().parent
-    script_path = here / "test.script"
-    binary_path = here / f"{TEST_NAME}.bin"
-    log_path = here / f"{TEST_NAME}.log"
+def run_case(here: Path, case: dict[str, object]) -> bool:
+    name=str(case["name"]); binary=f"{TEST_NAME}_{name}.bin"; log=f"{TEST_NAME}_{name}.log"
+    bp=here/binary; lp=here/log
+    print(f"  {name}")
+    if not bp.exists(): print(f"    FAIL missing binary: {binary}"); return False
+    data=bp.read_bytes(); off=int(case["encoding_offset"]); exp=bytes.fromhex(str(case["encoding_hex"])); got=data[off:off+len(exp)]
+    if got != exp:
+        print("    FAIL assembler encoding"); print(f"         expected: {exp.hex(' ')}"); print(f"         actual:   {got.hex(' ')}"); return False
+    print("    PASS assembler encoding")
+    if lp.exists(): lp.unlink()
+    steps=int(case["steps"])
+    script="\n".join([f"logfile {log}","version","reset",f"load {binary} 0x1000",f"e 0x1000 {len(data)}","set pc 0x1000",f"set run steps {steps}","run","regs","status","logfile off",""])
+    p=subprocess.run([VM],cwd=here,input=script,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,check=False)
+    if p.returncode != 0: print(p.stdout); print(f"    FAIL runner exit code {p.returncode}"); return False
+    if not lp.exists(): print(p.stdout); print(f"    FAIL missing log: {log}"); return False
+    text=lp.read_text(encoding="utf-8")
+    expected=[f"loaded {binary} at 0x00001000","state=halted",f"instructions={steps}",*case["checks"]]
+    ok=True
+    for value in expected:
+        if str(value) in text: print(f"    PASS {value}")
+        else: print(f"    FAIL missing: {value}"); ok=False
+    return ok
 
-    print(f"Running {TEST_NAME}...")
-
-    if not binary_path.exists():
-        print(f"FAIL missing binary: {binary_path.name}")
-        return 1
-
-    if log_path.exists():
-        log_path.unlink()
-
-    with script_path.open("r", encoding="utf-8") as script:
-        completed = subprocess.run(
-            [VM],
-            cwd=here,
-            stdin=script,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            check=False,
-        )
-
-    if completed.returncode != 0:
-        print(completed.stdout)
-        print(f"FAIL runner exit code {completed.returncode}")
-        return 1
-
-    if not log_path.exists():
-        print(completed.stdout)
-        print(f"FAIL missing log: {log_path.name}")
-        return 1
-
-    log = log_path.read_text(encoding="utf-8")
-    passed = True
-
-    for label, expected in CHECKS:
-        if expected in log:
-            print(f"  PASS {label}")
-        else:
-            print(f"  FAIL {label}")
-            print(f"       missing: {expected}")
-            passed = False
-
-    print(f"{TEST_NAME}: {'PASS' if passed else 'FAIL'}")
+def main()->int:
+    here=Path(__file__).resolve().parent
+    print(f"Running {TEST_NAME} expanded validation...")
+    results=[run_case(here,c) for c in CASES]
+    passed=all(results)
+    print(f"{TEST_NAME}: {'PASS' if passed else 'FAIL'} ({sum(results)}/{len(results)} cases)")
     return 0 if passed else 1
-
-if __name__ == "__main__":
-    raise SystemExit(main())
+if __name__=='__main__': raise SystemExit(main())

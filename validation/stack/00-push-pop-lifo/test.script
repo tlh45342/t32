@@ -1,0 +1,11 @@
+logfile push-pop-lifo.log
+version
+reset
+load push-pop-lifo.bin 0x1000
+set pc 0x1000
+set run steps 11
+run
+regs
+status
+e 0x2ff4 12
+logfile off
