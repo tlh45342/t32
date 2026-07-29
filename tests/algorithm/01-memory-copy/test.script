@@ -1,0 +1,8 @@
+version
+reset
+load memory-copy.bin 0x00008000
+set pc 0x00008000
+run
+regs
+status
+logfile off

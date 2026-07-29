@@ -1,0 +1,10 @@
+logfile memory-fill.log
+reset
+load memory-fill.bin 0x00001000
+set pc 0x00001000
+run
+regs
+status
+e 0x00009000 16
+logfile off
+quit
