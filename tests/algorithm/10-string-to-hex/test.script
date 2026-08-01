@@ -1,0 +1,9 @@
+logfile string-to-hex.log
+reset
+load string-to-hex.bin 0x00001000
+set pc 0x00001000
+run
+regs
+status
+logfile off
+quit
