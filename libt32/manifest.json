@@ -1,0 +1,24 @@
+{
+  "name": "libt32",
+  "version": "0.0.1",
+  "state": "source-only",
+  "object_format_required": "T32OBJ v1 (not yet implemented)",
+  "routines": [
+    "src/convert/atoi.s",
+    "src/convert/hex_to_string.s",
+    "src/convert/string_to_hex.s",
+    "src/memory/memchr.s",
+    "src/memory/memcmp.s",
+    "src/memory/memcpy.s",
+    "src/memory/memmove.s",
+    "src/memory/memset.s",
+    "src/string/strchr.s",
+    "src/string/strcmp.s",
+    "src/string/strcpy.s",
+    "src/string/strlen.s",
+    "src/string/strncmp.s",
+    "src/string/strncpy.s",
+    "src/string/strrev.s",
+    "src/string/strstr.s"
+  ]
+}
