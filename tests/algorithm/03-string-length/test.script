@@ -1,0 +1,9 @@
+logfile string-length.log
+reset
+load string-length.bin 0x00001000
+set pc 0x00001000
+run
+regs
+status
+logfile off
+quit

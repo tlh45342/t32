@@ -1,5 +1,5 @@
 logging to jz_backward_exit.log
-t32-run version 0.0.4
+t32-run version 0.0.5
 machine reset
 loaded jz_backward_exit.bin at 0x00001000
 0x00001000: 00 00 00 09 02 00 00 00 00 00 00 1b 01 00 00 00

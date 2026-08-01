@@ -1,5 +1,5 @@
 logging to or_normal.log
-t32-run version 0.0.4
+t32-run version 0.0.5
 machine reset
 loaded or_normal.bin at 0x00001000
 0x00001000: 00 00 00 09 20 00 00 00 00 00 10 09 0a 00 00 00

@@ -1,5 +1,5 @@
 logging to jz_source_preserved.log
-t32-run version 0.0.4
+t32-run version 0.0.5
 machine reset
 loaded jz_source_preserved.bin at 0x00001000
 0x00001000: 00 00 70 09 00 00 00 00 00 00 07 2b 18 10 00 00

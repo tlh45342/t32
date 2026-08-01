@@ -1,5 +1,5 @@
 logging to cmpi_greater.log
-t32-run version 0.0.4
+t32-run version 0.0.5
 machine reset
 loaded cmpi_greater.bin at 0x00001000
 0x00001000: 00 00 00 09 2a 00 00 00 00 00 00 29 14 00 00 00

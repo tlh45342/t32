@@ -1,5 +1,5 @@
 logging to jmp_over_multiword.log
-t32-run version 0.0.4
+t32-run version 0.0.5
 machine reset
 loaded jmp_over_multiword.bin at 0x00001000
 0x00001000: 00 00 00 09 01 00 00 00 00 00 00 2a 20 10 00 00

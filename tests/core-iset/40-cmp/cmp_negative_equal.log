@@ -1,5 +1,5 @@
 logging to cmp_negative_equal.log
-t32-run version 0.0.4
+t32-run version 0.0.5
 machine reset
 loaded cmp_negative_equal.bin at 0x00001000
 0x00001000: 00 00 00 09 ff ff ff ff 00 00 10 09 ff ff ff ff

@@ -1,0 +1,8 @@
+logfile memory-compare.log
+load memory-compare.bin 0x00001000
+set pc 0x00001000
+run
+regs
+status
+logfile off
+quit

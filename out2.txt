@@ -1,0 +1,2219 @@
+ECHO is off.
+"============================================================"
+"Running test: tests/algorithm/00-memory-fill"
+"============================================================"
+make -C "tests/algorithm/00-memory-fill" test
+make[1]: Entering directory `O:/Foundry/t32/tests/algorithm/00-memory-fill'
+python run_tests.py
+Running memory-fill validation...
+
+✅ t32-run exited successfully
+✅ binary loaded
+✅ machine halted
+✅ HALT instruction reached
+✅ buffer base preserved
+✅ fill pointer advanced 16 bytes
+✅ fill value preserved
+✅ fill count reached zero
+✅ verification pointer advanced 16 bytes
+✅ verification count reached zero
+✅ final comparison matched
+✅ algorithm result is PASS
+✅ host observed 16 filled bytes
+
+PASS: memory-fill
+make[1]: Leaving directory `O:/Foundry/t32/tests/algorithm/00-memory-fill'
+ECHO is off.
+"============================================================"
+"Running test: tests/algorithm/01-memory-copy"
+"============================================================"
+make -C "tests/algorithm/01-memory-copy" test
+make[1]: Entering directory `O:/Foundry/t32/tests/algorithm/01-memory-copy'
+python run_tests.py
+Running memory-copy validation...
+  ✅ t32-run exited successfully
+  ✅ machine halted
+  ✅ HALT instruction reached
+  ✅ r7 was reported
+  ✅ algorithm result is PASS
+  ✅ source pointer advanced 16 bytes
+  ✅ destination pointer advanced 16 bytes
+  ✅ copy count reached zero
+  ✅ final source byte is 0xFF
+  ✅ final destination byte is 0xFF
+  ✅ final byte comparison matched
+
+PASS: memory-copy
+make[1]: Leaving directory `O:/Foundry/t32/tests/algorithm/01-memory-copy'
+ECHO is off.
+"============================================================"
+"Running test: tests/algorithm/02-memory-compare"
+"============================================================"
+make -C "tests/algorithm/02-memory-compare" test
+make[1]: Entering directory `O:/Foundry/t32/tests/algorithm/02-memory-compare'
+python run_tests.py
+Running memory-compare validation...
+
+✅ t32-run exited successfully
+✅ binary loaded
+✅ machine halted
+✅ HALT instruction reached
+✅ identical blocks compare equal
+✅ first-byte difference is detected
+✅ middle-byte difference is detected
+✅ last-byte difference is detected
+✅ zero-length comparison is equal
+✅ all five test cases completed
+✅ stack pointer restored
+✅ algorithm result is PASS
+
+PASS: memory-compare
+make[1]: Leaving directory `O:/Foundry/t32/tests/algorithm/02-memory-compare'
+ECHO is off.
+"============================================================"
+"Running test: tests/algorithm/03-string-length"
+"============================================================"
+make -C "tests/algorithm/03-string-length" test
+make[1]: Entering directory `O:/Foundry/t32/tests/algorithm/03-string-length'
+python run_tests.py
+Running string-length validation...
+
+✅ t32-run exited successfully
+✅ binary loaded
+✅ machine halted
+✅ HALT instruction reached
+✅ empty string length is zero
+✅ one-character string length is one
+✅ HELLO length is five
+✅ Hello World length is eleven
+✅ all four test cases completed
+✅ algorithm result is PASS
+
+PASS: string-length
+make[1]: Leaving directory `O:/Foundry/t32/tests/algorithm/03-string-length'
+ECHO is off.
+"============================================================"
+"Running test: tests/algorithm/04-string-compare"
+"============================================================"
+make -C "tests/algorithm/04-string-compare" test
+make[1]: Entering directory `O:/Foundry/t32/tests/algorithm/04-string-compare'
+python run_tests.py
+Running string-compare validation...
+
+✅ t32-run exited successfully
+✅ binary loaded
+✅ machine halted
+✅ HALT instruction reached
+✅ empty strings compare equal
+✅ one-character strings compare equal
+✅ identical words compare equal
+✅ different character is detected
+✅ left-shorter string is detected
+✅ right-shorter string is detected
+✅ all six test cases completed
+✅ stack pointer restored
+✅ algorithm result is PASS
+
+PASS: string-compare
+make[1]: Leaving directory `O:/Foundry/t32/tests/algorithm/04-string-compare'
+ECHO is off.
+"============================================================"
+"Running test: tests/algorithm/05-string-copy"
+"============================================================"
+make -C "tests/algorithm/05-string-copy" test
+make[1]: Entering directory `O:/Foundry/t32/tests/algorithm/05-string-copy'
+python run_tests.py
+Running string-copy validation...
+
+✅ t32-run exited successfully
+✅ binary loaded
+✅ machine halted
+✅ HALT instruction reached
+✅ empty string copied
+✅ one-character string copied
+✅ short string copied
+✅ normal word copied
+✅ phrase with spaces copied
+✅ destination guards preserved
+✅ all five test cases completed
+✅ stack pointer restored
+✅ algorithm result is PASS
+✅ host observed copied phrase and intact guards
+
+PASS: string-copy
+make[1]: Leaving directory `O:/Foundry/t32/tests/algorithm/05-string-copy'
+ECHO is off.
+"============================================================"
+"Running test: tests/algorithm/06-string-to-int"
+"============================================================"
+make -C "tests/algorithm/06-string-to-int" test
+make[1]: Entering directory `O:/Foundry/t32/tests/algorithm/06-string-to-int'
+python run_tests.py
+Running string-to-int validation...
+
+✅ t32-run exited successfully
+✅ binary loaded
+✅ machine halted
+✅ HALT instruction reached
+✅ empty string converts to zero
+✅ zero converts to zero
+✅ single digit converts correctly
+✅ two-digit value converts correctly
+✅ multi-digit value converts correctly
+✅ leading zeroes are accepted
+✅ all six test cases completed
+✅ stack pointer restored
+✅ algorithm result is PASS
+
+PASS: string-to-int
+make[1]: Leaving directory `O:/Foundry/t32/tests/algorithm/06-string-to-int'
+ECHO is off.
+"============================================================"
+"Running test: tests/algorithm/07-int-to-string"
+"============================================================"
+make -C "tests/algorithm/07-int-to-string" test
+make[1]: Entering directory `O:/Foundry/t32/tests/algorithm/07-int-to-string'
+python run_tests.py
+Running int-to-string validation...
+
+✅ t32-run exited successfully
+✅ binary loaded
+✅ machine halted
+✅ HALT instruction reached
+✅ zero converts to decimal text
+✅ single digit converts correctly
+✅ two-digit value converts correctly
+✅ decimal carry into hundreds works
+✅ internal zeroes are preserved
+✅ five-digit value converts correctly
+✅ all six test cases completed
+✅ stack pointer restored
+✅ algorithm result is PASS
+✅ host observed five-digit text and intact guards
+
+PASS: int-to-string
+make[1]: Leaving directory `O:/Foundry/t32/tests/algorithm/07-int-to-string'
+ECHO is off.
+"============================================================"
+"Running test: tests/algorithm/08-string-reverse"
+"============================================================"
+make -C "tests/algorithm/08-string-reverse" test
+make[1]: Entering directory `O:/Foundry/t32/tests/algorithm/08-string-reverse'
+python run_tests.py
+Running string-reverse validation...
+
+✅ t32-run exited successfully
+✅ binary loaded
+✅ machine halted
+✅ HALT instruction reached
+✅ empty string reversed correctly
+✅ one-character string reversed correctly
+✅ even-length string reversed correctly
+✅ odd-length string reversed correctly
+✅ normal word reversed correctly
+✅ phrase with spaces reversed correctly
+✅ all six test cases completed
+✅ stack pointer restored
+✅ algorithm result is PASS
+✅ host observed reversed word and intact guards
+
+PASS: string-reverse
+make[1]: Leaving directory `O:/Foundry/t32/tests/algorithm/08-string-reverse'
+ECHO is off.
+"============================================================"
+"Running test: tests/core-iset/00-halt"
+"============================================================"
+make -C "tests/core-iset/00-halt" test
+make[1]: Entering directory `O:/Foundry/t32/tests/core-iset/00-halt'
+python run_tests.py
+Running halt...
+  PASS binary loaded
+  PASS pc
+  PASS halted
+  PASS instructions
+  PASS reason
+halt: PASS
+make[1]: Leaving directory `O:/Foundry/t32/tests/core-iset/00-halt'
+ECHO is off.
+"============================================================"
+"Running test: tests/core-iset/01-nop"
+"============================================================"
+make -C "tests/core-iset/01-nop" test
+make[1]: Entering directory `O:/Foundry/t32/tests/core-iset/01-nop'
+python run_tests.py
+Running nop...
+  PASS binary loaded
+  PASS pc
+  PASS halted
+  PASS instructions
+  PASS reason
+nop: PASS
+make[1]: Leaving directory `O:/Foundry/t32/tests/core-iset/01-nop'
+ECHO is off.
+"============================================================"
+"Running test: tests/core-iset/02-trap"
+"============================================================"
+make -C "tests/core-iset/02-trap" test
+make[1]: Entering directory `O:/Foundry/t32/tests/core-iset/02-trap'
+python run_tests.py
+Running trap...
+  PASS binary loaded
+  PASS halted
+  PASS instructions
+  PASS reason
+trap: PASS
+make[1]: Leaving directory `O:/Foundry/t32/tests/core-iset/02-trap'
+ECHO is off.
+"============================================================"
+"Running test: tests/core-iset/03-iret"
+"============================================================"
+make -C "tests/core-iset/03-iret" test
+make[1]: Entering directory `O:/Foundry/t32/tests/core-iset/03-iret'
+python run_tests.py
+Running iret expanded validation...
+  forward
+    PASS assembler encoding
+    PASS loaded iret_forward.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=6
+    PASS r1 =0x0000002a
+    PASS r15=0x00003000
+  next_instruction
+    PASS assembler encoding
+    PASS loaded iret_next_instruction.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=6
+    PASS r1 =0x0000002a
+    PASS r15=0x00003000
+  over_multiword
+    PASS assembler encoding
+    PASS loaded iret_over_multiword.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=6
+    PASS r1 =0x00000000
+    PASS r2 =0x00000000
+    PASS r3 =0x0000002a
+    PASS r15=0x00003000
+  stack_data_below_pc
+    PASS assembler encoding
+    PASS loaded iret_stack_data_below_pc.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=8
+    PASS r4 =0x12345678
+    PASS r5 =0x12345678
+    PASS r15=0x00003000
+  preserve_registers
+    PASS assembler encoding
+    PASS loaded iret_preserve_registers.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=6
+    PASS r7 =0xabcdef01
+    PASS r15=0x00003000
+iret: PASS (5/5 cases)
+make[1]: Leaving directory `O:/Foundry/t32/tests/core-iset/03-iret'
+ECHO is off.
+"============================================================"
+"Running test: tests/core-iset/04-cpuid"
+"============================================================"
+make -C "tests/core-iset/04-cpuid" test
+make[1]: Entering directory `O:/Foundry/t32/tests/core-iset/04-cpuid'
+python run_tests.py
+Running cpuid...
+  PASS binary loaded
+  PASS cpu id
+  PASS pc
+  PASS halted
+  PASS instructions
+cpuid: PASS
+make[1]: Leaving directory `O:/Foundry/t32/tests/core-iset/04-cpuid'
+ECHO is off.
+"============================================================"
+"Running test: tests/core-iset/05-reserved-system"
+"============================================================"
+make -C "tests/core-iset/05-reserved-system" test
+make[1]: Entering directory `O:/Foundry/t32/tests/core-iset/05-reserved-system'
+python run_tests.py
+Running reserved system opcode validation...
+  opcode_05
+    PASS assembler raw-word encoding
+    PASS binary loaded
+    PASS pc set
+    PASS run rejected reserved opcode
+    PASS pc advanced one word
+    PASS following halt not executed
+  opcode_06
+    PASS assembler raw-word encoding
+    PASS binary loaded
+    PASS pc set
+    PASS run rejected reserved opcode
+    PASS pc advanced one word
+    PASS following halt not executed
+  opcode_07
+    PASS assembler raw-word encoding
+    PASS binary loaded
+    PASS pc set
+    PASS run rejected reserved opcode
+    PASS pc advanced one word
+    PASS following halt not executed
+  assembler_rejects_reserved_mnemonics
+    PASS op05 rejected
+    PASS op06 rejected
+    PASS op07 rejected
+reserved-system: PASS (4/4 cases)
+make[1]: Leaving directory `O:/Foundry/t32/tests/core-iset/05-reserved-system'
+ECHO is off.
+"============================================================"
+"Running test: tests/core-iset/08-mov"
+"============================================================"
+make -C "tests/core-iset/08-mov" test
+make[1]: Entering directory `O:/Foundry/t32/tests/core-iset/08-mov'
+python run_tests.py
+Running mov...
+  PASS binary loaded
+  PASS source
+  PASS destination
+  PASS pc
+  PASS halted
+  PASS instructions
+mov: PASS
+make[1]: Leaving directory `O:/Foundry/t32/tests/core-iset/08-mov'
+ECHO is off.
+"============================================================"
+"Running test: tests/core-iset/09-movi"
+"============================================================"
+make -C "tests/core-iset/09-movi" test
+make[1]: Entering directory `O:/Foundry/t32/tests/core-iset/09-movi'
+python run_tests.py
+Running movi...
+  PASS binary loaded
+  PASS value
+  PASS pc
+  PASS halted
+  PASS instructions
+movi: PASS
+make[1]: Leaving directory `O:/Foundry/t32/tests/core-iset/09-movi'
+ECHO is off.
+"============================================================"
+"Running test: tests/core-iset/16-ldb"
+"============================================================"
+make -C "tests/core-iset/16-ldb" test
+make[1]: Entering directory `O:/Foundry/t32/tests/core-iset/16-ldb'
+python run_tests.py
+Running ldb expanded validation...
+  zero_extend_ff
+    PASS assembler encoding
+    PASS loaded ldb_zero_extend_ff.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=5
+    PASS r0 =0x00003000
+    PASS r1 =0xffffffff
+    PASS r2 =0x000000ff
+  offset_bytes
+    PASS assembler encoding
+    PASS loaded ldb_offset_bytes.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=8
+    PASS r2 =0x00000022
+  overwrite
+    PASS assembler encoding
+    PASS loaded ldb_overwrite.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=7
+    PASS r2 =0x00000055
+  source_preserved
+    PASS assembler encoding
+    PASS loaded ldb_source_preserved.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=5
+    PASS r0 =0x00003000
+    PASS r1 =0x0000007e
+    PASS r2 =0x0000007e
+  flags_preserved
+    PASS assembler encoding
+    PASS loaded ldb_flags_preserved.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=7
+    PASS r2 =0x0000005a
+    PASS carry=1
+    PASS zero=1
+    PASS negative=0
+    PASS overflow=0
+  unaligned_from_word
+    PASS assembler encoding
+    PASS loaded ldb_unaligned_from_word.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=6
+    PASS r2 =0x000000cc
+ldb: PASS (6/6 cases)
+make[1]: Leaving directory `O:/Foundry/t32/tests/core-iset/16-ldb'
+ECHO is off.
+"============================================================"
+"Running test: tests/core-iset/17-ldh"
+"============================================================"
+make -C "tests/core-iset/17-ldh" test
+make[1]: Entering directory `O:/Foundry/t32/tests/core-iset/17-ldh'
+python run_tests.py
+Running ldh expanded validation...
+  zero_extend_ffff
+    PASS assembler encoding
+    PASS loaded ldh_zero_extend_ffff.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=5
+    PASS r2 =0x0000ffff
+  little_endian_low
+    PASS assembler encoding
+    PASS loaded ldh_little_endian_low.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=5
+    PASS r2 =0x0000ccdd
+  little_endian_high
+    PASS assembler encoding
+    PASS loaded ldh_little_endian_high.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=6
+    PASS r2 =0x0000aabb
+  unaligned
+    PASS assembler encoding
+    PASS loaded ldh_unaligned.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=5
+    PASS r2 =0x00001234
+  overwrite
+    PASS assembler encoding
+    PASS loaded ldh_overwrite.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=7
+    PASS r2 =0x00005555
+  flags_preserved
+    PASS assembler encoding
+    PASS loaded ldh_flags_preserved.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=7
+    PASS r2 =0x0000beef
+    PASS carry=1
+    PASS zero=1
+    PASS negative=0
+    PASS overflow=0
+ldh: PASS (6/6 cases)
+make[1]: Leaving directory `O:/Foundry/t32/tests/core-iset/17-ldh'
+ECHO is off.
+"============================================================"
+"Running test: tests/core-iset/18-ldw"
+"============================================================"
+make -C "tests/core-iset/18-ldw" test
+make[1]: Entering directory `O:/Foundry/t32/tests/core-iset/18-ldw'
+python run_tests.py
+Running ldw expanded validation...
+  roundtrip
+    PASS assembler encoding
+    PASS loaded ldw_roundtrip.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=5
+    PASS r2 =0x12345678
+  little_endian_bytes
+    PASS assembler encoding
+    PASS loaded ldw_little_endian_bytes.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=15
+    PASS r2 =0x44332211
+  unaligned
+    PASS assembler encoding
+    PASS loaded ldw_unaligned.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=5
+    PASS r2 =0x89abcdef
+  overwrite
+    PASS assembler encoding
+    PASS loaded ldw_overwrite.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=7
+    PASS r2 =0x55555555
+  zero
+    PASS assembler encoding
+    PASS loaded ldw_zero.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=5
+    PASS r2 =0x00000000
+  flags_preserved
+    PASS assembler encoding
+    PASS loaded ldw_flags_preserved.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=7
+    PASS r2 =0xdeadbeef
+    PASS carry=1
+    PASS zero=1
+    PASS negative=0
+    PASS overflow=0
+ldw: PASS (6/6 cases)
+make[1]: Leaving directory `O:/Foundry/t32/tests/core-iset/18-ldw'
+ECHO is off.
+"============================================================"
+"Running test: tests/core-iset/19-stb"
+"============================================================"
+make -C "tests/core-iset/19-stb" test
+make[1]: Entering directory `O:/Foundry/t32/tests/core-iset/19-stb'
+python run_tests.py
+Running stb expanded validation...
+  low_byte_only
+    PASS assembler encoding
+    PASS loaded stb_low_byte_only.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=5
+    PASS r2 =0x00000078
+  neighbor_preserved
+    PASS assembler encoding
+    PASS loaded stb_neighbor_preserved.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=7
+    PASS r2 =0xaabbcc11
+  overwrite
+    PASS assembler encoding
+    PASS loaded stb_overwrite.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=7
+    PASS r2 =0x00000055
+  build_word
+    PASS assembler encoding
+    PASS loaded stb_build_word.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=15
+    PASS r2 =0x44332211
+  source_preserved
+    PASS assembler encoding
+    PASS loaded stb_source_preserved.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r0 =0x00003000
+    PASS r1 =0xabcdef7e
+  flags_preserved
+    PASS assembler encoding
+    PASS loaded stb_flags_preserved.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=6
+    PASS carry=1
+    PASS zero=1
+    PASS negative=0
+    PASS overflow=0
+stb: PASS (6/6 cases)
+make[1]: Leaving directory `O:/Foundry/t32/tests/core-iset/19-stb'
+ECHO is off.
+"============================================================"
+"Running test: tests/core-iset/20-sth"
+"============================================================"
+make -C "tests/core-iset/20-sth" test
+make[1]: Entering directory `O:/Foundry/t32/tests/core-iset/20-sth'
+python run_tests.py
+Running sth expanded validation...
+  low_half_only
+    PASS assembler encoding
+    PASS loaded sth_low_half_only.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=5
+    PASS r2 =0x00005678
+  little_endian_bytes
+    PASS assembler encoding
+    PASS loaded sth_little_endian_bytes.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=7
+    PASS r2 =0x00000034
+    PASS r3 =0x00000012
+  upper_half_preserved
+    PASS assembler encoding
+    PASS loaded sth_upper_half_preserved.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=7
+    PASS r2 =0xaabb1122
+  unaligned
+    PASS assembler encoding
+    PASS loaded sth_unaligned.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=5
+    PASS r2 =0x0000beef
+  overwrite
+    PASS assembler encoding
+    PASS loaded sth_overwrite.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=7
+    PASS r2 =0x00005555
+  flags_preserved
+    PASS assembler encoding
+    PASS loaded sth_flags_preserved.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=6
+    PASS carry=1
+    PASS zero=1
+    PASS negative=0
+    PASS overflow=0
+sth: PASS (6/6 cases)
+make[1]: Leaving directory `O:/Foundry/t32/tests/core-iset/20-sth'
+ECHO is off.
+"============================================================"
+"Running test: tests/core-iset/21-stw"
+"============================================================"
+make -C "tests/core-iset/21-stw" test
+make[1]: Entering directory `O:/Foundry/t32/tests/core-iset/21-stw'
+python run_tests.py
+Running stw expanded validation...
+  roundtrip
+    PASS assembler encoding
+    PASS loaded stw_roundtrip.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=5
+    PASS r2 =0x12345678
+  little_endian_bytes
+    PASS assembler encoding
+    PASS loaded stw_little_endian_bytes.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=11
+    PASS r2 =0x00000011
+    PASS r3 =0x00000022
+    PASS r4 =0x00000033
+    PASS r5 =0x00000044
+  overwrite
+    PASS assembler encoding
+    PASS loaded stw_overwrite.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=7
+    PASS r2 =0x55555555
+  unaligned
+    PASS assembler encoding
+    PASS loaded stw_unaligned.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=5
+    PASS r2 =0x89abcdef
+  zero
+    PASS assembler encoding
+    PASS loaded stw_zero.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=5
+    PASS r2 =0x00000000
+  flags_preserved
+    PASS assembler encoding
+    PASS loaded stw_flags_preserved.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=6
+    PASS carry=1
+    PASS zero=1
+    PASS negative=0
+    PASS overflow=0
+stw: PASS (6/6 cases)
+make[1]: Leaving directory `O:/Foundry/t32/tests/core-iset/21-stw'
+ECHO is off.
+"============================================================"
+"Running test: tests/core-iset/24-add"
+"============================================================"
+make -C "tests/core-iset/24-add" test
+make[1]: Entering directory `O:/Foundry/t32/tests/core-iset/24-add'
+python run_tests.py
+Running add expanded validation...
+  normal
+    PASS assembler encoding
+    PASS loaded add_normal.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r0 =0x00000014
+    PASS r1 =0x00000016
+    PASS r2 =0x0000002a
+    PASS carry=0
+    PASS zero=0
+    PASS negative=0
+    PASS overflow=0
+  zero
+    PASS assembler encoding
+    PASS loaded add_zero.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x00000000
+    PASS carry=0
+    PASS zero=1
+    PASS negative=0
+    PASS overflow=0
+  carry
+    PASS assembler encoding
+    PASS loaded add_carry.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r0 =0xffffffff
+    PASS r1 =0x00000001
+    PASS r2 =0x00000000
+    PASS carry=1
+    PASS zero=1
+    PASS negative=0
+    PASS overflow=0
+  overflow
+    PASS assembler encoding
+    PASS loaded add_overflow.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x80000000
+    PASS carry=0
+    PASS zero=0
+    PASS negative=1
+    PASS overflow=1
+  negative
+    PASS assembler encoding
+    PASS loaded add_negative.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x80000001
+    PASS carry=0
+    PASS zero=0
+    PASS negative=1
+    PASS overflow=0
+  alias
+    PASS assembler encoding
+    PASS loaded add_alias.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r0 =0x0000002a
+    PASS r1 =0x00000016
+    PASS carry=0
+    PASS zero=0
+    PASS negative=0
+    PASS overflow=0
+add: PASS (6/6 cases)
+make[1]: Leaving directory `O:/Foundry/t32/tests/core-iset/24-add'
+ECHO is off.
+"============================================================"
+"Running test: tests/core-iset/25-addi"
+"============================================================"
+make -C "tests/core-iset/25-addi" test
+make[1]: Entering directory `O:/Foundry/t32/tests/core-iset/25-addi'
+python run_tests.py
+Running addi expanded validation...
+  normal
+    PASS assembler encoding
+    PASS loaded addi_normal.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=3
+    PASS r0 =0x00000014
+    PASS r1 =0x0000002a
+    PASS carry=0
+    PASS zero=0
+    PASS negative=0
+    PASS overflow=0
+  zero_imm
+    PASS assembler encoding
+    PASS loaded addi_zero_imm.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=3
+    PASS r0 =0x0000002a
+    PASS r1 =0x0000002a
+    PASS carry=0
+    PASS zero=0
+    PASS negative=0
+    PASS overflow=0
+  carry
+    PASS assembler encoding
+    PASS loaded addi_carry.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=3
+    PASS r1 =0x00000000
+    PASS carry=1
+    PASS zero=1
+    PASS negative=0
+    PASS overflow=0
+  overflow
+    PASS assembler encoding
+    PASS loaded addi_overflow.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=3
+    PASS r1 =0x80000000
+    PASS carry=0
+    PASS zero=0
+    PASS negative=1
+    PASS overflow=1
+  negative
+    PASS assembler encoding
+    PASS loaded addi_negative.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=3
+    PASS r1 =0x80000001
+    PASS carry=0
+    PASS zero=0
+    PASS negative=1
+    PASS overflow=0
+  alias
+    PASS assembler encoding
+    PASS loaded addi_alias.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=3
+    PASS r0 =0x0000002a
+    PASS carry=0
+    PASS zero=0
+    PASS negative=0
+    PASS overflow=0
+addi: PASS (6/6 cases)
+make[1]: Leaving directory `O:/Foundry/t32/tests/core-iset/25-addi'
+ECHO is off.
+"============================================================"
+"Running test: tests/core-iset/26-sub"
+"============================================================"
+make -C "tests/core-iset/26-sub" test
+make[1]: Entering directory `O:/Foundry/t32/tests/core-iset/26-sub'
+python run_tests.py
+Running sub expanded validation...
+  normal
+    PASS assembler encoding
+    PASS loaded sub_normal.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r0 =0x0000002a
+    PASS r1 =0x00000014
+    PASS r2 =0x00000016
+    PASS carry=1
+    PASS zero=0
+    PASS negative=0
+    PASS overflow=0
+  equal
+    PASS assembler encoding
+    PASS loaded sub_equal.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x00000000
+    PASS carry=1
+    PASS zero=1
+    PASS negative=0
+    PASS overflow=0
+  borrow
+    PASS assembler encoding
+    PASS loaded sub_borrow.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0xfffffffe
+    PASS carry=0
+    PASS zero=0
+    PASS negative=1
+    PASS overflow=0
+  underflow
+    PASS assembler encoding
+    PASS loaded sub_underflow.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0xffffffff
+    PASS carry=0
+    PASS zero=0
+    PASS negative=1
+    PASS overflow=0
+  overflow
+    PASS assembler encoding
+    PASS loaded sub_overflow.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x7fffffff
+    PASS carry=1
+    PASS zero=0
+    PASS negative=0
+    PASS overflow=1
+  alias
+    PASS assembler encoding
+    PASS loaded sub_alias.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r0 =0x00000016
+    PASS r1 =0x00000014
+    PASS carry=1
+    PASS zero=0
+    PASS negative=0
+    PASS overflow=0
+sub: PASS (6/6 cases)
+make[1]: Leaving directory `O:/Foundry/t32/tests/core-iset/26-sub'
+ECHO is off.
+"============================================================"
+"Running test: tests/core-iset/27-subi"
+"============================================================"
+make -C "tests/core-iset/27-subi" test
+make[1]: Entering directory `O:/Foundry/t32/tests/core-iset/27-subi'
+python run_tests.py
+Running subi expanded validation...
+  normal
+    PASS assembler encoding
+    PASS loaded subi_normal.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=3
+    PASS r0 =0x0000002a
+    PASS r1 =0x00000016
+    PASS carry=1
+    PASS zero=0
+    PASS negative=0
+    PASS overflow=0
+  zero_imm
+    PASS assembler encoding
+    PASS loaded subi_zero_imm.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=3
+    PASS r1 =0x0000002a
+    PASS carry=1
+    PASS zero=0
+    PASS negative=0
+    PASS overflow=0
+  equal
+    PASS assembler encoding
+    PASS loaded subi_equal.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=3
+    PASS r1 =0x00000000
+    PASS carry=1
+    PASS zero=1
+    PASS negative=0
+    PASS overflow=0
+  borrow
+    PASS assembler encoding
+    PASS loaded subi_borrow.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=3
+    PASS r1 =0xfffffffe
+    PASS carry=0
+    PASS zero=0
+    PASS negative=1
+    PASS overflow=0
+  overflow
+    PASS assembler encoding
+    PASS loaded subi_overflow.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=3
+    PASS r1 =0x7fffffff
+    PASS carry=1
+    PASS zero=0
+    PASS negative=0
+    PASS overflow=1
+  alias
+    PASS assembler encoding
+    PASS loaded subi_alias.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=3
+    PASS r0 =0x00000016
+    PASS carry=1
+    PASS zero=0
+    PASS negative=0
+    PASS overflow=0
+subi: PASS (6/6 cases)
+make[1]: Leaving directory `O:/Foundry/t32/tests/core-iset/27-subi'
+ECHO is off.
+"============================================================"
+"Running test: tests/core-iset/28-mul"
+"============================================================"
+make -C "tests/core-iset/28-mul" test
+make[1]: Entering directory `O:/Foundry/t32/tests/core-iset/28-mul'
+python run_tests.py
+Running mul expanded validation...
+  normal
+    PASS assembler encoding
+    PASS loaded mul_normal.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r0 =0x00000006
+    PASS r1 =0x00000007
+    PASS r2 =0x0000002a
+    PASS carry=0
+    PASS zero=0
+    PASS negative=0
+    PASS overflow=0
+  zero
+    PASS assembler encoding
+    PASS loaded mul_zero.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x00000000
+    PASS zero=1
+    PASS negative=0
+    PASS carry=0
+    PASS overflow=0
+  identity
+    PASS assembler encoding
+    PASS loaded mul_identity.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0xffffffd6
+    PASS zero=0
+    PASS negative=1
+    PASS carry=0
+    PASS overflow=0
+  negative_positive
+    PASS assembler encoding
+    PASS loaded mul_negative_positive.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0xffffffd6
+    PASS negative=1
+    PASS zero=0
+    PASS carry=0
+    PASS overflow=0
+  negative_negative
+    PASS assembler encoding
+    PASS loaded mul_negative_negative.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x0000002a
+    PASS negative=0
+    PASS zero=0
+    PASS carry=0
+    PASS overflow=0
+  wrap_low32
+    PASS assembler encoding
+    PASS loaded mul_wrap_low32.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x00000000
+    PASS zero=1
+    PASS negative=0
+  alias
+    PASS assembler encoding
+    PASS loaded mul_alias.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r0 =0x0000002a
+    PASS r1 =0x00000007
+mul: PASS (7/7 cases)
+make[1]: Leaving directory `O:/Foundry/t32/tests/core-iset/28-mul'
+ECHO is off.
+"============================================================"
+"Running test: tests/core-iset/29-mulu"
+"============================================================"
+make -C "tests/core-iset/29-mulu" test
+make[1]: Entering directory `O:/Foundry/t32/tests/core-iset/29-mulu'
+python run_tests.py
+Running mulu expanded validation...
+  normal
+    PASS assembler encoding
+    PASS loaded mulu_normal.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x0000002a
+    PASS zero=0
+    PASS negative=0
+    PASS carry=0
+    PASS overflow=0
+  zero
+    PASS assembler encoding
+    PASS loaded mulu_zero.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x00000000
+    PASS zero=1
+    PASS negative=0
+  identity
+    PASS assembler encoding
+    PASS loaded mulu_identity.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0xffffffff
+    PASS negative=1
+    PASS zero=0
+  max_times_two
+    PASS assembler encoding
+    PASS loaded mulu_max_times_two.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0xfffffffe
+    PASS negative=1
+    PASS zero=0
+  high_bit_wrap
+    PASS assembler encoding
+    PASS loaded mulu_high_bit_wrap.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x00000000
+    PASS zero=1
+    PASS negative=0
+  alternating
+    PASS assembler encoding
+    PASS loaded mulu_alternating.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x00020001
+    PASS zero=0
+    PASS negative=0
+  alias
+    PASS assembler encoding
+    PASS loaded mulu_alias.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r0 =0x0000002a
+    PASS r1 =0x00000007
+mulu: PASS (7/7 cases)
+make[1]: Leaving directory `O:/Foundry/t32/tests/core-iset/29-mulu'
+ECHO is off.
+"============================================================"
+"Running test: tests/core-iset/30-div"
+"============================================================"
+make -C "tests/core-iset/30-div" test
+make[1]: Entering directory `O:/Foundry/t32/tests/core-iset/30-div'
+python run_tests.py
+Running div expanded validation...
+  normal
+    PASS assembler encoding
+    PASS loaded div_normal.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x0000002a
+    PASS zero=0
+    PASS negative=0
+    PASS carry=0
+    PASS overflow=0
+  positive_negative
+    PASS assembler encoding
+    PASS loaded div_positive_negative.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0xffffffd6
+    PASS negative=1
+    PASS zero=0
+  negative_positive
+    PASS assembler encoding
+    PASS loaded div_negative_positive.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0xffffffeb
+    PASS negative=1
+    PASS zero=0
+  negative_negative
+    PASS assembler encoding
+    PASS loaded div_negative_negative.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x0000002a
+    PASS negative=0
+    PASS zero=0
+  zero_dividend
+    PASS assembler encoding
+    PASS loaded div_zero_dividend.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x00000000
+    PASS zero=1
+    PASS negative=0
+  truncate_positive
+    PASS assembler encoding
+    PASS loaded div_truncate_positive.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x00000003
+    PASS negative=0
+    PASS zero=0
+  truncate_negative
+    PASS assembler encoding
+    PASS loaded div_truncate_negative.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0xfffffffd
+    PASS negative=1
+    PASS zero=0
+  alias
+    PASS assembler encoding
+    PASS loaded div_alias.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r0 =0x0000002a
+    PASS r1 =0x00000002
+div: PASS (8/8 cases)
+make[1]: Leaving directory `O:/Foundry/t32/tests/core-iset/30-div'
+ECHO is off.
+"============================================================"
+"Running test: tests/core-iset/31-divu"
+"============================================================"
+make -C "tests/core-iset/31-divu" test
+make[1]: Entering directory `O:/Foundry/t32/tests/core-iset/31-divu'
+python run_tests.py
+Running divu expanded validation...
+  normal
+    PASS assembler encoding
+    PASS loaded divu_normal.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x0000002a
+    PASS zero=0
+    PASS negative=0
+    PASS carry=0
+    PASS overflow=0
+  smaller_by_larger
+    PASS assembler encoding
+    PASS loaded divu_smaller_by_larger.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x00000000
+    PASS zero=1
+    PASS negative=0
+  max_by_two
+    PASS assembler encoding
+    PASS loaded divu_max_by_two.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x7fffffff
+    PASS negative=0
+    PASS zero=0
+  high_bit_by_two
+    PASS assembler encoding
+    PASS loaded divu_high_bit_by_two.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x40000000
+    PASS negative=0
+    PASS zero=0
+  zero_dividend
+    PASS assembler encoding
+    PASS loaded divu_zero_dividend.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x00000000
+    PASS zero=1
+  identity
+    PASS assembler encoding
+    PASS loaded divu_identity.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0xffffffff
+    PASS negative=1
+    PASS zero=0
+  alias
+    PASS assembler encoding
+    PASS loaded divu_alias.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r0 =0x0000002a
+    PASS r1 =0x00000002
+divu: PASS (7/7 cases)
+make[1]: Leaving directory `O:/Foundry/t32/tests/core-iset/31-divu'
+ECHO is off.
+"============================================================"
+"Running test: tests/core-iset/32-and"
+"============================================================"
+make -C "tests/core-iset/32-and" test
+make[1]: Entering directory `O:/Foundry/t32/tests/core-iset/32-and'
+python run_tests.py
+Running and expanded validation...
+  normal
+    PASS assembler encoding
+    PASS loaded and_normal.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r0 =0x0000002f
+    PASS r1 =0x0000002a
+    PASS r2 =0x0000002a
+    PASS zero=0
+    PASS negative=0
+    PASS carry=0
+    PASS overflow=0
+  zero
+    PASS assembler encoding
+    PASS loaded and_zero.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x00000000
+    PASS zero=1
+    PASS negative=0
+  identity
+    PASS assembler encoding
+    PASS loaded and_identity.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0xa5a5a5a5
+    PASS zero=0
+    PASS negative=1
+  mask
+    PASS assembler encoding
+    PASS loaded and_mask.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x00f000f0
+    PASS zero=0
+    PASS negative=0
+  negative
+    PASS assembler encoding
+    PASS loaded and_negative.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x80000001
+    PASS negative=1
+    PASS zero=0
+  alias
+    PASS assembler encoding
+    PASS loaded and_alias.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r0 =0x0000002a
+    PASS r1 =0x0000002a
+and: PASS (6/6 cases)
+make[1]: Leaving directory `O:/Foundry/t32/tests/core-iset/32-and'
+ECHO is off.
+"============================================================"
+"Running test: tests/core-iset/33-or"
+"============================================================"
+make -C "tests/core-iset/33-or" test
+make[1]: Entering directory `O:/Foundry/t32/tests/core-iset/33-or'
+python run_tests.py
+Running or expanded validation...
+  normal
+    PASS assembler encoding
+    PASS loaded or_normal.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x0000002a
+    PASS zero=0
+    PASS negative=0
+    PASS carry=0
+    PASS overflow=0
+  zero
+    PASS assembler encoding
+    PASS loaded or_zero.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x00000000
+    PASS zero=1
+    PASS negative=0
+  identity
+    PASS assembler encoding
+    PASS loaded or_identity.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0xa5a5a5a5
+    PASS negative=1
+    PASS zero=0
+  all_ones
+    PASS assembler encoding
+    PASS loaded or_all_ones.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0xffffffff
+    PASS negative=1
+    PASS zero=0
+  negative
+    PASS assembler encoding
+    PASS loaded or_negative.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x80000001
+    PASS negative=1
+    PASS zero=0
+  alias
+    PASS assembler encoding
+    PASS loaded or_alias.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r0 =0x0000002a
+    PASS r1 =0x0000000a
+or: PASS (6/6 cases)
+make[1]: Leaving directory `O:/Foundry/t32/tests/core-iset/33-or'
+ECHO is off.
+"============================================================"
+"Running test: tests/core-iset/34-xor"
+"============================================================"
+make -C "tests/core-iset/34-xor" test
+make[1]: Entering directory `O:/Foundry/t32/tests/core-iset/34-xor'
+python run_tests.py
+Running xor expanded validation...
+  normal
+    PASS assembler encoding
+    PASS loaded xor_normal.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x0000002a
+    PASS zero=0
+    PASS negative=0
+    PASS carry=0
+    PASS overflow=0
+  identity
+    PASS assembler encoding
+    PASS loaded xor_identity.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0xa5a5a5a5
+    PASS negative=1
+    PASS zero=0
+  self_zero
+    PASS assembler encoding
+    PASS loaded xor_self_zero.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x00000000
+    PASS zero=1
+    PASS negative=0
+  alternating
+    PASS assembler encoding
+    PASS loaded xor_alternating.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0xffffffff
+    PASS negative=1
+    PASS zero=0
+  negative
+    PASS assembler encoding
+    PASS loaded xor_negative.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x80000000
+    PASS negative=1
+    PASS zero=0
+  alias
+    PASS assembler encoding
+    PASS loaded xor_alias.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r0 =0x0000002a
+    PASS r1 =0x0000000a
+xor: PASS (6/6 cases)
+make[1]: Leaving directory `O:/Foundry/t32/tests/core-iset/34-xor'
+ECHO is off.
+"============================================================"
+"Running test: tests/core-iset/35-not"
+"============================================================"
+make -C "tests/core-iset/35-not" test
+make[1]: Entering directory `O:/Foundry/t32/tests/core-iset/35-not'
+python run_tests.py
+Running not expanded validation...
+  normal
+    PASS assembler encoding
+    PASS loaded not_normal.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=3
+    PASS r0 =0xffffffd5
+    PASS r1 =0x0000002a
+    PASS zero=0
+    PASS negative=0
+    PASS carry=0
+    PASS overflow=0
+  zero
+    PASS assembler encoding
+    PASS loaded not_zero.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=3
+    PASS r1 =0xffffffff
+    PASS negative=1
+    PASS zero=0
+  ones
+    PASS assembler encoding
+    PASS loaded not_ones.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=3
+    PASS r1 =0x00000000
+    PASS zero=1
+    PASS negative=0
+  alternating
+    PASS assembler encoding
+    PASS loaded not_alternating.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=3
+    PASS r1 =0x55555555
+    PASS negative=0
+    PASS zero=0
+  high_bit
+    PASS assembler encoding
+    PASS loaded not_high_bit.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=3
+    PASS r1 =0x80000000
+    PASS negative=1
+    PASS zero=0
+  alias
+    PASS assembler encoding
+    PASS loaded not_alias.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=3
+    PASS r0 =0x0000002a
+not: PASS (6/6 cases)
+make[1]: Leaving directory `O:/Foundry/t32/tests/core-iset/35-not'
+ECHO is off.
+"============================================================"
+"Running test: tests/core-iset/36-shl"
+"============================================================"
+make -C "tests/core-iset/36-shl" test
+make[1]: Entering directory `O:/Foundry/t32/tests/core-iset/36-shl'
+python run_tests.py
+Running shl expanded validation...
+  normal
+    PASS assembler encoding
+    PASS loaded shl_normal.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x0000002a
+    PASS carry=0
+    PASS zero=0
+    PASS negative=0
+    PASS overflow=0
+  zero_count
+    PASS assembler encoding
+    PASS loaded shl_zero_count.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0xa5a5a5a5
+    PASS negative=1
+    PASS zero=0
+  by_31
+    PASS assembler encoding
+    PASS loaded shl_by_31.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x80000000
+    PASS negative=1
+    PASS zero=0
+    PASS carry=0
+  carry_out
+    PASS assembler encoding
+    PASS loaded shl_carry_out.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x00000002
+    PASS carry=1
+    PASS negative=0
+    PASS zero=0
+  zero_result
+    PASS assembler encoding
+    PASS loaded shl_zero_result.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x00000000
+    PASS carry=1
+    PASS zero=1
+    PASS negative=0
+  negative_result
+    PASS assembler encoding
+    PASS loaded shl_negative_result.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x80000000
+    PASS negative=1
+  alias
+    PASS assembler encoding
+    PASS loaded shl_alias.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r0 =0x0000002a
+    PASS r1 =0x00000001
+shl: PASS (7/7 cases)
+make[1]: Leaving directory `O:/Foundry/t32/tests/core-iset/36-shl'
+ECHO is off.
+"============================================================"
+"Running test: tests/core-iset/37-shr"
+"============================================================"
+make -C "tests/core-iset/37-shr" test
+make[1]: Entering directory `O:/Foundry/t32/tests/core-iset/37-shr'
+python run_tests.py
+Running shr expanded validation...
+  normal
+    PASS assembler encoding
+    PASS loaded shr_normal.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x0000002a
+    PASS carry=0
+    PASS zero=0
+    PASS negative=0
+    PASS overflow=0
+  zero_count
+    PASS assembler encoding
+    PASS loaded shr_zero_count.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x80000001
+    PASS negative=1
+    PASS zero=0
+  by_31
+    PASS assembler encoding
+    PASS loaded shr_by_31.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x00000001
+    PASS negative=0
+    PASS zero=0
+    PASS carry=0
+  carry_out
+    PASS assembler encoding
+    PASS loaded shr_carry_out.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x00000001
+    PASS carry=1
+    PASS zero=0
+    PASS negative=0
+  logical_fill
+    PASS assembler encoding
+    PASS loaded shr_logical_fill.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x40000000
+    PASS negative=0
+    PASS zero=0
+    PASS carry=0
+  zero_result
+    PASS assembler encoding
+    PASS loaded shr_zero_result.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x00000000
+    PASS carry=1
+    PASS zero=1
+    PASS negative=0
+  alias
+    PASS assembler encoding
+    PASS loaded shr_alias.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r0 =0x0000002a
+    PASS r1 =0x00000001
+shr: PASS (7/7 cases)
+make[1]: Leaving directory `O:/Foundry/t32/tests/core-iset/37-shr'
+ECHO is off.
+"============================================================"
+"Running test: tests/core-iset/38-sar"
+"============================================================"
+make -C "tests/core-iset/38-sar" test
+make[1]: Entering directory `O:/Foundry/t32/tests/core-iset/38-sar'
+python run_tests.py
+Running sar expanded validation...
+  negative
+    PASS assembler encoding
+    PASS loaded sar_negative.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0xffffffd6
+    PASS negative=1
+    PASS zero=0
+    PASS carry=0
+    PASS overflow=0
+  positive
+    PASS assembler encoding
+    PASS loaded sar_positive.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x0000002a
+    PASS negative=0
+    PASS zero=0
+  zero_count
+    PASS assembler encoding
+    PASS loaded sar_zero_count.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x80000001
+    PASS negative=1
+    PASS zero=0
+  by_31_negative
+    PASS assembler encoding
+    PASS loaded sar_by_31_negative.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0xffffffff
+    PASS negative=1
+    PASS zero=0
+    PASS carry=0
+  by_31_positive
+    PASS assembler encoding
+    PASS loaded sar_by_31_positive.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0x00000000
+    PASS negative=0
+    PASS zero=1
+    PASS carry=1
+  carry_out
+    PASS assembler encoding
+    PASS loaded sar_carry_out.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r2 =0xfffffffe
+    PASS carry=1
+    PASS negative=1
+    PASS zero=0
+  alias
+    PASS assembler encoding
+    PASS loaded sar_alias.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r0 =0xffffffd6
+    PASS r1 =0x00000001
+sar: PASS (7/7 cases)
+make[1]: Leaving directory `O:/Foundry/t32/tests/core-iset/38-sar'
+ECHO is off.
+"============================================================"
+"Running test: tests/core-iset/40-cmp"
+"============================================================"
+make -C "tests/core-iset/40-cmp" test
+make[1]: Entering directory `O:/Foundry/t32/tests/core-iset/40-cmp'
+python run_tests.py
+Running cmp expanded validation...
+  equal
+    PASS assembler encoding
+    PASS loaded cmp_equal.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r0 =0x0000002a
+    PASS r1 =0x0000002a
+    PASS carry=1
+    PASS zero=1
+    PASS negative=0
+    PASS overflow=0
+  greater
+    PASS assembler encoding
+    PASS loaded cmp_greater.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r0 =0x0000002a
+    PASS r1 =0x00000014
+    PASS carry=1
+    PASS zero=0
+    PASS negative=0
+    PASS overflow=0
+  less
+    PASS assembler encoding
+    PASS loaded cmp_less.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r0 =0x00000003
+    PASS r1 =0x00000005
+    PASS carry=0
+    PASS zero=0
+    PASS negative=1
+    PASS overflow=0
+  signed_overflow
+    PASS assembler encoding
+    PASS loaded cmp_signed_overflow.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r0 =0x80000000
+    PASS r1 =0x00000001
+    PASS carry=1
+    PASS zero=0
+    PASS negative=0
+    PASS overflow=1
+  negative_equal
+    PASS assembler encoding
+    PASS loaded cmp_negative_equal.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r0 =0xffffffff
+    PASS r1 =0xffffffff
+    PASS carry=1
+    PASS zero=1
+    PASS negative=0
+    PASS overflow=0
+cmp: PASS (5/5 cases)
+make[1]: Leaving directory `O:/Foundry/t32/tests/core-iset/40-cmp'
+ECHO is off.
+"============================================================"
+"Running test: tests/core-iset/41-cmpi"
+"============================================================"
+make -C "tests/core-iset/41-cmpi" test
+make[1]: Entering directory `O:/Foundry/t32/tests/core-iset/41-cmpi'
+python run_tests.py
+Running cmpi expanded validation...
+  equal
+    PASS assembler encoding
+    PASS loaded cmpi_equal.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=3
+    PASS r0 =0x0000002a
+    PASS carry=1
+    PASS zero=1
+    PASS negative=0
+    PASS overflow=0
+  greater
+    PASS assembler encoding
+    PASS loaded cmpi_greater.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=3
+    PASS r0 =0x0000002a
+    PASS carry=1
+    PASS zero=0
+    PASS negative=0
+    PASS overflow=0
+  less
+    PASS assembler encoding
+    PASS loaded cmpi_less.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=3
+    PASS r0 =0x00000003
+    PASS carry=0
+    PASS zero=0
+    PASS negative=1
+    PASS overflow=0
+  signed_overflow
+    PASS assembler encoding
+    PASS loaded cmpi_signed_overflow.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=3
+    PASS r0 =0x80000000
+    PASS carry=1
+    PASS zero=0
+    PASS negative=0
+    PASS overflow=1
+  zero
+    PASS assembler encoding
+    PASS loaded cmpi_zero.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=3
+    PASS r0 =0x00000000
+    PASS carry=1
+    PASS zero=1
+    PASS negative=0
+    PASS overflow=0
+cmpi: PASS (5/5 cases)
+make[1]: Leaving directory `O:/Foundry/t32/tests/core-iset/41-cmpi'
+ECHO is off.
+"============================================================"
+"Running test: tests/core-iset/42-jmp"
+"============================================================"
+make -C "tests/core-iset/42-jmp" test
+make[1]: Entering directory `O:/Foundry/t32/tests/core-iset/42-jmp'
+python run_tests.py
+Running jmp expanded validation...
+  forward
+    PASS assembler encoding
+    PASS loaded jmp_forward.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=3
+    PASS r0 =0x0000002a
+  next_instruction
+    PASS assembler encoding
+    PASS loaded jmp_next_instruction.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=3
+    PASS r0 =0x0000002a
+  over_multiword
+    PASS assembler encoding
+    PASS loaded jmp_over_multiword.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r0 =0x00000001
+    PASS r1 =0x00000000
+    PASS r2 =0x00000000
+    PASS r3 =0x0000002a
+  backward
+    PASS assembler encoding
+    PASS loaded jmp_backward.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=14
+    PASS r0 =0x00000003
+    PASS r1 =0x00000000
+  preserve_flags
+    PASS assembler encoding
+    PASS loaded jmp_preserve_flags.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=5
+    PASS r2 =0x00000000
+    PASS carry=1
+    PASS zero=1
+    PASS negative=0
+    PASS overflow=0
+jmp: PASS (5/5 cases)
+make[1]: Leaving directory `O:/Foundry/t32/tests/core-iset/42-jmp'
+ECHO is off.
+"============================================================"
+"Running test: tests/core-iset/43-jz"
+"============================================================"
+make -C "tests/core-iset/43-jz" test
+make[1]: Entering directory `O:/Foundry/t32/tests/core-iset/43-jz'
+python run_tests.py
+Running jz expanded validation...
+  taken_zero
+    PASS assembler encoding
+    PASS loaded jz_taken_zero.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r0 =0x00000000
+    PASS r1 =0x0000002a
+  not_taken_positive
+    PASS assembler encoding
+    PASS loaded jz_not_taken_positive.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r0 =0x00000001
+    PASS r1 =0x0000002a
+  not_taken_negative
+    PASS assembler encoding
+    PASS loaded jz_not_taken_negative.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r0 =0xffffffff
+    PASS r1 =0x0000002a
+  over_multiword
+    PASS assembler encoding
+    PASS loaded jz_over_multiword.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r1 =0x00000000
+    PASS r2 =0x00000000
+    PASS r3 =0x0000002a
+  source_preserved
+    PASS assembler encoding
+    PASS loaded jz_source_preserved.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r7 =0x00000000
+    PASS r0 =0x0000002a
+  backward_exit
+    PASS assembler encoding
+    PASS loaded jz_backward_exit.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=8
+    PASS r0 =0x00000000
+    PASS r1 =0x0000002a
+jz: PASS (6/6 cases)
+make[1]: Leaving directory `O:/Foundry/t32/tests/core-iset/43-jz'
+ECHO is off.
+"============================================================"
+"Running test: tests/core-iset/44-jnz"
+"============================================================"
+make -C "tests/core-iset/44-jnz" test
+make[1]: Entering directory `O:/Foundry/t32/tests/core-iset/44-jnz'
+python run_tests.py
+Running jnz expanded validation...
+  taken_positive
+    PASS assembler encoding
+    PASS loaded jnz_taken_positive.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r0 =0x00000001
+    PASS r1 =0x0000002a
+  not_taken_zero
+    PASS assembler encoding
+    PASS loaded jnz_not_taken_zero.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r0 =0x00000000
+    PASS r1 =0x0000002a
+  taken_negative
+    PASS assembler encoding
+    PASS loaded jnz_taken_negative.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r0 =0x80000000
+    PASS r1 =0x0000002a
+  over_multiword
+    PASS assembler encoding
+    PASS loaded jnz_over_multiword.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r1 =0x00000000
+    PASS r2 =0x00000000
+    PASS r3 =0x0000002a
+  source_preserved
+    PASS assembler encoding
+    PASS loaded jnz_source_preserved.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r7 =0x00000007
+    PASS r0 =0x0000002a
+  backward_loop
+    PASS assembler encoding
+    PASS loaded jnz_backward_loop.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=12
+    PASS r0 =0x00000000
+    PASS r1 =0x00000003
+jnz: PASS (6/6 cases)
+make[1]: Leaving directory `O:/Foundry/t32/tests/core-iset/44-jnz'
+ECHO is off.
+"============================================================"
+"Running test: tests/core-iset/48-push"
+"============================================================"
+make -C "tests/core-iset/48-push" test
+make[1]: Entering directory `O:/Foundry/t32/tests/core-iset/48-push'
+python run_tests.py
+Running push expanded validation...
+  single
+    PASS assembler encoding
+    PASS loaded push_single.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=4
+    PASS r0 =0x0000002a
+    PASS r15=0x00002ffc
+  roundtrip
+    PASS assembler encoding
+    PASS loaded push_roundtrip.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=5
+    PASS r0 =0x0000002a
+    PASS r1 =0x0000002a
+    PASS r15=0x00003000
+  lifo
+    PASS assembler encoding
+    PASS loaded push_lifo.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=8
+    PASS r2 =0x22222222
+    PASS r3 =0x11111111
+    PASS r15=0x00003000
+  zero
+    PASS assembler encoding
+    PASS loaded push_zero.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=5
+    PASS r1 =0x00000000
+    PASS r15=0x00003000
+  high_bit
+    PASS assembler encoding
+    PASS loaded push_high_bit.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=5
+    PASS r7 =0x80000001
+    PASS r8 =0x80000001
+    PASS r15=0x00003000
+  four_values
+    PASS assembler encoding
+    PASS loaded push_four_values.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=14
+    PASS r4 =0x00000004
+    PASS r5 =0x00000003
+    PASS r6 =0x00000002
+    PASS r7 =0x00000001
+    PASS r15=0x00003000
+push: PASS (6/6 cases)
+make[1]: Leaving directory `O:/Foundry/t32/tests/core-iset/48-push'
+ECHO is off.
+"============================================================"
+"Running test: tests/core-iset/49-pop"
+"============================================================"
+make -C "tests/core-iset/49-pop" test
+make[1]: Entering directory `O:/Foundry/t32/tests/core-iset/49-pop'
+python run_tests.py
+Running pop expanded validation...
+  single
+    PASS assembler encoding
+    PASS loaded pop_single.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=5
+    PASS r1 =0x0000002a
+    PASS r15=0x00003000
+  overwrite
+    PASS assembler encoding
+    PASS loaded pop_overwrite.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=6
+    PASS r1 =0x0000002a
+    PASS r15=0x00003000
+  lifo
+    PASS assembler encoding
+    PASS loaded pop_lifo.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=8
+    PASS r2 =0x22222222
+    PASS r3 =0x11111111
+    PASS r15=0x00003000
+  zero
+    PASS assembler encoding
+    PASS loaded pop_zero.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=5
+    PASS r9 =0x00000000
+    PASS r15=0x00003000
+  negative
+    PASS assembler encoding
+    PASS loaded pop_negative.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=5
+    PASS r9 =0xffffffff
+    PASS r15=0x00003000
+  source_preserved
+    PASS assembler encoding
+    PASS loaded pop_source_preserved.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=5
+    PASS r0 =0x0000002a
+    PASS r1 =0x0000002a
+pop: PASS (6/6 cases)
+make[1]: Leaving directory `O:/Foundry/t32/tests/core-iset/49-pop'
+ECHO is off.
+"============================================================"
+"Running test: tests/core-iset/50-call"
+"============================================================"
+make -C "tests/core-iset/50-call" test
+make[1]: Entering directory `O:/Foundry/t32/tests/core-iset/50-call'
+python run_tests.py
+Running call expanded validation...
+  forward
+    PASS assembler encoding
+    PASS loaded call_forward.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=5
+    PASS r0 =0x0000002a
+    PASS r15=0x00003000
+  nested
+    PASS assembler encoding
+    PASS loaded call_nested.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=9
+    PASS r0 =0x0000002a
+    PASS r15=0x00003000
+  sequential
+    PASS assembler encoding
+    PASS loaded call_sequential.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=9
+    PASS r0 =0x00000002
+    PASS r15=0x00003000
+  return_after_multiword
+    PASS assembler encoding
+    PASS loaded call_return_after_multiword.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=5
+    PASS r0 =0x0000002a
+    PASS r15=0x00003000
+  existing_stack_data
+    PASS assembler encoding
+    PASS loaded call_existing_stack_data.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=8
+    PASS r0 =0x0000002a
+    PASS r4 =0x12345678
+    PASS r5 =0x12345678
+    PASS r15=0x00003000
+  preserve_flags
+    PASS assembler encoding
+    PASS loaded call_preserve_flags.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=7
+    PASS r2 =0x00000000
+    PASS carry=1
+    PASS zero=1
+    PASS negative=0
+    PASS overflow=0
+    PASS r15=0x00003000
+call: PASS (6/6 cases)
+make[1]: Leaving directory `O:/Foundry/t32/tests/core-iset/50-call'
+ECHO is off.
+"============================================================"
+"Running test: tests/core-iset/51-ret"
+"============================================================"
+make -C "tests/core-iset/51-ret" test
+make[1]: Entering directory `O:/Foundry/t32/tests/core-iset/51-ret'
+python run_tests.py
+Running ret expanded validation...
+  basic
+    PASS assembler encoding
+    PASS loaded ret_basic.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=5
+    PASS r0 =0x0000002a
+    PASS r15=0x00003000
+  nested
+    PASS assembler encoding
+    PASS loaded ret_nested.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=9
+    PASS r0 =0x0000002a
+    PASS r15=0x00003000
+  sequential
+    PASS assembler encoding
+    PASS loaded ret_sequential.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=9
+    PASS r0 =0x00000002
+    PASS r15=0x00003000
+  stack_data_survives
+    PASS assembler encoding
+    PASS loaded ret_stack_data_survives.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=7
+    PASS r5 =0x12345678
+    PASS r15=0x00003000
+  return_to_movi
+    PASS assembler encoding
+    PASS loaded ret_return_to_movi.bin at 0x00001000
+    PASS state=halted
+    PASS instructions=5
+    PASS r6 =0xabcdef01
+    PASS r15=0x00003000
+ret: PASS (5/5 cases)
+make[1]: Leaving directory `O:/Foundry/t32/tests/core-iset/51-ret'
+ECHO is off.
+"All T32 tests passed."

@@ -1,5 +1,5 @@
 logging to call_return_after_multiword.log
-t32-run version 0.0.4
+t32-run version 0.0.5
 machine reset
 loaded call_return_after_multiword.bin at 0x00001000
 0x00001000: 00 00 f0 09 00 30 00 00 00 00 00 32 1c 10 00 00

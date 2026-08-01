@@ -1,5 +1,5 @@
 logging to not_normal.log
-t32-run version 0.0.4
+t32-run version 0.0.5
 machine reset
 loaded not_normal.bin at 0x00001000
 0x00001000: 00 00 00 09 d5 ff ff ff 00 00 10 23 00 00 00 00

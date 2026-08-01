@@ -1,5 +1,5 @@
 logging to jz_over_multiword.log
-t32-run version 0.0.4
+t32-run version 0.0.5
 machine reset
 loaded jz_over_multiword.bin at 0x00001000
 0x00001000: 00 00 00 09 00 00 00 00 00 00 00 2b 20 10 00 00

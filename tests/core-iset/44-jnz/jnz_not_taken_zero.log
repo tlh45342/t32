@@ -1,5 +1,5 @@
 logging to jnz_not_taken_zero.log
-t32-run version 0.0.4
+t32-run version 0.0.5
 machine reset
 loaded jnz_not_taken_zero.bin at 0x00001000
 0x00001000: 00 00 00 09 00 00 00 00 00 00 00 2c 1c 10 00 00

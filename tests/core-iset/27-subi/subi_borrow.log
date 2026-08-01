@@ -1,5 +1,5 @@
 logging to subi_borrow.log
-t32-run version 0.0.4
+t32-run version 0.0.5
 machine reset
 loaded subi_borrow.bin at 0x00001000
 0x00001000: 00 00 00 09 03 00 00 00 00 00 10 1b 05 00 00 00

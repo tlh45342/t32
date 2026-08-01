@@ -1,43 +1,35 @@
 # T32 Documentation
 
-This directory contains the architectural, testing, and project-status documentation for the T32 virtual processor.
+This directory is the maintained documentation set for the T32 virtual processor and its early software environment.
 
-## Document roles
+## Documentation layers
 
-| Document | Purpose |
-|---|---|
-| [programmer-model.md](programmer-model.md) | CPU-visible registers, flags, state, and execution model |
-| [instruction-set.md](instruction-set.md) | Instruction inventory, syntax, and currently verified behavior |
-| [instruction-encoding.md](instruction-encoding.md) | Current encoding evidence and rules that still require formalization |
-| [memory-map.md](memory-map.md) | Test-environment addresses and future architectural memory regions |
-| [testing-guide.md](testing-guide.md) | How the regression and conformance tests are organized and run |
-| [implementation-status.md](implementation-status.md) | Current assembler/runtime/test coverage by instruction |
-| [design-decisions.md](design-decisions.md) | Decisions that define intended T32 behavior |
-| [roadmap.md](roadmap.md) | Ordered development plan |
-| [related-projects.md](related-projects.md) | Repositories in the wider Foundry/T32 ecosystem |
+- `architecture/` defines the processor-visible architecture.
+- `runtime/` defines conventions used by software built for T32.
+- `development/` explains implementation status, testing, decisions, and planned work.
+- `project/` places T32 within the wider Foundry ecosystem.
+- `archive/` preserves useful non-normative notes that do not belong in the active specification.
 
-## Authority and evidence
+## Authority
 
-The architectural documents describe intended behavior. The implementation and tests must eventually agree with them.
+Documents use these terms:
 
-At the current stage, some behaviors are proven only by tests and some architectural details are still provisional. Documents use these labels:
+- **Specified** — intentionally part of the architecture or software contract.
+- **Verified** — demonstrated by current tests.
+- **Provisional** — current convention that may still change.
+- **Open** — requires a deliberate decision or additional validation.
 
-- **Verified** — demonstrated by the supplied assembler/runtime tests.
-- **Specified** — intentionally defined as part of the architecture.
-- **Provisional** — current convention that may change.
-- **Open** — requires an explicit design decision or additional validation.
+The architecture documents describe intended behavior. Tests and implementations must converge on those documents. A single implementation result does not silently redefine the architecture.
 
-When documentation and implementation differ, record the discrepancy in `implementation-status.md` and resolve it deliberately. Do not silently redefine the architecture from a single test result.
+## Recommended reading order
 
-## Current snapshot
-
-The supplied test tree contains 36 instruction-test directories. All have smoke tests. Expanded multi-case validation currently exists for:
-
-- ADD
-- ADDI
-- SUB
-- SUBI
-- CMP
-- CMPI
-
-The next planned validation phase covers logical, shift, multiplication, and division instructions.
+1. `architecture/programmer-model.md`
+2. `architecture/instruction-set.md`
+3. `architecture/instruction-encoding.md`
+4. `architecture/conditional-branches.md`
+5. `architecture/memory-map.md`
+6. `runtime/abi.md`
+7. `runtime/algorithms.md`
+8. `development/testing-guide.md`
+9. `development/implementation-status.md`
+10. `development/roadmap.md`

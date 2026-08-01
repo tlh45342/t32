@@ -1,7 +1,5 @@
 # Related Projects
 
-The following repositories were listed in the previous documentation.
-
 ## Foundry and T32
 
 - `https://github.com/tlh45342/foundry`
@@ -17,4 +15,4 @@ The following repositories were listed in the previous documentation.
 - `https://github.com/tlh45342/x64-vm`
 - `https://github.com/tlh45342/libvm`
 
-This file is a project index, not part of the T32 architectural specification.
+This index is project context, not part of the T32 architecture specification.

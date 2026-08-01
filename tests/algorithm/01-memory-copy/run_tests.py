@@ -5,12 +5,17 @@ import re
 import subprocess
 import sys
 
-
 ROOT = Path(__file__).resolve().parent
 BINARY = ROOT / "memory-copy.bin"
 SCRIPT = ROOT / "test.script"
 LOG = ROOT / "memory-copy.log"
 
+def initialize():
+    for stream in (sys.stdin, sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
 
 def check(label: str, condition: bool) -> bool:
     marker = "✅" if condition else "❌"
@@ -19,6 +24,7 @@ def check(label: str, condition: bool) -> bool:
 
 
 def main() -> int:
+    initialize()
     print("Running memory-copy validation...")
 
     if LOG.exists():

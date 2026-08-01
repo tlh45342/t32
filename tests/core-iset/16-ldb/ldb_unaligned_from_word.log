@@ -1,5 +1,5 @@
 logging to ldb_unaligned_from_word.log
-t32-run version 0.0.4
+t32-run version 0.0.5
 machine reset
 loaded ldb_unaligned_from_word.bin at 0x00001000
 0x00001000: 00 00 00 09 01 30 00 00 00 00 10 09 dd cc bb aa

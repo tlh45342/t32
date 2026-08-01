@@ -3,7 +3,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-ASM = os.environ.get("T32_ASM", "t32-asm")
+ASM = os.environ.get("T32_AS", "t32-as")
 VM = os.environ.get("T32_RUN", "t32-run")
 LOAD_ADDRESS = 0x00001000
 
@@ -13,6 +13,12 @@ CASES = (
     ("opcode_07", "reserved_07.bin", 0x07),
 )
 
+def initialize():
+    for stream in (sys.stdin, sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
 
 def run_process(args, *, input_text=None):
     return subprocess.run(
@@ -151,6 +157,7 @@ def validate_unknown_mnemonics():
 
 
 def main():
+    initialize()
     print("Running reserved system opcode validation...")
 
     results = [

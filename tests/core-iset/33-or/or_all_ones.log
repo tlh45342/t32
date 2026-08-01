@@ -1,5 +1,5 @@
 logging to or_all_ones.log
-t32-run version 0.0.4
+t32-run version 0.0.5
 machine reset
 loaded or_all_ones.bin at 0x00001000
 0x00001000: 00 00 00 09 0f 0f 0f 0f 00 00 10 09 f0 f0 f0 f0

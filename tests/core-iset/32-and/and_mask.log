@@ -1,5 +1,5 @@
 logging to and_mask.log
-t32-run version 0.0.4
+t32-run version 0.0.5
 machine reset
 loaded and_mask.bin at 0x00001000
 0x00001000: 00 00 00 09 f0 f0 f0 f0 00 00 10 09 f0 0f f0 0f

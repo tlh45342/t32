@@ -3,6 +3,13 @@ import re
 import subprocess
 import sys
 
+def initialize():
+    for stream in (sys.stdin, sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
+
 VM = "t32-run"
 TEST_NAME = "memory-fill"
 
@@ -22,6 +29,7 @@ CHECKS = [
 
 
 def run_test() -> bool:
+    initialize()
     print("Running memory-fill validation...\n")
 
     for path in ("test.script", "memory-fill.bin"):

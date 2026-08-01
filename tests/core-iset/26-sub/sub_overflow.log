@@ -1,5 +1,5 @@
 logging to sub_overflow.log
-t32-run version 0.0.4
+t32-run version 0.0.5
 machine reset
 loaded sub_overflow.bin at 0x00001000
 0x00001000: 00 00 00 09 00 00 00 80 00 00 10 09 01 00 00 00
