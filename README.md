@@ -1,415 +1,174 @@
-# T32 Virtual Computer
+# T32
 
-*A developmental virtual computer architecture for exploring instruction set design, compiler construction, operating systems, and virtualization.*
+*A small, documented, educational 32-bit computer architecture and software platform.*
 
-**Author:** Thomas Hamilton
-
----
+------
 
 # Overview
 
-T32 is a developmental 32-bit virtual computer architecture created to explore the design and implementation of complete computing systems from first principles.
+**T32** is an open-source project dedicated to demonstrating how an entire computer system is built.
 
-Unlike commercial processor architectures that have evolved over decades, T32 intentionally begins with a minimal instruction set and expands incrementally. Every instruction, subsystem, and virtual device is introduced only after it has been specified, implemented, validated, and documented.
+Rather than beginning with an operating system or compiler, T32 starts at the foundation—the Instruction Set Architecture (ISA)—and builds upward one layer at a time. Every major component is documented, validated, and designed to be understandable.
 
-The objective is not to build the fastest processor or compete with existing architectures. Instead, T32 provides an environment where architectural decisions remain visible, understandable, and open to discussion.
+The goal is not simply to build another virtual machine. The goal is to build a complete computing platform whose evolution can be followed from the first machine instruction through the assembler, linker, compiler, runtime library, firmware, and ultimately an operating environment.
 
-T32 serves as both a practical software development platform and an educational vehicle for studying computer architecture, compiler construction, firmware, operating systems, and virtualization.
+Whether you're a student, educator, hobbyist, or simply curious about how computers work beneath the operating system, T32 is intended to be a platform that can be explored, studied, and extended.
 
----
+------
 
-# Development Status
+# Project Status
 
-**T32 is an active developmental project.**
+The project currently includes:
 
-The instruction set, ABI, virtual devices, firmware interfaces, executable format, compiler, operating system, and development tools continue to evolve.
+- ✔ 32-bit Instruction Set Architecture (ISA)
+- ✔ Virtual Machine
+- ✔ Executable ISA Validation Suite
+- ✔ ABI 0.1
+- ✔ ABI Validation Suite
+- ✔ Relocatable Object Format
+- ✔ Static Archive Format
+- ✔ T32 Assembler (`t32-as`)
+- ✔ T32 Linker (`t32-ld`)
+- ✔ T32 Symbol Inspector (`t32-nm`)
+- ✔ T32 Archive Manager (`t32-ar`)
+- ✔ Static Runtime Library (`libt32`)
+- ✔ Algorithm Validation Suite
+- ✔ Architecture Validation Suite
+- ✔ Comprehensive Documentation
+- ✔ Early-stage C Compiler (`t32-cc`)
 
-Backward compatibility between early versions is not guaranteed. Refinement through experimentation is considered an essential part of the project's development process.
+Every significant subsystem is accompanied by automated validation tests. Documentation and executable behavior are developed together so that the implementation and its specification remain synchronized.
 
----
+------
 
-# Project Philosophy
+# Design Philosophy
 
-The project is built around several guiding principles:
+T32 is built around a few guiding principles.
 
-* Keep the architecture understandable.
-* Introduce complexity only when justified.
-* Validate every feature before depending upon it.
-* Document engineering decisions.
-* Build reusable components with clean interfaces.
-* Learn by constructing complete systems rather than isolated examples.
+- Build from the foundation upward.
+- Keep every subsystem understandable.
+- Prefer clarity over cleverness.
+- Document the engineering decisions.
+- Validate behavior with executable tests.
+- Make the journey as educational as the destination.
 
-Many architectural decisions intentionally remain open until practical implementation demonstrates whether additional complexity is warranted.
+The objective is not merely to build software, but to understand *why* each layer exists and how those layers cooperate to form a complete computing system.
 
-For example:
+------
 
-* Should conditional branches depend upon processor flags?
-* Should branches inspect registers directly?
-* Which instructions belong in hardware?
-* Which features should instead be implemented by the compiler?
-* When does minimalism become unnecessary inconvenience?
-
-These questions are considered part of the project itself.
-
----
-
-# Development Methodology
-
-Every major feature follows the same engineering process:
-
-```text
-Specification
-      ↓
-Implementation
-      ↓
-Validation
-      ↓
-Documentation
-      ↓
-Reuse
-```
-
-Validation programs are intentionally small and focused. Once validated, they become reusable building blocks for firmware, operating systems, libraries, and applications.
-
----
-
-# Goals
-
-The long-term goals of T32 include:
-
-* Design a clean virtual instruction set.
-* Develop a complete virtual machine implementation.
-* Build an assembler, linker, compiler, and debugger.
-* Explore compiler construction through incremental bootstrapping.
-* Develop firmware and monitor software.
-* Build a small operating system.
-* Construct reusable virtual devices.
-* Provide an educational platform for systems programming.
-* Serve as the reference architecture for developing the Foundry ecosystem.
-
----
-
-# Non-Goals
-
-T32 is **not** intended to:
-
-* compete with x86 or ARM processors
-* maximize execution performance
-* emulate existing hardware
-* preserve historical compatibility
-* replace commercial virtualization platforms
-
-Its purpose is education, experimentation, and incremental engineering.
-
----
-
-# Why T32?
-
-Modern processors contain decades of accumulated complexity.
-
-T32 intentionally starts with very little.
-
-A smaller instruction set makes it practical to explore topics that are normally hidden within mature architectures, including:
-
-* instruction selection
-* addressing modes
-* calling conventions
-* compiler code generation
-* executable formats
-* interrupt handling
-* firmware design
-* operating system construction
-
-Rather than inheriting architectural decisions, T32 encourages understanding **why** those decisions exist.
-
----
-
-# Relationship to Foundry
-
-Although T32 is a complete architecture in its own right, it also serves as the initial reference architecture for the Foundry ecosystem.
-
-**Foundry is a developmental virtual machine hosting ecosystem.**
-
-Foundry is intentionally architecture-independent.
-
-Its purpose is to host, manage, and orchestrate virtual machines regardless of the guest processor architecture.
-
-Current and future execution environments may include:
-
-* T32
-* x64-vm
-* armvm
-* additional architectures
-
-Only execution nodes are architecture-specific.
-
-Infrastructure services remain reusable across all supported virtual machine implementations.
-
----
-
-# Architecture Overview
-
-The ecosystem separates architecture-specific software from shared infrastructure.
+# Repository Layout
 
 ```text
-                 Guest Software
-                        │
-                Firmware / OS
-                        │
-               Architecture Library
-                        │
-                Execution Node
-────────────────────────────────────────
-               Foundry Platform
-────────────────────────────────────────
- VM Management
- Virtual Storage
- Virtual Networking
- Console Services
- REST APIs
- Scheduling
- Administration
+docs/
+    Architecture, ABI, runtime, and project documentation.
+
+toolchain/
+    Assembler, compiler, linker, archive manager, and related tools.
+
+runtime/
+    Runtime library, startup code, and supporting runtime components.
+
+vm/
+    Virtual machine implementations and execution support.
+
+tests/
+    ISA, ABI, algorithm, and platform validation.
+
+validation/
+    Higher-level integration and behavioral validation.
+
+tools/
+    Build and maintenance utilities.
 ```
 
-This separation allows infrastructure services to evolve independently from processor architectures.
+------
 
----
+# Roadmap
 
-# Ecosystem
+## Completed
 
-## Architecture-Specific Components
+- Instruction Set Architecture
+- Virtual Machine
+- Relocatable Object Format
+- Static Archive Format
+- Assembler
+- Linker
+- Archive Manager
+- Symbol Inspector
+- Runtime Library
+- ABI 0.1
+- ABI Validation Suite
 
-### libt32
+## In Progress
 
-Reference implementation of the T32 virtual machine.
+- C Compiler (`t32-cc`)
+- Runtime Startup (`crt0`)
+- Runtime Refinement
 
-Provides:
+## Planned
 
-* CPU execution
-* memory management
-* interrupt processing
-* virtual devices
-* execution state
+- BIOS
+- Console Subsystem
+- Block Storage
+- T32 Filesystem (T32FS)
+- System Monitor
+- Operating Environment
+- Expanded Standard Library
+- Advanced Compiler Features
 
----
+------
 
-### t32-as
+# Why T32 Exists
 
-Reference assembler for the T32 instruction set.
+Most software projects begin near the top of the software stack and work downward.
 
-Converts assembly language into executable binary images.
+T32 intentionally takes the opposite approach.
 
----
+Beginning with the instruction set allows every subsequent layer—the assembler, linker, compiler, runtime library, firmware, operating system, and applications—to be developed on a well-understood foundation.
 
-### t32-run
+The project documents not only the finished result, but also the engineering decisions and development path that produced it.
 
-Interactive execution and debugging environment.
+The journey is considered just as valuable as the destination.
 
-Features include:
+------
 
-* program loading
-* execution
-* debugging
-* register inspection
-* memory inspection
-* console display
-* validation support
+# Building
 
----
+Typical development workflow:
 
-### t32-node
+```text
+make
+make test
+make validation
+```
 
-Architecture-specific execution node for Foundry.
+Each subsystem may also be built and tested independently from its own directory.
 
-Hosts T32 virtual machines and provides the interface between libt32 and the Foundry hosting platform.
+------
 
-Future execution nodes will provide equivalent services for additional processor architectures.
+# Contributing
 
----
+Contributions, bug reports, documentation improvements, ideas, and thoughtful questions are always welcome.
 
-# Foundry Infrastructure
+One of the goals of T32 is to remain approachable. Curiosity is encouraged, and every contribution—large or small—helps improve the project.
 
-The following services are intentionally architecture-independent.
+------
 
----
+# About the Author
 
-## Foundry
+**Thomas L. Hamilton**
+Computer Engineer • Dog Nanny • Alternative LEGO® Enthusiast
 
-Virtual machine hosting ecosystem.
+I share my home with three dogs who take turns chaperoning me.
 
-Provides:
+When I'm not writing software, you'll probably find me experimenting with LEGO® bricks, magnets, simple machines, and homemade generators—because engineering should always leave room for curiosity, exploration, and play.
 
-* VM lifecycle management
-* orchestration
-* scheduling
-* REST APIs
-* image management
-* infrastructure services
-
----
-
-## vmctl
-
-Command-line management client.
-
-Provides administrative access to Foundry services.
-
----
-
-## Web Management Interface
-
-Browser-based administration interface for Foundry.
-
-Provides graphical management of:
-
-* virtual machines
-* execution nodes
-* storage
-* networking
-* infrastructure
-
----
-
-## VConsole
-
-Architecture-independent virtual console service.
-
-Provides console connectivity for all supported virtual machine architectures.
-
----
-
-## VDisk
-
-Architecture-independent virtual storage service.
-
-Provides virtual block storage independently of the guest processor architecture.
-
-Current implementations are expected to utilize VVdisk from r32lib as the underlying storage engine.
-
----
-
-## Switchyard
-
-Architecture-independent virtual networking environment.
-
-Provides:
-
-* virtual Ethernet segments
-* virtual switching
-* network attachment
-* packet forwarding
-* bridge support
-* network isolation
-* future routing capabilities
-
----
-
-# Engineering Tools
-
-These tools assist in building, provisioning, and deploying complete virtual systems.
-
----
-
-## Guppy
-
-Architecture-independent disk image and filesystem management tool.
-
-Guppy prepares and manages virtual machine storage without requiring knowledge of the guest processor architecture.
-
-Primary capabilities include:
-
-* create virtual disk images
-* partition disks
-* create filesystems
-* copy files into and out of virtual disk images
-* build bootable system images
-* automate deployment through scripting
-* support repeatable provisioning workflows
-
-Guppy is intended to be fully scriptable and suitable for scheduled automation, continuous integration, and repeatable system deployment.
-
----
-
-# Compiler Development
-
-Compiler development is expected to proceed incrementally.
-
-Rather than attempting to build a complete compiler immediately, increasingly capable stages will be developed, including:
-
-* constant expressions
-* arithmetic
-* variables
-* conditional execution
-* loops
-* procedures
-* pointers
-* structures
-* runtime libraries
-
-The long-term objective is to demonstrate the traditional compiler bootstrap process by constructing increasingly capable development tools using earlier generations of those same tools.
-
----
-
-# Validation
-
-Validation is considered a first-class engineering activity.
-
-Every instruction, subsystem, and virtual device is accompanied by focused validation programs.
-
-Examples include:
-
-* Hello World
-* String Copy
-* Screen Position
-* Character Overwrite
-* Screen Clear
-
-These programs become reusable examples and eventually evolve into firmware, operating-system components, and application software.
-
----
-
-# Long-Term Vision
-
-The long-term objective is to develop an understandable and reusable virtual computing platform from the instruction set upward.
-
-The complete ecosystem is expected to include:
-
-* instruction set architecture
-* assembler
-* linker
-* compiler
-* executable format
-* debugger
-* virtual machine
-* firmware
-* operating system
-* virtual devices
-* deployment tools
-* virtual machine hosting
-* distributed management
-
-The emphasis throughout the project remains on clarity, modularity, validation, and documentation.
-
----
+------
 
 # License
 
-MIT License
+Copyright © Thomas L. Hamilton
 
-Copyright (c) Thomas Hamilton
+Released under the **MIT License**.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
----
-
-# Author
-
-Thomas Hamilton
-
-Computer Scientist
-
-T32 is developed as an exploration of computer architecture, compiler construction, operating systems, virtualization, and distributed systems. The project emphasizes understanding complete systems through careful engineering, validation, and documentation while providing the reference architecture for the broader Foundry virtual machine hosting ecosystem.
+See the accompanying **LICENSE** file for the complete license text.
