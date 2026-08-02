@@ -1,11 +1,12 @@
-# libt32 tests
+# libt32 integration tests
 
-The current algorithm tests remain under:
+`00-strlen-linked` proves separate compilation and linking:
 
 ```text
-tests/algorithm/
+main.s -> main.o
+strlen.s -> strlen.o
+main.o + strlen.o -> strlen-linked.bin
 ```
 
-Once `t32-as -f obj` and `t32-ld` exist, this directory will contain linked
-integration tests that assemble library routines separately and verify symbol
-resolution, relocation, and execution.
+The test inspects `strlen.o` with `t32-nm`, links with `t32-ld`, executes with
+`t32-run`, and expects `r1 = 5`.

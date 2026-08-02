@@ -6,6 +6,9 @@
 ;
 ; clobbers r0, r1, r3-r5
 ;
+.section .text
+.global strcmp
+
 strcmp:
 strcmp_loop:
     ldb  r3, [r0]

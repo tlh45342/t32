@@ -6,6 +6,9 @@
 ;
 ; clobbers r0, r1, r3-r4
 ;
+.section .text
+.global strchr
+
 strchr:
     movi r3, 0xFF
     and  r1, r1, r3

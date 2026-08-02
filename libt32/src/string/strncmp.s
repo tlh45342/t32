@@ -7,6 +7,9 @@
 ;
 ; clobbers r0-r2, r4-r6
 ;
+.section .text
+.global strncmp
+
 strncmp:
     jz   r2, strncmp_equal
 strncmp_loop:

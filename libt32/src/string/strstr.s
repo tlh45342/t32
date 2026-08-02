@@ -6,6 +6,9 @@
 ;
 ; clobbers r0-r6
 ;
+.section .text
+.global strstr
+
 strstr:
     ldb  r3, [r1]
     jz   r3, strstr_empty_needle

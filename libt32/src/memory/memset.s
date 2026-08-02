@@ -7,6 +7,9 @@
 ;
 ; clobbers r0, r2
 ;
+.section .text
+.global memset
+
 memset:
     mov  r3, r0
     jz   r2, memset_done

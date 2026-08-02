@@ -1,24 +1,16 @@
-# T32 object-format next step
+# Object-library status
 
-`libt32 0.0.1` is intentionally source-only.
-
-The next toolchain milestone is:
+`libt32 0.0.2` builds individual T32OBJ modules with:
 
 ```text
-t32-as -f obj source.s -o source.o
-t32-nm source.o
-t32-ld main.o source.o -o program.bin
-t32-ar rcs libt32.a *.o
+t32-as -f obj
 ```
 
-The first object format should preserve:
+It validates them with `t32-nm` and links them directly with `t32-ld`.
 
-- section bytes;
-- defined symbols;
-- undefined symbols;
-- relocation entries;
-- a string table;
-- section alignment.
+The next phase is `t32-ar`, after which this repository can activate:
 
-The existing `-f bin` behavior should remain compatible and explicit in
-project Makefiles.
+```text
+make archive
+libt32.a
+```

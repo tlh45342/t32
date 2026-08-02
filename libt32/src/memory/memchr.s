@@ -7,6 +7,9 @@
 ;
 ; clobbers r0, r2, r4-r6
 ;
+.section .text
+.global memchr
+
 memchr:
     jz   r2, memchr_not_found
     movi r5, 0xFF

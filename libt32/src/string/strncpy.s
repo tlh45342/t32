@@ -7,6 +7,9 @@
 ;
 ; clobbers r0-r5
 ;
+.section .text
+.global strncpy
+
 strncpy:
     mov  r3, r0
     jz   r2, strncpy_done

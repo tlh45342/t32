@@ -5,6 +5,9 @@
 ;
 ; clobbers r0, r2
 ;
+.section .text
+.global strlen
+
 strlen:
     movi r1, 0
 strlen_loop:

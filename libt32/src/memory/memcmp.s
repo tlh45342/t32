@@ -7,6 +7,9 @@
 ;
 ; clobbers r0-r2, r4-r6
 ;
+.section .text
+.global memcmp
+
 memcmp:
     jz   r2, memcmp_equal
 memcmp_loop:

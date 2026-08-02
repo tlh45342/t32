@@ -7,6 +7,9 @@
 ; Writes eight uppercase digits and a zero terminator.
 ; clobbers r0-r6
 ;
+.section .text
+.global hex_to_string
+
 hex_to_string:
     mov  r2, r1
     movi r3, 8
@@ -35,6 +38,8 @@ hex_to_string_loop:
     movi r4, 0
     stb  r4, [r1]
     ret
+
+.section .data
 
 hex_digits:
     .byte '0', '1', '2', '3', '4', '5', '6', '7'

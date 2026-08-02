@@ -6,6 +6,9 @@
 ;
 ; clobbers r0, r1, r3
 ;
+.section .text
+.global strcpy
+
 strcpy:
     mov  r2, r0
 strcpy_loop:

@@ -1,5 +1,6 @@
 from __future__ import annotations
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -18,6 +19,11 @@ if missing:
 
 for name in manifest["routines"]:
     text = (ROOT / name).read_text(encoding="utf-8")
+    routine = Path(name).stem
+    for required in (".section .text", f".global {routine}", f"{routine}:"):
+        if required not in text:
+            print(f"  FAIL {name} lacks {required}")
+            sys.exit(1)
     if "\t" in text:
         print(f"  FAIL tab found in {name}")
         sys.exit(1)
@@ -25,4 +31,4 @@ for name in manifest["routines"]:
         print(f"  FAIL no trailing newline in {name}")
         sys.exit(1)
 
-print("libt32: PASS")
+print("libt32 manifest: PASS")

@@ -1,23 +1,23 @@
-PYTHON ?= python
-ASM ?= t32-as
-AR ?= t32-ar
+PYTHON := python
 
-all: check
+all: archive
 
 check:
 	$(PYTHON) tools/check_manifest.py
 
-objects:
-	@echo "libt32 objects require: t32-as -f obj"
-	@echo "T32OBJ v1 has not been implemented yet."
-	@exit 1
+objects: check
+	$(PYTHON) tools/build.py objects
 
-archive:
-	@echo "libt32.a requires t32-as -f obj and t32-ar."
-	@exit 1
+archive: check
+	$(PYTHON) tools/build.py archive
+
+inspect: check
+	$(PYTHON) tools/build.py inspect
+
+test: archive
+	$(PYTHON) tests/run_tests.py
 
 clean:
-	-rm -rf build/*
-	-mkdir -p build
+	$(PYTHON) tools/build.py clean
 
-.PHONY: all check objects archive clean
+.PHONY: all check objects archive inspect test clean

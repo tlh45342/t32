@@ -1,0 +1,18 @@
+T32 Link Map
+
+.text  0x00001000  0x000000B4
+.data  0x000010B4  0x0000000C
+.bss   0x000010C0  0x00000000
+
+Inputs:
+O:\Foundry\t32\libt32\build\tests\multi-archive.o
+O:\Foundry\t32\libt32\build\libt32.a(strcmp.o)
+O:\Foundry\t32\libt32\build\libt32.a(strlen.o)
+
+Symbols:
+0x00001000  GLOBAL  _start
+0x0000103C  GLOBAL  strcmp
+0x00001084  GLOBAL  strlen
+
+Entry:
+0x00001000  _start

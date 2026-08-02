@@ -7,6 +7,9 @@
 ; Accepts uppercase and lowercase.
 ; clobbers r0-r9
 ;
+.section .text
+.global string_to_hex
+
 string_to_hex:
     movi r1, 0
     movi r2, 1
@@ -42,6 +45,8 @@ string_to_hex_invalid:
     movi r1, 0
     movi r2, 1
     ret
+
+.section .data
 
 hex_chars:
     .byte '0', '1', '2', '3', '4', '5', '6', '7'

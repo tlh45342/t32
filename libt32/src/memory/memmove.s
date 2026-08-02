@@ -7,6 +7,9 @@
 ;
 ; clobbers r0-r6
 ;
+.section .text
+.global memmove
+
 memmove:
     mov  r3, r0
     jz   r2, memmove_done

@@ -1,8 +1,14 @@
 {
   "name": "libt32",
-  "version": "0.0.1",
-  "state": "source-only",
-  "object_format_required": "T32OBJ v1 (not yet implemented)",
+  "version": "0.0.3",
+  "state": "static-archive",
+  "object_format": "T32OBJ 1.0",
+  "tools": {
+    "assembler": "t32-as >= 0.0.9",
+    "inspector": "t32-nm >= 0.0.1",
+    "linker": "t32-ld >= 0.0.2",
+    "archiver": "t32-ar >= 0.0.1"
+  },
   "routines": [
     "src/convert/atoi.s",
     "src/convert/hex_to_string.s",
@@ -20,5 +26,6 @@
     "src/string/strncpy.s",
     "src/string/strrev.s",
     "src/string/strstr.s"
-  ]
+  ],
+  "archive_format": "T32AR 1.0"
 }

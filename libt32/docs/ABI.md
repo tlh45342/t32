@@ -1,21 +1,17 @@
-# libt32 routine ABI — draft 0.0.1
+# libt32 routine ABI — working object-library contract
 
-This source library follows the register contracts written at the top of each
-routine. T32 does not yet have a finalized link-time ABI.
+`libt32 0.0.2` preserves the register contracts proven by the algorithm suite.
+Each source file documents its arguments, result registers, and clobbers.
 
-Current working rules:
+Current common rules:
 
 - `r15` is the stack pointer and must be restored before return.
-- `CALL` and `RET` use the machine stack.
-- Each routine documents its input, output, and clobbered registers.
-- Test programs should not preserve values in registers listed as clobbered.
-- No routine currently assumes flag-consuming conditional branches.
-- `JZ` and `JNZ` always name the register they test.
+- `CALL` and `RET` use the T32 machine stack.
+- `JZ` and `JNZ` test an explicitly named register.
+- A caller may preserve values only in registers not listed as clobbered by the routine.
+- Every public routine is exported with `.global` from `.text`.
+- Internal loop and data labels remain local to their object file.
 
-The object-format phase must formalize:
-
-- global and local symbol visibility;
-- caller-saved and callee-saved registers;
-- section placement and alignment;
-- relocation types;
-- archive member selection.
+A single compiler-facing calling convention has not yet replaced the
+routine-specific historical contracts. That ABI consolidation should happen
+before `t32-cc` begins generating general library calls.

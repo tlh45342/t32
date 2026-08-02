@@ -7,6 +7,9 @@
 ; Empty string returns zero. Input validation is intentionally minimal.
 ; clobbers r0, r2-r5
 ;
+.section .text
+.global atoi
+
 atoi:
     movi r1, 0
 atoi_loop:

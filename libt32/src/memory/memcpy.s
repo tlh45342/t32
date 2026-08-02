@@ -8,6 +8,9 @@
 ; Source and destination must not overlap.
 ; clobbers r0-r2, r4
 ;
+.section .text
+.global memcpy
+
 memcpy:
     mov  r3, r0
     jz   r2, memcpy_done

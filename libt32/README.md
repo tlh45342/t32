@@ -1,78 +1,34 @@
-# libt32 0.0.1
+# libt32 0.0.3
 
-`libt32` is the reusable source-library home for routines proven by the T32
-algorithm validation suite.
+`libt32` is now a real T32 static library.
 
-## Current status
-
-This version is **source-only**. It does not pretend that T32 object files,
-linking, or static archives exist yet.
-
-Today:
+## Build
 
 ```text
-make
+make            build build/libt32.a
+make objects    build individual T32OBJ files
+make archive    build build/libt32.a
+make inspect    inspect representative objects and list archive members
+make test       link and execute programs through libt32.a
+make clean
 ```
 
-runs a manifest and source-layout check.
-
-Future:
+## Tool requirements
 
 ```text
-t32-as -f obj ...
-t32-nm ...
-t32-ld ...
-t32-ar ...
+t32-as >= 0.0.9
+t32-nm >= 0.0.1
+t32-ld >= 0.0.2
+t32-ar >= 0.0.1
+t32-run
 ```
 
-will allow the same sources to become `libt32.a`.
+## Validation
 
-## Layout
+The integration suite links through `libt32.a` rather than naming routine
+objects directly. It verifies selective archive extraction with:
 
-```text
-libt32/
-├── include/
-├── src/
-│   ├── memory/
-│   ├── string/
-│   └── convert/
-├── docs/
-├── tests/
-├── tools/
-├── build/
-├── Makefile
-└── manifest.json
-```
-
-## Included routines
-
-Memory:
-
-```text
-memset memcpy memmove memcmp memchr
-```
-
-String:
-
-```text
-strlen strcpy strncpy strcmp strncmp strchr strstr strrev
-```
-
-Conversion:
-
-```text
-atoi hex_to_string string_to_hex
-```
-
-## Important distinction
-
-```text
-tests/algorithm/
-    validates independent executable examples
-
-libt32/
-    owns the reusable routine implementations
-```
-
-The next phase should make the algorithm tests consume these implementations
-through relocatable object files rather than carrying private copies.
+- a one-function `strlen` program;
+- a multi-function program using `strlen` and `strcmp`;
+- map checks proving unrelated members are not extracted;
+- VM execution and register validation.
