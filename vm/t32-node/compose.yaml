@@ -1,0 +1,7 @@
+services:
+  t32-node:
+    build: .
+    image: t32-node:latest
+    container_name: t32-node
+    # For the POC, run once and exit. Override command as needed.
+    command: ["/app/samples/hello.t32", "--vconsole-host", "192.168.160.73", "--vconsole-port", "8765"]
