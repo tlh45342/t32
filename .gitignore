@@ -21,7 +21,7 @@
 *.bin
 
 # Logs
-#*.log
+*.log
 
 # Temporary files
 *.tmp
