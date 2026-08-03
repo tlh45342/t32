@@ -21,7 +21,7 @@
 *.bin
 
 # Logs
-*.log
+#*.log
 
 # Temporary files
 *.tmp
@@ -33,3 +33,6 @@
 
 # macOS
 .DS_Store
+
+# testing
+.zip

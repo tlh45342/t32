@@ -1,0 +1,17 @@
+logging to caller-saved.log
+machine reset
+loaded caller-saved.bin at 0x00001000
+pc <= 0x00001000
+r0 =0x00000000  r1 =0xa1111111  r2 =0xa2222222  r3 =0xa3333333
+r4 =0x44444444  r5 =0x55555555  r6 =0x66666666  r7 =0x00000001
+r8 =0x00000000  r9 =0x00000000  r10=0x00000000  r11=0x00000000
+r12=0x00000000  r13=0x00000000  r14=0x00000000  r15=0x0000f000
+pc =0x00001098
+state=halted
+instructions=33
+carry=0
+zero=0
+negative=0
+overflow=0
+reason=HALT instruction
+logging disabled

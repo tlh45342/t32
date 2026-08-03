@@ -1,0 +1,17 @@
+logging to string-to-hex-abi.log
+machine reset
+loaded build/tests/string-to-hex-abi.bin at 0x00001000
+pc <= 0x00001000
+r0 =0x1234abcd  r1 =0x00000000  r2 =0x1234abcd  r3 =0x00001144
+r4 =0x00000000  r5 =0x00000000  r6 =0x00001152  r7 =0x00001168
+r8 =0x88888888  r9 =0x99999999  r10=0x10101010  r11=0x11111111
+r12=0x12121212  r13=0x13131313  r14=0x14141414  r15=0x0000f000
+pc =0x00001054
+state=halted
+instructions=537
+carry=1
+zero=1
+negative=0
+overflow=0
+reason=HALT instruction
+logging disabled

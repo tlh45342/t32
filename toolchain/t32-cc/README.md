@@ -1,51 +1,25 @@
-# t32-cc
+# t32-cc 0.2.0 — First Local Variable
 
-Native C shim for the future T32 C compiler.
+Stage 3 preserves the Stage 2 compiler driver and adds one initialized local `int`.
 
-This iteration only proves that `t32-cc` can be built, run, tested, and
-installed as a native executable. It does not compile C yet.
+Supported forms:
 
-## Linux
+```c
+int main(void) { return 42; }
 
-```bash
-make
-make test
-sudo make install
+int main(void) {
+    int x = 5;
+    return x;
+}
 ```
 
-Installs:
+The local variable is deliberately stored in a four-byte stack slot. The compiler emits allocation, store, load, release, and `RET` rather than optimizing the variable away. This makes the first symbol/storage model directly inspectable.
+
+Commands remain:
 
 ```text
-/usr/local/bin/t32-cc
+t32-cc -S main.c
+t32-cc -c main.c
+t32-cc main.c
+t32-cc -v main.c
 ```
-
-## Windows
-
-```bat
-make
-make test
-make install
-```
-
-Default install location:
-
-```text
-C:/Program Files/libvm/bin/t32-cc.exe
-```
-
-Override the prefix when needed:
-
-```bat
-make PREFIX="C:/Program Files/t32" install
-```
-
-## Current behavior
-
-```bash
-t32-cc
-t32-cc --version
-t32-cc --help
-t32-cc hello.c
-```
-
-The final form is reserved for the future compiler pipeline.

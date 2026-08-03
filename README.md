@@ -157,11 +157,7 @@ One of the goals of T32 is to remain approachable. Curiosity is encouraged, and 
 # About the Author
 
 **Thomas L. Hamilton**
-Computer Engineer • Dog Nanny • Alternative LEGO® Enthusiast
-
-I share my home with three dogs who take turns chaperoning me.
-
-When I'm not writing software, you'll probably find me experimenting with LEGO® bricks, magnets, simple machines, and homemade generators—because engineering should always leave room for curiosity, exploration, and play.
+Computer Engineer 
 
 ------
 

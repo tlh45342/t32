@@ -1,0 +1,17 @@
+logging to callee-saved.log
+machine reset
+loaded callee-saved.bin at 0x00001000
+pc <= 0x00001000
+r0 =0x00000000  r1 =0x00000000  r2 =0x00000000  r3 =0x00000000
+r4 =0x00000000  r5 =0x00000000  r6 =0x00000000  r7 =0x00000001
+r8 =0x08080808  r9 =0x09090909  r10=0x10101010  r11=0x11111111
+r12=0x12121212  r13=0x13131313  r14=0x14141414  r15=0x0000f000
+pc =0x000010f0
+state=halted
+instructions=56
+carry=0
+zero=0
+negative=0
+overflow=0
+reason=HALT instruction
+logging disabled
