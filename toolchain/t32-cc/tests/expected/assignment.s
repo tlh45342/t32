@@ -9,6 +9,9 @@ main:
     subi r15, r15, 4
     movi r1, 0x00000005
     stw  r1, [r15]
+    ; assign x
+    movi r1, 0x00000007
+    stw  r1, [r15]
     ldw  r0, [r15]
     addi r15, r15, 4
     ret

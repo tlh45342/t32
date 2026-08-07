@@ -1,11 +1,25 @@
-# t32-cc Version History
+# t32-cc 0.4.0
 
-## 0.2.0
+## Added
 
-- Added one initialized local `int` in `main`.
-- Added compiler-local symbol name storage and identifier lookup.
-- Assigned `int` a 4-byte stack slot.
-- Added `STW` initialization and `LDW` return generation.
-- Restores `r15` before `RET`.
-- Added undeclared-variable, second-local, and missing-initializer negatives.
-- Preserved Stage 2 `-S`, `-c`, link, quiet, verbose, and failure behavior.
+- One binary `+` expression.
+- Literal-plus-literal expressions.
+- Local-plus-literal and literal-plus-local expressions.
+- Local-plus-local expressions.
+- Addition expressions in assignments.
+- Repeated increment validation.
+- Negative-literal addition validation.
+
+## Preserved
+
+- `-S`, `-c`, and full-link modes.
+- ABI 0.1 stack restoration.
+- Quiet success and opt-in `-v` output.
+- Existing constant, local, and assignment behavior.
+- Failure cleanup and missing-runtime diagnostics.
+
+## Deferred
+
+- Chained expressions and precedence.
+- Parenthesized expressions.
+- Operators other than `+`.

@@ -1,0 +1,5 @@
+int main(void)
+{
+    x = 5;
+    return 0;
+}

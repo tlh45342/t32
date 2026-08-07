@@ -7,7 +7,7 @@
 #include <string.h>
 
 #ifndef T32CC_VERSION
-#define T32CC_VERSION "0.2.0"
+#define T32CC_VERSION "0.4.0"
 #endif
 
 #ifdef _WIN32
@@ -70,10 +70,12 @@ static void print_usage(FILE *stream, const char *program_name)
 {
     fprintf(stream,
         "Usage: %s [options] <input.c>\n\n"
-        "T32 C compiler driver - Stage 3\n\n"
+        "T32 C compiler driver - Stage 5\n\n"
         "Supported source form:\n"
         "  int main(void) { return <integer>; }\n"
-        "  int main(void) { int <name> = <integer>; return <name>; }\n\n"
+        "  int main(void) { int <name> = <integer>; return <name>; }\n"
+        "  int main(void) { int <name> = <integer>; <name> = <expr>; return <expr>; }\n\n"
+        "Expressions currently support one binary '+' using integer literals or the local variable.\n\n"
         "Options:\n"
         "  -S                 Compile to assembly and stop\n"
         "  -c                 Compile to relocatable object and stop\n"
@@ -506,16 +508,34 @@ static int parser_expect_word(parser_t *parser, const char *word)
 }
 
 typedef enum {
-    RETURN_INTEGER = 0,
-    RETURN_LOCAL
-} return_kind_t;
+    OPERAND_INTEGER = 0,
+    OPERAND_LOCAL
+} operand_kind_t;
+
+typedef struct {
+    operand_kind_t kind;
+    uint32_t value;
+} operand_t;
+
+typedef struct {
+    operand_t left;
+    int has_add;
+    operand_t right;
+} expression_t;
+
+#define MAX_ASSIGNMENTS 16
+
+typedef struct {
+    expression_t expression;
+} assignment_t;
 
 typedef struct {
     int has_local;
     char local_name[64];
     uint32_t local_initializer;
-    return_kind_t return_kind;
-    uint32_t return_value;
+    assignment_t assignments[MAX_ASSIGNMENTS];
+    size_t assignment_count;
+    expression_t return_expression;
 } program_t;
 
 static int copy_identifier(const token_t *token, char *buffer, size_t size)
@@ -566,6 +586,61 @@ static int parse_integer_literal(parser_t *parser, uint32_t *value_out)
     return 1;
 }
 
+static int parse_operand(
+    parser_t *parser,
+    const program_t *program,
+    operand_t *operand)
+{
+    if (parser->current.kind == TOK_INTEGER ||
+        parser->current.kind == TOK_MINUS) {
+        operand->kind = OPERAND_INTEGER;
+        return parse_integer_literal(parser, &operand->value);
+    }
+
+    if (parser->current.kind == TOK_IDENTIFIER) {
+        if (!program->has_local ||
+            !token_matches_name(&parser->current, program->local_name)) {
+            parser_error(parser, "use of undeclared local variable");
+            return 0;
+        }
+
+        operand->kind = OPERAND_LOCAL;
+        operand->value = 0;
+        parser_advance(parser);
+        return !parser->failed;
+    }
+
+    parser_error(parser, "expected integer literal or local variable");
+    return 0;
+}
+
+static int parse_expression(
+    parser_t *parser,
+    const program_t *program,
+    expression_t *expression)
+{
+    memset(expression, 0, sizeof(*expression));
+
+    if (!parse_operand(parser, program, &expression->left))
+        return 0;
+
+    if (parser->current.kind == TOK_PLUS) {
+        expression->has_add = 1;
+        parser_advance(parser);
+
+        if (!parse_operand(parser, program, &expression->right))
+            return 0;
+
+        if (parser->current.kind == TOK_PLUS) {
+            parser_error(parser,
+                "Stage 5 supports one binary '+' operator per expression");
+            return 0;
+        }
+    }
+
+    return !parser->failed;
+}
+
 static int parse_program(parser_t *parser, program_t *program)
 {
     memset(program, 0, sizeof(*program));
@@ -602,40 +677,81 @@ static int parse_program(parser_t *parser, program_t *program)
         if (!parser_expect_kind(parser, TOK_ASSIGN, "'='")) return 0;
         if (!parse_integer_literal(parser, &program->local_initializer)) return 0;
         if (!parser_expect_kind(parser, TOK_SEMICOLON, "';'")) return 0;
+    }
 
+    while (!token_is_identifier(&parser->current, "return")) {
         if (token_is_identifier(&parser->current, "int")) {
-            parser_error(parser, "Stage 3 supports exactly one local variable");
+            parser_error(parser, "Stage 5 supports exactly one local variable");
             return 0;
         }
+
+        if (parser->current.kind != TOK_IDENTIFIER) {
+            parser_error(parser, "expected assignment or return statement");
+            return 0;
+        }
+
+        if (!program->has_local ||
+            !token_matches_name(&parser->current, program->local_name)) {
+            parser_error(parser, "assignment to undeclared local variable");
+            return 0;
+        }
+
+        parser_advance(parser);
+        if (!parser_expect_kind(parser, TOK_ASSIGN, "'='")) return 0;
+
+        if (program->assignment_count >= MAX_ASSIGNMENTS) {
+            parser_error(parser, "too many assignment statements");
+            return 0;
+        }
+
+        if (!parse_expression(
+                parser,
+                program,
+                &program->assignments[program->assignment_count].expression)) {
+            return 0;
+        }
+        if (!parser_expect_kind(parser, TOK_SEMICOLON, "';'")) return 0;
+        ++program->assignment_count;
     }
 
     if (!parser_expect_word(parser, "return")) return 0;
-
-    if (parser->current.kind == TOK_INTEGER || parser->current.kind == TOK_MINUS) {
-        program->return_kind = RETURN_INTEGER;
-        if (!parse_integer_literal(parser, &program->return_value)) return 0;
-    } else if (parser->current.kind == TOK_IDENTIFIER) {
-        if (!program->has_local ||
-            !token_matches_name(&parser->current, program->local_name)) {
-            parser_error(parser, "use of undeclared local variable");
-            return 0;
-        }
-        program->return_kind = RETURN_LOCAL;
-        parser_advance(parser);
-    } else {
-        parser_error(parser, "return expression must be an integer literal or local variable");
-        return 0;
-    }
+    if (!parse_expression(parser, program, &program->return_expression)) return 0;
 
     if (!parser_expect_kind(parser, TOK_SEMICOLON, "';'")) return 0;
     if (!parser_expect_kind(parser, TOK_RBRACE, "'}'")) return 0;
 
     if (parser->current.kind != TOK_EOF) {
-        parser_error(parser, "Stage 3 supports exactly one function named main");
+        parser_error(parser, "Stage 5 supports exactly one function named main");
         return 0;
     }
 
     return !parser->failed;
+}
+
+static void emit_operand(FILE *output, const operand_t *operand, unsigned reg)
+{
+    if (operand->kind == OPERAND_LOCAL)
+        fprintf(output, "    ldw  r%u, [r15]\n", reg);
+    else
+        fprintf(output, "    movi r%u, 0x%08X\n", reg, operand->value);
+}
+
+static void emit_expression(
+    FILE *output,
+    const expression_t *expression,
+    unsigned destination,
+    unsigned temporary)
+{
+    emit_operand(output, &expression->left, destination);
+
+    if (expression->has_add) {
+        emit_operand(output, &expression->right, temporary);
+        fprintf(output,
+            "    add  r%u, r%u, r%u\n",
+            destination,
+            destination,
+            temporary);
+    }
 }
 
 static int emit_assembly(const char *path, const program_t *program)
@@ -648,7 +764,7 @@ static int emit_assembly(const char *path, const program_t *program)
 
     fprintf(output,
         "; generated by t32-cc %s\n"
-        "; Stage 3 ABI 0.1 translation unit\n\n"
+        "; Stage 5 ABI 0.1 translation unit\n\n"
         ".section .text\n"
         ".global main\n\n"
         "main:\n",
@@ -662,13 +778,19 @@ static int emit_assembly(const char *path, const program_t *program)
             "    stw  r1, [r15]\n",
             program->local_name,
             program->local_initializer);
+
+        for (size_t index = 0; index < program->assignment_count; ++index) {
+            fprintf(output, "    ; assign %s\n", program->local_name);
+            emit_expression(
+                output,
+                &program->assignments[index].expression,
+                1,
+                2);
+            fprintf(output, "    stw  r1, [r15]\n");
+        }
     }
 
-    if (program->return_kind == RETURN_LOCAL) {
-        fprintf(output, "    ldw  r0, [r15]\n");
-    } else {
-        fprintf(output, "    movi r0, 0x%08X\n", program->return_value);
-    }
+    emit_expression(output, &program->return_expression, 0, 1);
 
     if (program->has_local)
         fprintf(output, "    addi r15, r15, 4\n");

@@ -1,25 +1,40 @@
-# t32-cc 0.2.0 — First Local Variable
+# t32-cc 0.4.0 Addition Patch
 
-Stage 3 preserves the Stage 2 compiler driver and adds one initialized local `int`.
+Changed-files-only update for `toolchain/t32-cc`.
 
-Supported forms:
+## New language forms
 
 ```c
-int main(void) { return 42; }
-
-int main(void) {
-    int x = 5;
-    return x;
-}
+return 5 + 3;
+return x + 3;
+return 3 + x;
+return x + x;
+x = x + 1;
+x = 4 + 5;
 ```
 
-The local variable is deliberately stored in a four-byte stack slot. The compiler emits allocation, store, load, release, and `RET` rather than optimizing the variable away. This makes the first symbol/storage model directly inspectable.
+Expressions currently permit exactly one binary `+`. Each operand may be an
+integer literal (including a negative literal) or the one declared local
+integer.
 
-Commands remain:
+## Deliberately deferred
 
-```text
-t32-cc -S main.c
-t32-cc -c main.c
-t32-cc main.c
-t32-cc -v main.c
+- chained addition
+- parentheses
+- subtraction
+- multiplication and division
+- multiple locals
+- precedence
+
+## Test
+
+From `O:\Foundry\t32\toolchain\t32-cc`:
+
+```bat
+make clean
+make
+make test
+make install
 ```
+
+The suite also corrects the stale version label and now expects `0.4.0`.

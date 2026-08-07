@@ -5,5 +5,7 @@
 .global main
 
 main:
-    movi r0, 0x0000002A
+    movi r0, 0x00000005
+    movi r1, 0x00000003
+    add  r0, r0, r1
     ret

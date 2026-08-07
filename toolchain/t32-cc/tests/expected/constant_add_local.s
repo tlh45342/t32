@@ -9,6 +9,8 @@ main:
     subi r15, r15, 4
     movi r1, 0x00000005
     stw  r1, [r15]
-    ldw  r0, [r15]
+    movi r0, 0x00000003
+    ldw  r1, [r15]
+    add  r0, r0, r1
     addi r15, r15, 4
     ret
