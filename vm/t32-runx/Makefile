@@ -1,4 +1,4 @@
-# t32-runx 0.0.6
+# t32-runx 0.0.7
 #
 # Windows-only interactive developer host for T32.
 # Canonical VM implementation is owned by ../libt32vm.

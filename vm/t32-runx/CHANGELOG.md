@@ -1,5 +1,15 @@
 # t32-runx Changelog
 
+## 0.0.7 - menu dispatch fix, Machine load, About
+
+- fix the main-window class bug that prevented menu commands from reaching the
+  application `WM_COMMAND` handler;
+- move `Load Program...` from File to Machine;
+- retain the standard Windows `GetOpenFileNameA` common dialog for program load;
+- make `View -> Stats...` reach the real modeless Stats-window creation path;
+- add `Help -> About...` and report version 0.0.7.
+
+
 ## 0.0.6 - direct program loading and CPU stats
 
 - add `File -> Load Program...` for flat binaries at `0x00020000`;

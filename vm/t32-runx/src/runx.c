@@ -3,14 +3,15 @@
  *
  * Windows-only interactive application host for T32.
  *
- * 0.0.6 scope:
+ * 0.0.7 scope:
  *   - one VM / one vCPU
  *   - existing 80x25 T32 text display
  *   - polling keyboard through libt32vm
  *   - Machine: Start / Stop / Reset / Exit
  *   - Firmware: Select BIOS...
- *   - File: Load Program... at 0x00020000 for direct development
+ *   - Machine: Load Program... at 0x00020000 for direct development
  *   - View: modeless Stats... CPU state window
+ *   - Help: About... reports the running version
  *   - Disk: Attach / Detach Disk 0
  *   - red/green status lamp on the far right of the menu bar
  *   - guest POWER_OFF powers off the VM but leaves the application open
@@ -29,7 +30,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define T32_RUNX_VERSION "0.0.6"
+#define T32_RUNX_VERSION "0.0.7"
 #define T32_RUNX_LOAD_ADDRESS UINT32_C(0x00001000)
 #define T32_RUNX_PROGRAM_ADDRESS UINT32_C(0x00020000)
 #define T32_RUNX_SLICE_INSTRUCTIONS UINT64_C(20000)
@@ -39,8 +40,9 @@
 #define T32_RUNX_CELL_HEIGHT 16
 #define T32_RUNX_MARGIN 8
 
-#define IDM_FILE_LOAD_PROGRAM  901
-#define IDM_VIEW_STATS         902
+#define IDM_MACHINE_LOAD_PROGRAM 1005
+#define IDM_VIEW_STATS           1301
+#define IDM_HELP_ABOUT           1401
 #define IDM_MACHINE_START    1001
 #define IDM_MACHINE_STOP     1002
 #define IDM_MACHINE_RESET    1003
@@ -92,6 +94,21 @@ static void show_error(HWND owner, const char *message)
 static void show_info(HWND owner, const char *message)
 {
     MessageBoxA(owner, message, "t32-runx", MB_OK | MB_ICONINFORMATION);
+}
+
+static void show_about(HWND owner)
+{
+    char message[256];
+
+    snprintf(message, sizeof(message),
+             "T32 RunX\n"
+             "Version %s\n\n"
+             "Windows interactive developer host for T32.\n"
+             "One VM / one vCPU.",
+             T32_RUNX_VERSION);
+
+    MessageBoxA(owner, message, "About T32 RunX",
+                MB_OK | MB_ICONINFORMATION);
 }
 
 static bool choose_file(HWND owner, const char *title, const char *filter,
@@ -608,18 +625,19 @@ static void paint_display(HWND window)
 static HMENU create_application_menu(void)
 {
     HMENU root = CreateMenu();
-    HMENU file = CreatePopupMenu();
     HMENU machine = CreatePopupMenu();
     HMENU firmware = CreatePopupMenu();
     HMENU disk = CreatePopupMenu();
     HMENU view = CreatePopupMenu();
+    HMENU help = CreatePopupMenu();
     MENUITEMINFOA status;
-
-    AppendMenuA(file, MF_STRING, IDM_FILE_LOAD_PROGRAM, "&Load Program...");
 
     AppendMenuA(machine, MF_STRING, IDM_MACHINE_START, "&Start");
     AppendMenuA(machine, MF_STRING, IDM_MACHINE_STOP, "S&top");
     AppendMenuA(machine, MF_STRING, IDM_MACHINE_RESET, "&Reset");
+    AppendMenuA(machine, MF_SEPARATOR, 0, NULL);
+    AppendMenuA(machine, MF_STRING, IDM_MACHINE_LOAD_PROGRAM,
+                "&Load Program...");
     AppendMenuA(machine, MF_SEPARATOR, 0, NULL);
     AppendMenuA(machine, MF_STRING, IDM_MACHINE_EXIT, "E&xit");
 
@@ -632,12 +650,13 @@ static HMENU create_application_menu(void)
                 "&Detach Disk 0");
 
     AppendMenuA(view, MF_STRING, IDM_VIEW_STATS, "&Stats...");
+    AppendMenuA(help, MF_STRING, IDM_HELP_ABOUT, "&About...");
 
-    AppendMenuA(root, MF_POPUP, (UINT_PTR)file, "&File");
     AppendMenuA(root, MF_POPUP, (UINT_PTR)machine, "&Machine");
     AppendMenuA(root, MF_POPUP, (UINT_PTR)firmware, "&Firmware");
     AppendMenuA(root, MF_POPUP, (UINT_PTR)disk, "&Disk");
     AppendMenuA(root, MF_POPUP, (UINT_PTR)view, "&View");
+    AppendMenuA(root, MF_POPUP, (UINT_PTR)help, "&Help");
 
     memset(&status, 0, sizeof(status));
     status.cbSize = sizeof(status);
@@ -657,11 +676,14 @@ static LRESULT CALLBACK runx_window_proc(HWND window, UINT message,
     switch (message) {
     case WM_COMMAND:
         switch (LOWORD(wparam)) {
-        case IDM_FILE_LOAD_PROGRAM:
+        case IDM_MACHINE_LOAD_PROGRAM:
             load_program(window);
             return 0;
         case IDM_VIEW_STATS:
             show_stats_window(window);
+            return 0;
+        case IDM_HELP_ABOUT:
+            show_about(window);
             return 0;
         case IDM_MACHINE_START:
             machine_start(window);
@@ -741,7 +763,7 @@ int main(int argc, char **argv)
     if (argc == 2 &&
         (strcmp(argv[1], "--version") == 0 ||
          strcmp(argv[1], "-v") == 0)) {
-        MessageBoxA(NULL, "t32-runx 0.0.6", "t32-runx",
+        MessageBoxA(NULL, "t32-runx 0.0.7", "t32-runx",
                     MB_OK | MB_ICONINFORMATION);
         return 0;
     }
@@ -801,7 +823,7 @@ int main(int argc, char **argv)
 
     window = CreateWindowExA(
         0,
-        wc.lpszClassName,
+        "T32RunXWindow",
         "t32-runx",
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT,

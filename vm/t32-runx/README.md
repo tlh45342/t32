@@ -1,18 +1,19 @@
-# t32-runx 0.0.6
+# t32-runx 0.0.7
 
-`t32-runx` is the intentionally Windows-only, single-vCPU interactive
-developer host for T32.
+`t32-runx` is the Windows-only, single-vCPU interactive developer host for T32.
+It reuses the canonical sibling `../libt32vm`; there is no duplicate CPU/MMIO
+implementation.
 
-It links the canonical sibling `../libt32vm/lib/libt32vm.a`. It does not contain
-a second CPU or MMIO implementation.
-
-## Application shell
+## Menus
 
 ```text
 Machine
   Start
   Stop
   Reset
+  ----------------
+  Load Program...
+  ----------------
   Exit
 
 Firmware
@@ -22,50 +23,57 @@ Disk
   Attach Disk 0...
   Detach Disk 0
 
+View
+  Stats...
+
+Help
+  About...
+
                                                ●
 ```
 
-The far-right status lamp is:
+The far-right lamp is green while the VM executes and red while it is stopped
+or powered off.
+
+## Direct program development
+
+`Machine -> Load Program...` uses the standard Windows common file-open dialog.
+A selected flat `.bin` program is loaded at `0x00020000`, PC is set to the same
+address, and the VM remains stopped until `Machine -> Start`.
+
+This is the GUI equivalent of:
 
 ```text
-green   VM executing
-red     VM stopped/powered off
+load hello.bin 0x00020000
+set pc 0x00020000
+run
 ```
 
-The window title is deliberately just `t32-runx`; firmware paths, disk paths,
-and state are no longer packed into the title bar.
+Selecting BIOS firmware switches back to the normal firmware + Disk 0 boot
+workflow.
 
-## Lifecycle semantics
+## CPU Stats
 
-`Start`
-: Starts the configured machine. After Stop, HALT/error, or guest POWER_OFF,
-  Start performs a fresh boot from the selected firmware.
+`View -> Stats...` opens a modeless read-only window containing r0-r15, PC,
+state, instruction count, flags, and halt/fault reason. It refreshes during
+execution and after lifecycle changes.
 
-`Stop`
-: Immediate host-enforced power cut. The guest is not notified and receives no
-  cleanup opportunity. The last framebuffer remains visible for inspection.
+## About
 
-`Reset`
-: Recreates the machine from the selected firmware and disk and immediately
-  starts it.
+`Help -> About...` displays the running `t32-runx` version so development builds
+can be identified immediately.
 
-Guest `POWER_OFF`
-: Powers off the virtual machine but leaves the `t32-runx` application open.
-  This is intentionally different from **Exit**.
+## 0.0.7 fix
 
-`Exit`
-: Closes the Windows application.
+0.0.6 registered the main window class and the Stats window class, but then
+created the visible main window through the last value left in
+`WNDCLASS.lpszClassName`. At that point the last class was the Stats class, so
+the visible application window received the Stats window procedure instead of
+the normal application window procedure. Menu commands therefore never reached
+the real `WM_COMMAND` dispatcher.
 
-## Firmware and disk
-
-Firmware remains replaceable:
-
-```text
-Firmware -> Select BIOS...
-```
-
-If `disk.img` exists in the current working directory it remains the initial
-Disk 0 convention. A different image can be selected interactively.
+0.0.7 explicitly creates the main window with `T32RunXWindow`. This repairs the
+Stats command and the standard file-open command path.
 
 ## Current scope
 
@@ -74,45 +82,9 @@ Disk 0 convention. A different image can be selected interactively.
 - 80x25 text display
 - polling ASCII keyboard
 - synchronous disk
+- direct flat-binary development loading
+- read-only CPU Stats window
 - guest POWER_OFF / RESET platform control
 - no mouse
 - no timer/RTC/IRQ yet
 - no networking yet
-
-
-## 0.0.6 cleanup
-
-- Status lamp is enabled/display-only so Windows renders red/green instead of grey.
-- Clicking the lamp intentionally does nothing.
-- Disk detach no longer has an unused window parameter.
-- `make install` no longer forces a relink merely because a phony library helper ran.
-
-
-## Direct program development
-
-`File -> Load Program...` loads a flat T32 binary at `0x00020000`, sets PC to
-that same address, and leaves the machine stopped. Choose `Machine -> Start`
-to execute it. This is the GUI equivalent of the `t32-run` monitor sequence:
-
-```text
-load hello.bin 0x00020000
-set pc 0x00020000
-run
-```
-
-Selecting BIOS firmware switches back to normal firmware boot mode. The direct
-program path does not replace BIOS + Disk 0 boot; both workflows remain
-available.
-
-## CPU Stats window
-
-`View -> Stats...` opens a modeless, read-only CPU state window showing:
-
-- r0-r15;
-- PC;
-- machine state;
-- executed instruction count;
-- carry, zero, negative, and overflow flags;
-- halt/fault reason.
-
-The window refreshes while the VM is running and after lifecycle transitions.
