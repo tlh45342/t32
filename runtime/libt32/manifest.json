@@ -1,6 +1,6 @@
 {
   "name": "libt32",
-  "version": "0.0.4",
+  "version": "0.0.6",
   "state": "abi-0.1-static-archive",
   "object_format": "T32OBJ 1.0",
   "tools": {
@@ -10,6 +10,8 @@
     "archiver": "t32-ar >= 0.0.1"
   },
   "routines": [
+    "src/io/putchar.s",
+    "src/io/puts.s",
     "src/convert/atoi.s",
     "src/convert/hex_to_string.s",
     "src/convert/string_to_hex.s",

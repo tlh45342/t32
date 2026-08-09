@@ -1,0 +1,830 @@
+
+O:\Foundry\t32>make -C toolchain/t32-cc clean 
+make: Entering directory `O:/Foundry/t32/toolchain/t32-cc'
+make: Leaving directory `O:/Foundry/t32/toolchain/t32-cc'
+
+O:\Foundry\t32>make -C runtime/libt32 clean 
+make: Entering directory `O:/Foundry/t32/runtime/libt32'
+python tools/build.py clean
+libt32: cleaned
+make: Leaving directory `O:/Foundry/t32/runtime/libt32'
+
+O:\Foundry\t32>make -C firmware/stage3 clean 
+make: Entering directory `O:/Foundry/t32/firmware/stage3'
+make: Leaving directory `O:/Foundry/t32/firmware/stage3'
+
+O:\Foundry\t32>make -C toolchain/t32-cc 
+make: Entering directory `O:/Foundry/t32/toolchain/t32-cc'
+gcc  -std=c11 -Wall -Wextra -Wpedantic -O2 \
+		-DT32CC_VERSION=\"0.17.0\" \
+		-c src/t32-cc.c -o build/t32-cc.o
+gcc  build/t32-cc.o  -o t32-cc.exe
+make: Leaving directory `O:/Foundry/t32/toolchain/t32-cc'
+
+O:\Foundry\t32>make -C toolchain/t32-cc install 
+make: Entering directory `O:/Foundry/t32/toolchain/t32-cc'
+Installed t32-cc.exe to C:\Users\User/.local/bin
+make: Leaving directory `O:/Foundry/t32/toolchain/t32-cc'
+
+O:\Foundry\t32>make test-firmware 
+make --no-print-directory -C firmware/bios test
+make --no-print-directory -C ../boot
+make[2]: Nothing to be done for `all'.
+make --no-print-directory -C ../stage3
+t32-as -f obj stage3.s -o build/stage3.o
+assembled stage3.s -> build/stage3.o
+t32-cc -S main.c -o build/main.s
+t32-as -f obj build/main.s -o build/main.o
+assembled build/main.s -> build/main.o
+make --no-print-directory -C ../../runtime/libt32 archive
+python tools/check_manifest.py
+Checking libt32 0.0.6...
+  state: abi-0.1-static-archive
+  routines: 18
+libt32 manifest: PASS
+python tools/build.py archive
+assembled O:\Foundry\t32\runtime\libt32\src\io\putchar.s -> O:\Foundry\t32\runtime\libt32\build\io\putchar.o
+assembled O:\Foundry\t32\runtime\libt32\src\io\puts.s -> O:\Foundry\t32\runtime\libt32\build\io\puts.o
+assembled O:\Foundry\t32\runtime\libt32\src\convert\atoi.s -> O:\Foundry\t32\runtime\libt32\build\convert\atoi.o
+assembled O:\Foundry\t32\runtime\libt32\src\convert\hex_to_string.s -> O:\Foundry\t32\runtime\libt32\build\convert\hex_to_string.o
+assembled O:\Foundry\t32\runtime\libt32\src\convert\string_to_hex.s -> O:\Foundry\t32\runtime\libt32\build\convert\string_to_hex.o
+assembled O:\Foundry\t32\runtime\libt32\src\memory\memchr.s -> O:\Foundry\t32\runtime\libt32\build\memory\memchr.o
+assembled O:\Foundry\t32\runtime\libt32\src\memory\memcmp.s -> O:\Foundry\t32\runtime\libt32\build\memory\memcmp.o
+assembled O:\Foundry\t32\runtime\libt32\src\memory\memcpy.s -> O:\Foundry\t32\runtime\libt32\build\memory\memcpy.o
+assembled O:\Foundry\t32\runtime\libt32\src\memory\memmove.s -> O:\Foundry\t32\runtime\libt32\build\memory\memmove.o
+assembled O:\Foundry\t32\runtime\libt32\src\memory\memset.s -> O:\Foundry\t32\runtime\libt32\build\memory\memset.o
+assembled O:\Foundry\t32\runtime\libt32\src\string\strchr.s -> O:\Foundry\t32\runtime\libt32\build\string\strchr.o
+assembled O:\Foundry\t32\runtime\libt32\src\string\strcmp.s -> O:\Foundry\t32\runtime\libt32\build\string\strcmp.o
+assembled O:\Foundry\t32\runtime\libt32\src\string\strcpy.s -> O:\Foundry\t32\runtime\libt32\build\string\strcpy.o
+assembled O:\Foundry\t32\runtime\libt32\src\string\strlen.s -> O:\Foundry\t32\runtime\libt32\build\string\strlen.o
+assembled O:\Foundry\t32\runtime\libt32\src\string\strncmp.s -> O:\Foundry\t32\runtime\libt32\build\string\strncmp.o
+assembled O:\Foundry\t32\runtime\libt32\src\string\strncpy.s -> O:\Foundry\t32\runtime\libt32\build\string\strncpy.o
+assembled O:\Foundry\t32\runtime\libt32\src\string\strrev.s -> O:\Foundry\t32\runtime\libt32\build\string\strrev.o
+assembled O:\Foundry\t32\runtime\libt32\src\string\strstr.s -> O:\Foundry\t32\runtime\libt32\build\string\strstr.o
+t32-as -f obj O:\Foundry\t32\runtime\libt32\src\io\putchar.s -o O:\Foundry\t32\runtime\libt32\build\io\putchar.o
+t32-as -f obj O:\Foundry\t32\runtime\libt32\src\io\puts.s -o O:\Foundry\t32\runtime\libt32\build\io\puts.o
+t32-as -f obj O:\Foundry\t32\runtime\libt32\src\convert\atoi.s -o O:\Foundry\t32\runtime\libt32\build\convert\atoi.o
+t32-as -f obj O:\Foundry\t32\runtime\libt32\src\convert\hex_to_string.s -o O:\Foundry\t32\runtime\libt32\build\convert\hex_to_string.o
+t32-as -f obj O:\Foundry\t32\runtime\libt32\src\convert\string_to_hex.s -o O:\Foundry\t32\runtime\libt32\build\convert\string_to_hex.o
+t32-as -f obj O:\Foundry\t32\runtime\libt32\src\memory\memchr.s -o O:\Foundry\t32\runtime\libt32\build\memory\memchr.o
+t32-as -f obj O:\Foundry\t32\runtime\libt32\src\memory\memcmp.s -o O:\Foundry\t32\runtime\libt32\build\memory\memcmp.o
+t32-as -f obj O:\Foundry\t32\runtime\libt32\src\memory\memcpy.s -o O:\Foundry\t32\runtime\libt32\build\memory\memcpy.o
+t32-as -f obj O:\Foundry\t32\runtime\libt32\src\memory\memmove.s -o O:\Foundry\t32\runtime\libt32\build\memory\memmove.o
+t32-as -f obj O:\Foundry\t32\runtime\libt32\src\memory\memset.s -o O:\Foundry\t32\runtime\libt32\build\memory\memset.o
+t32-as -f obj O:\Foundry\t32\runtime\libt32\src\string\strchr.s -o O:\Foundry\t32\runtime\libt32\build\string\strchr.o
+t32-as -f obj O:\Foundry\t32\runtime\libt32\src\string\strcmp.s -o O:\Foundry\t32\runtime\libt32\build\string\strcmp.o
+t32-as -f obj O:\Foundry\t32\runtime\libt32\src\string\strcpy.s -o O:\Foundry\t32\runtime\libt32\build\string\strcpy.o
+t32-as -f obj O:\Foundry\t32\runtime\libt32\src\string\strlen.s -o O:\Foundry\t32\runtime\libt32\build\string\strlen.o
+t32-as -f obj O:\Foundry\t32\runtime\libt32\src\string\strncmp.s -o O:\Foundry\t32\runtime\libt32\build\string\strncmp.o
+t32-as -f obj O:\Foundry\t32\runtime\libt32\src\string\strncpy.s -o O:\Foundry\t32\runtime\libt32\build\string\strncpy.o
+t32-as -f obj O:\Foundry\t32\runtime\libt32\src\string\strrev.s -o O:\Foundry\t32\runtime\libt32\build\string\strrev.o
+t32-as -f obj O:\Foundry\t32\runtime\libt32\src\string\strstr.s -o O:\Foundry\t32\runtime\libt32\build\string\strstr.o
+libt32: built 18 objects
+t32-ar rcs O:\Foundry\t32\runtime\libt32\build\libt32.a O:\Foundry\t32\runtime\libt32\build\io\putchar.o O:\Foundry\t32\runtime\libt32\build\io\puts.o O:\Foundry\t32\runtime\libt32\build\convert\atoi.o O:\Foundry\t32\runtime\libt32\build\convert\hex_to_string.o O:\Foundry\t32\runtime\libt32\build\convert\string_to_hex.o O:\Foundry\t32\runtime\libt32\build\memory\memchr.o O:\Foundry\t32\runtime\libt32\build\memory\memcmp.o O:\Foundry\t32\runtime\libt32\build\memory\memcpy.o O:\Foundry\t32\runtime\libt32\build\memory\memmove.o O:\Foundry\t32\runtime\libt32\build\memory\memset.o O:\Foundry\t32\runtime\libt32\build\string\strchr.o O:\Foundry\t32\runtime\libt32\build\string\strcmp.o O:\Foundry\t32\runtime\libt32\build\string\strcpy.o O:\Foundry\t32\runtime\libt32\build\string\strlen.o O:\Foundry\t32\runtime\libt32\build\string\strncmp.o O:\Foundry\t32\runtime\libt32\build\string\strncpy.o O:\Foundry\t32\runtime\libt32\build\string\strrev.o O:\Foundry\t32\runtime\libt32\build\string\strstr.o
+libt32: created O:\Foundry\t32\runtime\libt32\build\libt32.a
+t32-ld -Ttext 0x00020000 build/stage3.o build/main.o ../../runtime/libt32/build/libt32.a -Map build/next.map -o next.bin
+linked 4 objects from 1 archive -> next.bin
+text=0x00020000 data=0x0002031C bss=0x00020338
+entry _start=0x00020000
+make --no-print-directory -C ../../tools/t32-disk
+make[2]: Nothing to be done for `all'.
+make --no-print-directory -C ../../vm/t32-run
+make[2]: Nothing to be done for `all'.
+python tests/run_tests.py "../../vm/t32-run/bin/t32-run.exe" "bios.bin" "../boot/boot.bin" "../stage3/next.bin" "../../tools/t32-disk/bin/t32-disk.exe"
+Running T32 BIOS 0.0.6 validation...
+  PASS t32-run exists
+  PASS t32-disk exists
+  PASS bios.bin exists and is non-empty
+  PASS BOOT.BIN payload exists and is non-empty
+  PASS NEXT.BIN payload exists and is non-empty
+  PASS monitor execution exits successfully
+  PASS BIOS banner appears without media
+  PASS BIOS reports missing disk0
+  PASS monitor execution exits successfully
+  PASS BIOS rejects an unformatted disk
+  PASS BOOT-only T32D image is created
+  PASS monitor execution exits successfully
+  PASS BOOT reports missing NEXT.BIN
+  PASS T32D boot image is created
+  PASS BOOT.BIN is installed into T32D image
+  PASS NEXT.BIN is installed into T32D image
+  PASS monitor execution exits successfully
+  PASS BIOS transfers control to BOOT.BIN
+  PASS second stage accepts BIOS Bootinfo
+  PASS BOOT reads disk through BIOS service
+  PASS second-stage payload executes
+  PASS BOOT transfers control to NEXT.BIN
+  PASS compiler-built third stage executes
+  PASS C stage writes string literal through libt32 puts
+  PASS C main return path executes through full boot chain
+  PASS third stage accepts Bootinfo handoff
+  PASS Bootinfo memory carries T32B magic
+  PASS Bootinfo memory records 72-byte size
+  PASS Bootinfo reports 1 MiB RAM
+  PASS Bootinfo reports 512-byte sectors
+  PASS Bootinfo publishes BIOS service v0.1 and disk_read entry
+t32-bios: PASS (30/30 cases)
+make --no-print-directory -C firmware/boot test
+python tests/run_tests.py "../../vm/t32-run/bin/t32-run.exe" "boot.bin"
+Running T32 BOOT 0.0.4 validation...
+  PASS boot.bin exists
+  PASS boot.bin is non-empty
+  PASS synthetic Bootinfo v0.2 is 72 bytes
+  PASS standalone BOOT.BIN monitor execution succeeds
+  PASS BOOT banner appears
+  PASS BOOT accepts valid Bootinfo v0.2
+  PASS Hello payload appears
+  PASS standalone BOOT.BIN monitor execution succeeds
+  PASS BOOT rejects invalid Bootinfo
+t32-boot: PASS (8/8 cases)
+make --no-print-directory -C firmware/stage3 test
+make --no-print-directory -C ../../runtime/libt32 archive
+python tools/check_manifest.py
+Checking libt32 0.0.6...
+  state: abi-0.1-static-archive
+  routines: 18
+libt32 manifest: PASS
+python tools/build.py archive
+assembled O:\Foundry\t32\runtime\libt32\src\io\putchar.s -> O:\Foundry\t32\runtime\libt32\build\io\putchar.o
+assembled O:\Foundry\t32\runtime\libt32\src\io\puts.s -> O:\Foundry\t32\runtime\libt32\build\io\puts.o
+assembled O:\Foundry\t32\runtime\libt32\src\convert\atoi.s -> O:\Foundry\t32\runtime\libt32\build\convert\atoi.o
+assembled O:\Foundry\t32\runtime\libt32\src\convert\hex_to_string.s -> O:\Foundry\t32\runtime\libt32\build\convert\hex_to_string.o
+assembled O:\Foundry\t32\runtime\libt32\src\convert\string_to_hex.s -> O:\Foundry\t32\runtime\libt32\build\convert\string_to_hex.o
+assembled O:\Foundry\t32\runtime\libt32\src\memory\memchr.s -> O:\Foundry\t32\runtime\libt32\build\memory\memchr.o
+assembled O:\Foundry\t32\runtime\libt32\src\memory\memcmp.s -> O:\Foundry\t32\runtime\libt32\build\memory\memcmp.o
+assembled O:\Foundry\t32\runtime\libt32\src\memory\memcpy.s -> O:\Foundry\t32\runtime\libt32\build\memory\memcpy.o
+assembled O:\Foundry\t32\runtime\libt32\src\memory\memmove.s -> O:\Foundry\t32\runtime\libt32\build\memory\memmove.o
+assembled O:\Foundry\t32\runtime\libt32\src\memory\memset.s -> O:\Foundry\t32\runtime\libt32\build\memory\memset.o
+assembled O:\Foundry\t32\runtime\libt32\src\string\strchr.s -> O:\Foundry\t32\runtime\libt32\build\string\strchr.o
+assembled O:\Foundry\t32\runtime\libt32\src\string\strcmp.s -> O:\Foundry\t32\runtime\libt32\build\string\strcmp.o
+assembled O:\Foundry\t32\runtime\libt32\src\string\strcpy.s -> O:\Foundry\t32\runtime\libt32\build\string\strcpy.o
+assembled O:\Foundry\t32\runtime\libt32\src\string\strlen.s -> O:\Foundry\t32\runtime\libt32\build\string\strlen.o
+assembled O:\Foundry\t32\runtime\libt32\src\string\strncmp.s -> O:\Foundry\t32\runtime\libt32\build\string\strncmp.o
+assembled O:\Foundry\t32\runtime\libt32\src\string\strncpy.s -> O:\Foundry\t32\runtime\libt32\build\string\strncpy.o
+assembled O:\Foundry\t32\runtime\libt32\src\string\strrev.s -> O:\Foundry\t32\runtime\libt32\build\string\strrev.o
+assembled O:\Foundry\t32\runtime\libt32\src\string\strstr.s -> O:\Foundry\t32\runtime\libt32\build\string\strstr.o
+t32-as -f obj O:\Foundry\t32\runtime\libt32\src\io\putchar.s -o O:\Foundry\t32\runtime\libt32\build\io\putchar.o
+t32-as -f obj O:\Foundry\t32\runtime\libt32\src\io\puts.s -o O:\Foundry\t32\runtime\libt32\build\io\puts.o
+t32-as -f obj O:\Foundry\t32\runtime\libt32\src\convert\atoi.s -o O:\Foundry\t32\runtime\libt32\build\convert\atoi.o
+t32-as -f obj O:\Foundry\t32\runtime\libt32\src\convert\hex_to_string.s -o O:\Foundry\t32\runtime\libt32\build\convert\hex_to_string.o
+t32-as -f obj O:\Foundry\t32\runtime\libt32\src\convert\string_to_hex.s -o O:\Foundry\t32\runtime\libt32\build\convert\string_to_hex.o
+t32-as -f obj O:\Foundry\t32\runtime\libt32\src\memory\memchr.s -o O:\Foundry\t32\runtime\libt32\build\memory\memchr.o
+t32-as -f obj O:\Foundry\t32\runtime\libt32\src\memory\memcmp.s -o O:\Foundry\t32\runtime\libt32\build\memory\memcmp.o
+t32-as -f obj O:\Foundry\t32\runtime\libt32\src\memory\memcpy.s -o O:\Foundry\t32\runtime\libt32\build\memory\memcpy.o
+t32-as -f obj O:\Foundry\t32\runtime\libt32\src\memory\memmove.s -o O:\Foundry\t32\runtime\libt32\build\memory\memmove.o
+t32-as -f obj O:\Foundry\t32\runtime\libt32\src\memory\memset.s -o O:\Foundry\t32\runtime\libt32\build\memory\memset.o
+t32-as -f obj O:\Foundry\t32\runtime\libt32\src\string\strchr.s -o O:\Foundry\t32\runtime\libt32\build\string\strchr.o
+t32-as -f obj O:\Foundry\t32\runtime\libt32\src\string\strcmp.s -o O:\Foundry\t32\runtime\libt32\build\string\strcmp.o
+t32-as -f obj O:\Foundry\t32\runtime\libt32\src\string\strcpy.s -o O:\Foundry\t32\runtime\libt32\build\string\strcpy.o
+t32-as -f obj O:\Foundry\t32\runtime\libt32\src\string\strlen.s -o O:\Foundry\t32\runtime\libt32\build\string\strlen.o
+t32-as -f obj O:\Foundry\t32\runtime\libt32\src\string\strncmp.s -o O:\Foundry\t32\runtime\libt32\build\string\strncmp.o
+t32-as -f obj O:\Foundry\t32\runtime\libt32\src\string\strncpy.s -o O:\Foundry\t32\runtime\libt32\build\string\strncpy.o
+t32-as -f obj O:\Foundry\t32\runtime\libt32\src\string\strrev.s -o O:\Foundry\t32\runtime\libt32\build\string\strrev.o
+t32-as -f obj O:\Foundry\t32\runtime\libt32\src\string\strstr.s -o O:\Foundry\t32\runtime\libt32\build\string\strstr.o
+libt32: built 18 objects
+t32-ar rcs O:\Foundry\t32\runtime\libt32\build\libt32.a O:\Foundry\t32\runtime\libt32\build\io\putchar.o O:\Foundry\t32\runtime\libt32\build\io\puts.o O:\Foundry\t32\runtime\libt32\build\convert\atoi.o O:\Foundry\t32\runtime\libt32\build\convert\hex_to_string.o O:\Foundry\t32\runtime\libt32\build\convert\string_to_hex.o O:\Foundry\t32\runtime\libt32\build\memory\memchr.o O:\Foundry\t32\runtime\libt32\build\memory\memcmp.o O:\Foundry\t32\runtime\libt32\build\memory\memcpy.o O:\Foundry\t32\runtime\libt32\build\memory\memmove.o O:\Foundry\t32\runtime\libt32\build\memory\memset.o O:\Foundry\t32\runtime\libt32\build\string\strchr.o O:\Foundry\t32\runtime\libt32\build\string\strcmp.o O:\Foundry\t32\runtime\libt32\build\string\strcpy.o O:\Foundry\t32\runtime\libt32\build\string\strlen.o O:\Foundry\t32\runtime\libt32\build\string\strncmp.o O:\Foundry\t32\runtime\libt32\build\string\strncpy.o O:\Foundry\t32\runtime\libt32\build\string\strrev.o O:\Foundry\t32\runtime\libt32\build\string\strstr.o
+libt32: created O:\Foundry\t32\runtime\libt32\build\libt32.a
+t32-ld -Ttext 0x00020000 build/stage3.o build/main.o ../../runtime/libt32/build/libt32.a -Map build/next.map -o next.bin
+linked 4 objects from 1 archive -> next.bin
+text=0x00020000 data=0x0002031C bss=0x00020338
+entry _start=0x00020000
+python tests/run_tests.py "../../vm/t32-run/bin/t32-run.exe" "next.bin" "build/next.map"
+Running T32 C STAGE3 0.0.4 validation...
+  PASS t32-run exists
+  PASS next.bin exists and is non-empty
+  PASS link map exists and is non-empty
+  PASS C stage entry is linked at 0x00020000
+  PASS compiler-generated main is linked into NEXT.BIN
+  PASS standalone stage-3 execution succeeds
+  PASS C stage-3 banner appears
+  PASS NEXT.BIN identifies compiler-built payload
+  PASS C string literal writes through libt32 puts
+  PASS C main return path executes
+  PASS C stage accepts Bootinfo handoff
+  PASS C main return value remains in r0
+  PASS invalid-handoff monitor execution succeeds
+  PASS stage-3 rejects invalid Bootinfo
+t32-stage3: PASS (13/13 cases)
+
+O:\Foundry\t32>make -C toolchain/t32-cc test 
+make: Entering directory `O:/Foundry/t32/toolchain/t32-cc'
+python tests/run_tests.py ./t32-cc.exe
+  PASS compiler exists
+Running t32-cc 0.17.0 string/runtime-call tests...
+  PASS --version exits successfully
+  PASS --version reports 0.17.0
+  PASS constant return -S compile succeeds
+  PASS constant return remains quiet by default
+  PASS constant return assembly matches
+  PASS local variable -S compile succeeds
+  PASS local variable remains quiet by default
+  PASS local variable assembly matches
+  PASS local allocates four-byte stack slot
+  PASS initializer stored to local slot
+  PASS local loaded into return register
+  PASS local stack slot released
+  PASS literal assignment -S compile succeeds
+  PASS literal assignment remains quiet by default
+  PASS literal assignment assembly matches
+  PASS literal assignment emits second store
+  PASS local program links
+  PASS local program executes
+  PASS local returns expected value
+  PASS local restores stack
+  PASS local halts
+  PASS negative local program links
+  PASS negative local program executes
+  PASS negative local returns expected value
+  PASS negative local restores stack
+  PASS negative local halts
+  PASS literal assignment program links
+  PASS literal assignment program executes
+  PASS literal assignment returns expected value
+  PASS literal assignment restores stack
+  PASS literal assignment halts
+  PASS repeated literal assignment program links
+  PASS repeated literal assignment program executes
+  PASS repeated literal assignment returns expected value
+  PASS repeated literal assignment restores stack
+  PASS repeated literal assignment halts
+  PASS negative assignment program links
+  PASS negative assignment program executes
+  PASS negative assignment returns expected value
+  PASS negative assignment restores stack
+  PASS negative assignment halts
+  PASS constant plus constant -S compile succeeds
+  PASS constant plus constant remains quiet by default
+  PASS constant plus constant assembly matches
+  PASS constant addition loads left operand
+  PASS constant addition loads right operand
+  PASS constant addition emits ADD
+  PASS local plus constant -S compile succeeds
+  PASS local plus constant remains quiet by default
+  PASS local plus constant assembly matches
+  PASS local addition loads local operand
+  PASS local addition emits ADD
+  PASS constant plus local -S compile succeeds
+  PASS constant plus local remains quiet by default
+  PASS constant plus local assembly matches
+  PASS constant-left addition loads literal
+  PASS constant-left addition loads local
+  PASS local plus local -S compile succeeds
+  PASS local plus local remains quiet by default
+  PASS local plus local assembly matches
+  PASS local plus local loads both operands
+  PASS addition assignment -S compile succeeds
+  PASS addition assignment remains quiet by default
+  PASS addition assignment assembly matches
+  PASS addition assignment loads current value
+  PASS addition assignment loads increment
+  PASS addition assignment emits ADD
+  PASS addition assignment stores updated value
+  PASS constant minus constant -S compile succeeds
+  PASS constant minus constant remains quiet by default
+  PASS constant minus constant assembly matches
+  PASS constant subtraction loads left operand
+  PASS constant subtraction loads right operand
+  PASS constant subtraction emits SUB
+  PASS local minus constant -S compile succeeds
+  PASS local minus constant remains quiet by default
+  PASS local minus constant assembly matches
+  PASS local subtraction loads local operand
+  PASS local subtraction emits SUB
+  PASS constant minus local -S compile succeeds
+  PASS constant minus local remains quiet by default
+  PASS constant minus local assembly matches
+  PASS constant-left subtraction loads literal
+  PASS constant-left subtraction loads local
+  PASS local minus local -S compile succeeds
+  PASS local minus local remains quiet by default
+  PASS local minus local assembly matches
+  PASS local minus local loads both operands
+  PASS subtraction assignment -S compile succeeds
+  PASS subtraction assignment remains quiet by default
+  PASS subtraction assignment assembly matches
+  PASS subtraction assignment loads current value
+  PASS subtraction assignment loads decrement
+  PASS subtraction assignment emits SUB
+  PASS subtraction assignment stores updated value
+  PASS constant times constant -S compile succeeds
+  PASS constant times constant remains quiet by default
+  PASS constant times constant assembly matches
+  PASS constant multiplication loads left operand
+  PASS constant multiplication loads right operand
+  PASS constant multiplication emits MUL
+  PASS local times constant -S compile succeeds
+  PASS local times constant remains quiet by default
+  PASS local times constant assembly matches
+  PASS local multiplication loads local operand
+  PASS local multiplication emits MUL
+  PASS constant times local -S compile succeeds
+  PASS constant times local remains quiet by default
+  PASS constant times local assembly matches
+  PASS constant-left multiplication loads literal
+  PASS constant-left multiplication loads local
+  PASS local times local -S compile succeeds
+  PASS local times local remains quiet by default
+  PASS local times local assembly matches
+  PASS local times local loads both operands
+  PASS multiplication assignment -S compile succeeds
+  PASS multiplication assignment remains quiet by default
+  PASS multiplication assignment assembly matches
+  PASS multiplication assignment loads current value
+  PASS multiplication assignment loads factor
+  PASS multiplication assignment emits MUL
+  PASS multiplication assignment stores updated value
+  PASS constant divided by constant -S compile succeeds
+  PASS constant divided by constant remains quiet by default
+  PASS constant divided by constant assembly matches
+  PASS constant division loads left operand
+  PASS constant division loads right operand
+  PASS constant division emits DIV
+  PASS local divided by constant -S compile succeeds
+  PASS local divided by constant remains quiet by default
+  PASS local divided by constant assembly matches
+  PASS local division loads local operand
+  PASS local division emits DIV
+  PASS constant divided by local -S compile succeeds
+  PASS constant divided by local remains quiet by default
+  PASS constant divided by local assembly matches
+  PASS constant-left division loads literal
+  PASS constant-left division loads local
+  PASS local divided by local -S compile succeeds
+  PASS local divided by local remains quiet by default
+  PASS local divided by local assembly matches
+  PASS local divided by local loads both operands
+  PASS division assignment -S compile succeeds
+  PASS division assignment remains quiet by default
+  PASS division assignment assembly matches
+  PASS division assignment loads current value
+  PASS division assignment loads divisor
+  PASS division assignment emits DIV
+  PASS division assignment stores updated value
+  PASS constant remainder constant -S compile succeeds
+  PASS constant remainder constant remains quiet by default
+  PASS constant remainder constant assembly matches
+  PASS remainder computes quotient in scratch register
+  PASS remainder reconstructs divisible portion
+  PASS remainder subtracts divisible portion
+  PASS local remainder constant -S compile succeeds
+  PASS local remainder constant remains quiet by default
+  PASS local remainder constant assembly matches
+  PASS local remainder loads local operand
+  PASS local remainder emits synthesized division
+  PASS remainder assignment -S compile succeeds
+  PASS remainder assignment remains quiet by default
+  PASS remainder assignment assembly matches
+  PASS remainder assignment computes quotient
+  PASS remainder assignment restores remainder
+  PASS remainder assignment stores updated value
+  PASS -c emits expression object
+  PASS expression object exports main
+  PASS constant plus constant program links
+  PASS constant plus constant program executes
+  PASS constant plus constant returns expected value
+  PASS constant plus constant restores stack
+  PASS constant plus constant halts
+  PASS local plus constant program links
+  PASS local plus constant program executes
+  PASS local plus constant returns expected value
+  PASS local plus constant restores stack
+  PASS local plus constant halts
+  PASS constant plus local program links
+  PASS constant plus local program executes
+  PASS constant plus local returns expected value
+  PASS constant plus local restores stack
+  PASS constant plus local halts
+  PASS local plus local program links
+  PASS local plus local program executes
+  PASS local plus local returns expected value
+  PASS local plus local restores stack
+  PASS local plus local halts
+  PASS addition assignment program links
+  PASS addition assignment program executes
+  PASS addition assignment returns expected value
+  PASS addition assignment restores stack
+  PASS addition assignment halts
+  PASS identifier assignment program links
+  PASS identifier assignment program executes
+  PASS identifier assignment returns expected value
+  PASS identifier assignment restores stack
+  PASS identifier assignment halts
+  PASS constant-expression assignment program links
+  PASS constant-expression assignment program executes
+  PASS constant-expression assignment returns expected value
+  PASS constant-expression assignment restores stack
+  PASS constant-expression assignment halts
+  PASS repeated increment program links
+  PASS repeated increment program executes
+  PASS repeated increment returns expected value
+  PASS repeated increment restores stack
+  PASS repeated increment halts
+  PASS negative addition program links
+  PASS negative addition program executes
+  PASS negative addition returns expected value
+  PASS negative addition restores stack
+  PASS negative addition halts
+  PASS constant minus constant program links
+  PASS constant minus constant program executes
+  PASS constant minus constant returns expected value
+  PASS constant minus constant restores stack
+  PASS constant minus constant halts
+  PASS local minus constant program links
+  PASS local minus constant program executes
+  PASS local minus constant returns expected value
+  PASS local minus constant restores stack
+  PASS local minus constant halts
+  PASS constant minus local program links
+  PASS constant minus local program executes
+  PASS constant minus local returns expected value
+  PASS constant minus local restores stack
+  PASS constant minus local halts
+  PASS local minus local program links
+  PASS local minus local program executes
+  PASS local minus local returns expected value
+  PASS local minus local restores stack
+  PASS local minus local halts
+  PASS subtraction assignment program links
+  PASS subtraction assignment program executes
+  PASS subtraction assignment returns expected value
+  PASS subtraction assignment restores stack
+  PASS subtraction assignment halts
+  PASS constant-minus-local assignment program links
+  PASS constant-minus-local assignment program executes
+  PASS constant-minus-local assignment returns expected value
+  PASS constant-minus-local assignment restores stack
+  PASS constant-minus-local assignment halts
+  PASS repeated decrement program links
+  PASS repeated decrement program executes
+  PASS repeated decrement returns expected value
+  PASS repeated decrement restores stack
+  PASS repeated decrement halts
+  PASS negative subtraction result program links
+  PASS negative subtraction result program executes
+  PASS negative subtraction result returns expected value
+  PASS negative subtraction result restores stack
+  PASS negative subtraction result halts
+  PASS subtract negative operand program links
+  PASS subtract negative operand program executes
+  PASS subtract negative operand returns expected value
+  PASS subtract negative operand restores stack
+  PASS subtract negative operand halts
+  PASS constant times constant program links
+  PASS constant times constant program executes
+  PASS constant times constant returns expected value
+  PASS constant times constant restores stack
+  PASS constant times constant halts
+  PASS local times constant program links
+  PASS local times constant program executes
+  PASS local times constant returns expected value
+  PASS local times constant restores stack
+  PASS local times constant halts
+  PASS constant times local program links
+  PASS constant times local program executes
+  PASS constant times local returns expected value
+  PASS constant times local restores stack
+  PASS constant times local halts
+  PASS local times local program links
+  PASS local times local program executes
+  PASS local times local returns expected value
+  PASS local times local restores stack
+  PASS local times local halts
+  PASS multiplication assignment program links
+  PASS multiplication assignment program executes
+  PASS multiplication assignment returns expected value
+  PASS multiplication assignment restores stack
+  PASS multiplication assignment halts
+  PASS constant-times-local assignment program links
+  PASS constant-times-local assignment program executes
+  PASS constant-times-local assignment returns expected value
+  PASS constant-times-local assignment restores stack
+  PASS constant-times-local assignment halts
+  PASS repeated doubling program links
+  PASS repeated doubling program executes
+  PASS repeated doubling returns expected value
+  PASS repeated doubling restores stack
+  PASS repeated doubling halts
+  PASS negative multiplication result program links
+  PASS negative multiplication result program executes
+  PASS negative multiplication result returns expected value
+  PASS negative multiplication result restores stack
+  PASS negative multiplication result halts
+  PASS two-negative multiplication program links
+  PASS two-negative multiplication program executes
+  PASS two-negative multiplication returns expected value
+  PASS two-negative multiplication restores stack
+  PASS two-negative multiplication halts
+  PASS constant divided by constant program links
+  PASS constant divided by constant program executes
+  PASS constant divided by constant returns expected value
+  PASS constant divided by constant restores stack
+  PASS constant divided by constant halts
+  PASS local divided by constant program links
+  PASS local divided by constant program executes
+  PASS local divided by constant returns expected value
+  PASS local divided by constant restores stack
+  PASS local divided by constant halts
+  PASS constant divided by local program links
+  PASS constant divided by local program executes
+  PASS constant divided by local returns expected value
+  PASS constant divided by local restores stack
+  PASS constant divided by local halts
+  PASS local divided by local program links
+  PASS local divided by local program executes
+  PASS local divided by local returns expected value
+  PASS local divided by local restores stack
+  PASS local divided by local halts
+  PASS division assignment program links
+  PASS division assignment program executes
+  PASS division assignment returns expected value
+  PASS division assignment restores stack
+  PASS division assignment halts
+  PASS constant-divided-by-local assignment program links
+  PASS constant-divided-by-local assignment program executes
+  PASS constant-divided-by-local assignment returns expected value
+  PASS constant-divided-by-local assignment restores stack
+  PASS constant-divided-by-local assignment halts
+  PASS repeated halving program links
+  PASS repeated halving program executes
+  PASS repeated halving returns expected value
+  PASS repeated halving restores stack
+  PASS repeated halving halts
+  PASS negative dividend division program links
+  PASS negative dividend division program executes
+  PASS negative dividend division returns expected value
+  PASS negative dividend division restores stack
+  PASS negative dividend division halts
+  PASS negative divisor division program links
+  PASS negative divisor division program executes
+  PASS negative divisor division returns expected value
+  PASS negative divisor division restores stack
+  PASS negative divisor division halts
+  PASS two-negative division program links
+  PASS two-negative division program executes
+  PASS two-negative division returns expected value
+  PASS two-negative division restores stack
+  PASS two-negative division halts
+  PASS constant remainder constant program links
+  PASS constant remainder constant program executes
+  PASS constant remainder constant returns expected value
+  PASS constant remainder constant restores stack
+  PASS constant remainder constant halts
+  PASS local remainder constant program links
+  PASS local remainder constant program executes
+  PASS local remainder constant returns expected value
+  PASS local remainder constant restores stack
+  PASS local remainder constant halts
+  PASS constant remainder local program links
+  PASS constant remainder local program executes
+  PASS constant remainder local returns expected value
+  PASS constant remainder local restores stack
+  PASS constant remainder local halts
+  PASS local remainder local program links
+  PASS local remainder local program executes
+  PASS local remainder local returns expected value
+  PASS local remainder local restores stack
+  PASS local remainder local halts
+  PASS remainder assignment program links
+  PASS remainder assignment program executes
+  PASS remainder assignment returns expected value
+  PASS remainder assignment restores stack
+  PASS remainder assignment halts
+  PASS negative dividend remainder program links
+  PASS negative dividend remainder program executes
+  PASS negative dividend remainder returns expected value
+  PASS negative dividend remainder restores stack
+  PASS negative dividend remainder halts
+  PASS negative divisor remainder program links
+  PASS negative divisor remainder program executes
+  PASS negative divisor remainder returns expected value
+  PASS negative divisor remainder restores stack
+  PASS negative divisor remainder halts
+  PASS two-negative remainder program links
+  PASS two-negative remainder program executes
+  PASS two-negative remainder returns expected value
+  PASS two-negative remainder restores stack
+  PASS two-negative remainder halts
+  PASS left-associative chained addition program links
+  PASS left-associative chained addition program executes
+  PASS left-associative chained addition returns expected value
+  PASS left-associative chained addition restores stack
+  PASS left-associative chained addition halts
+  PASS left-associative chained subtraction program links
+  PASS left-associative chained subtraction program executes
+  PASS left-associative chained subtraction returns expected value
+  PASS left-associative chained subtraction restores stack
+  PASS left-associative chained subtraction halts
+  PASS left-associative chained multiplication program links
+  PASS left-associative chained multiplication program executes
+  PASS left-associative chained multiplication returns expected value
+  PASS left-associative chained multiplication restores stack
+  PASS left-associative chained multiplication halts
+  PASS left-associative chained division program links
+  PASS left-associative chained division program executes
+  PASS left-associative chained division returns expected value
+  PASS left-associative chained division restores stack
+  PASS left-associative chained division halts
+  PASS left-associative chained remainder program links
+  PASS left-associative chained remainder program executes
+  PASS left-associative chained remainder returns expected value
+  PASS left-associative chained remainder restores stack
+  PASS left-associative chained remainder halts
+  PASS multiplication before addition program links
+  PASS multiplication before addition program executes
+  PASS multiplication before addition returns expected value
+  PASS multiplication before addition restores stack
+  PASS multiplication before addition halts
+  PASS division before addition program links
+  PASS division before addition program executes
+  PASS division before addition returns expected value
+  PASS division before addition restores stack
+  PASS division before addition halts
+  PASS remainder/multiplication left associativity program links
+  PASS remainder/multiplication left associativity program executes
+  PASS remainder/multiplication left associativity returns expected value
+  PASS remainder/multiplication left associativity restores stack
+  PASS remainder/multiplication left associativity halts
+  PASS parenthesized expression program links
+  PASS parenthesized expression program executes
+  PASS parenthesized expression returns expected value
+  PASS parenthesized expression restores stack
+  PASS parenthesized expression halts
+  PASS multiplication precedence program links
+  PASS multiplication precedence program executes
+  PASS multiplication precedence returns expected value
+  PASS multiplication precedence restores stack
+  PASS multiplication precedence halts
+  PASS division precedence program links
+  PASS division precedence program executes
+  PASS division precedence returns expected value
+  PASS division precedence restores stack
+  PASS division precedence halts
+  PASS parentheses override precedence program links
+  PASS parentheses override precedence program executes
+  PASS parentheses override precedence returns expected value
+  PASS parentheses override precedence restores stack
+  PASS parentheses override precedence halts
+  PASS nested parentheses program links
+  PASS nested parentheses program executes
+  PASS nested parentheses returns expected value
+  PASS nested parentheses restores stack
+  PASS nested parentheses halts
+  PASS complex assignment expression program links
+  PASS complex assignment expression program executes
+  PASS complex assignment expression returns expected value
+  PASS complex assignment expression restores stack
+  PASS complex assignment expression halts
+  PASS parenthesized assignment expression program links
+  PASS parenthesized assignment expression program executes
+  PASS parenthesized assignment expression returns expected value
+  PASS parenthesized assignment expression restores stack
+  PASS parenthesized assignment expression halts
+  PASS equality comparison -S compile succeeds
+  PASS equality comparison remains quiet by default
+  PASS equality comparison assembly matches
+  PASS equality compares via XOR
+  PASS equality normalizes to Boolean
+  PASS inequality comparison -S compile succeeds
+  PASS inequality comparison remains quiet by default
+  PASS inequality comparison assembly matches
+  PASS inequality compares via XOR
+  PASS signed less-than comparison -S compile succeeds
+  PASS signed less-than comparison remains quiet by default
+  PASS signed less-than comparison assembly matches
+  PASS signed less-than computes difference
+  PASS signed less-than emits Boolean result
+  PASS signed less-than-or-equal comparison -S compile succeeds
+  PASS signed less-than-or-equal comparison remains quiet by default
+  PASS signed less-than-or-equal comparison assembly matches
+  PASS signed greater-than comparison -S compile succeeds
+  PASS signed greater-than comparison remains quiet by default
+  PASS signed greater-than comparison assembly matches
+  PASS signed greater-than-or-equal comparison -S compile succeeds
+  PASS signed greater-than-or-equal comparison remains quiet by default
+  PASS signed greater-than-or-equal comparison assembly matches
+  PASS equality true program links
+  PASS equality true program executes
+  PASS equality true returns expected value
+  PASS equality true restores stack
+  PASS equality true halts
+  PASS equality false program links
+  PASS equality false program executes
+  PASS equality false returns expected value
+  PASS equality false restores stack
+  PASS equality false halts
+  PASS inequality true program links
+  PASS inequality true program executes
+  PASS inequality true returns expected value
+  PASS inequality true restores stack
+  PASS inequality true halts
+  PASS inequality false program links
+  PASS inequality false program executes
+  PASS inequality false returns expected value
+  PASS inequality false restores stack
+  PASS inequality false halts
+  PASS signed less-than true program links
+  PASS signed less-than true program executes
+  PASS signed less-than true returns expected value
+  PASS signed less-than true restores stack
+  PASS signed less-than true halts
+  PASS signed less-than false program links
+  PASS signed less-than false program executes
+  PASS signed less-than false returns expected value
+  PASS signed less-than false restores stack
+  PASS signed less-than false halts
+  PASS signed less-than-or-equal equality program links
+  PASS signed less-than-or-equal equality program executes
+  PASS signed less-than-or-equal equality returns expected value
+  PASS signed less-than-or-equal equality restores stack
+  PASS signed less-than-or-equal equality halts
+  PASS signed less-than-or-equal false program links
+  PASS signed less-than-or-equal false program executes
+  PASS signed less-than-or-equal false returns expected value
+  PASS signed less-than-or-equal false restores stack
+  PASS signed less-than-or-equal false halts
+  PASS signed greater-than true program links
+  PASS signed greater-than true program executes
+  PASS signed greater-than true returns expected value
+  PASS signed greater-than true restores stack
+  PASS signed greater-than true halts
+  PASS signed greater-than false program links
+  PASS signed greater-than false program executes
+  PASS signed greater-than false returns expected value
+  PASS signed greater-than false restores stack
+  PASS signed greater-than false halts
+  PASS signed greater-than-or-equal equality program links
+  PASS signed greater-than-or-equal equality program executes
+  PASS signed greater-than-or-equal equality returns expected value
+  PASS signed greater-than-or-equal equality restores stack
+  PASS signed greater-than-or-equal equality halts
+  PASS signed greater-than-or-equal false program links
+  PASS signed greater-than-or-equal false program executes
+  PASS signed greater-than-or-equal false returns expected value
+  PASS signed greater-than-or-equal false restores stack
+  PASS signed greater-than-or-equal false halts
+  PASS comparison of arithmetic expressions program links
+  PASS comparison of arithmetic expressions program executes
+  PASS comparison of arithmetic expressions returns expected value
+  PASS comparison of arithmetic expressions restores stack
+  PASS comparison of arithmetic expressions halts
+  PASS parenthesized arithmetic comparison program links
+  PASS parenthesized arithmetic comparison program executes
+  PASS parenthesized arithmetic comparison returns expected value
+  PASS parenthesized arithmetic comparison restores stack
+  PASS parenthesized arithmetic comparison halts
+  PASS comparison assigned as integer value program links
+  PASS comparison assigned as integer value program executes
+  PASS comparison assigned as integer value returns expected value
+  PASS comparison assigned as integer value restores stack
+  PASS comparison assigned as integer value halts
+  PASS comparison used inside arithmetic program links
+  PASS comparison used inside arithmetic program executes
+  PASS comparison used inside arithmetic returns expected value
+  PASS comparison used inside arithmetic restores stack
+  PASS comparison used inside arithmetic halts
+  PASS relational before equality precedence program links
+  PASS relational before equality precedence program executes
+  PASS relational before equality precedence returns expected value
+  PASS relational before equality precedence restores stack
+  PASS relational before equality precedence halts
+  PASS INT32_MIN signed comparison program links
+  PASS INT32_MIN signed comparison program executes
+  PASS INT32_MIN signed comparison returns expected value
+  PASS INT32_MIN signed comparison restores stack
+  PASS INT32_MIN signed comparison halts
+  PASS INT32_MAX signed comparison program links
+  PASS INT32_MAX signed comparison program executes
+  PASS INT32_MAX signed comparison returns expected value
+  PASS INT32_MAX signed comparison restores stack
+  PASS INT32_MAX signed comparison halts
+  PASS left-associative relational chain program links
+  PASS left-associative relational chain program executes
+  PASS left-associative relational chain returns expected value
+  PASS left-associative relational chain restores stack
+  PASS left-associative relational chain halts
+  PASS if true -S compile succeeds
+  PASS if true remains quiet by default
+  PASS if true assembly matches
+  PASS if branches on zero condition
+  PASS if/else -S compile succeeds
+  PASS if/else remains quiet by default
+  PASS if/else assembly matches
+  PASS if/else branches to else arm
+  PASS if/else skips else after true arm
+  PASS if/else emits control-flow labels
+  PASS true if program links
+  PASS true if program executes
+  PASS true if returns expected value
+  PASS true if restores stack
+  PASS true if halts
+  PASS false if program links
+  PASS false if program executes
+  PASS false if returns expected value
+  PASS false if restores stack
+  PASS false if halts
+  PASS true if/else program links
+  PASS true if/else program executes
+  PASS true if/else returns expected value
+  PASS true if/else restores stack
+  PASS true if/else halts
+Terminate batch job (Y/N)? Terminate batch job (Y/N)? 

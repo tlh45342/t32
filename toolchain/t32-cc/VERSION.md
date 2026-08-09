@@ -1,25 +1,23 @@
-# t32-cc 0.4.0
+# t32-cc 0.16.0
 
-## Added
+Stage 17 matures the first T32 function-call model.
 
-- One binary `+` expression.
-- Literal-plus-literal expressions.
-- Local-plus-literal and literal-plus-local expressions.
-- Local-plus-local expressions.
-- Addition expressions in assignments.
-- Repeated increment validation.
-- Negative-literal addition validation.
+New capabilities:
+- function calls as ordinary expression operands
+- calls on either side of arithmetic/comparison expressions
+- nested function calls
+- function calls used as arguments to other calls
+- early `return` from conditional and loop bodies
+- multiple return paths with a shared function epilogue
+- generated recursive calls (recursion groundwork)
+- parameters and ordinary locals used together
 
-## Preserved
+Caller-saved argument/result registers are protected during nested expression
+evaluation by compiler-owned scratch slots in the current stack frame. Calls
+still use up to four ABI register arguments (`r0`-`r3`) and return through `r0`.
 
-- `-S`, `-c`, and full-link modes.
-- ABI 0.1 stack restoration.
-- Quiet success and opt-in `-v` output.
-- Existing constant, local, and assignment behavior.
-- Failure cleanup and missing-runtime diagnostics.
-
-## Deferred
-
-- Chained expressions and precedence.
-- Parenthesized expressions.
-- Operators other than `+`.
+Still deferred:
+- arguments beyond four / stack-passed compiler arguments
+- function prototypes separate from definitions
+- richer type system
+- pointer parameters

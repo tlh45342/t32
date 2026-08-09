@@ -41,3 +41,19 @@ Each device must define:
 ## Early console
 
 The first console device should support at least one simple character-output path suitable for BIOS diagnostics. A memory-mapped text framebuffer may be added separately for direct 80x25 display access.
+
+## Current platform-control extension
+
+The platform-control device at `0x90004000` exposes one discovery register used
+by BIOS when constructing Bootinfo:
+
+```text
+0x00  ID
+0x04  STATUS
+0x08  CONTROL
+0x0c  RAM_SIZE   read-only configured guest RAM bytes
+```
+
+`RAM_SIZE` reports the RAM capacity configured for the current T32 machine. It
+allows firmware to describe memory to later boot stages without hard-coding the
+VM's present default size.

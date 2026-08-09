@@ -1,0 +1,13 @@
+# Create a bootable-development T32D image.
+#
+# Run either:
+#   t32-disk < samples/create-boot-disk.script
+#
+# or from the t32-disk prompt:
+#   do samples/create-boot-disk.script
+
+create disk.img 16M
+format disk.img
+put disk.img ../../firmware/boot/boot.bin BOOT.BIN
+info disk.img
+list disk.img

@@ -36,3 +36,15 @@ A service contract must define:
 ## Boundary
 
 Firmware services are not a substitute for a general operating-system ABI. They should remain small and stable.
+
+
+## BIOS service ABI v0.1
+
+The first concrete firmware service is now defined by Boot ABI v0.2.
+
+`disk_read` is entered at `0x00001008` and reads one 512-byte sector from
+disk0 into caller-supplied RAM. Its register convention is documented in
+`docs/abi/T32-BOOT-ABI.md`.
+
+This is a firmware bootstrap service, not the final application-facing SVC
+ABI. `TRAP` semantics remain unfrozen and are not changed by this milestone.
