@@ -60,6 +60,7 @@ removing direct hardware access for firmware and standalone software.
   inspection
 - Guest-requested POWER_OFF and RESET platform controls
 - Configured RAM-size platform query
+- Guest-visible RTC with validated ID, status, and UTC epoch registers
 
 ### Keyboard
 
@@ -109,6 +110,19 @@ work.
 
 T32D is a bootstrap media format, not the final T32 filesystem.
 
+### RTC
+
+- RTC MMIO is implemented and guest-readable.
+- Device ID reports `T3R1`.
+- STATUS exposes valid time.
+- EPOCH exposes host UTC epoch seconds.
+- RTC registers are read-only.
+- Standalone guest RTC validation passes.
+- Stage3 `time` is validated through the full BIOS -> BOOT -> NEXT chain.
+
+RTC is wall-clock time. A separate monotonic timer/counter is planned for
+elapsed-time measurement and benchmarking.
+
 ### Firmware and boot
 
 - T32 BIOS
@@ -125,6 +139,9 @@ T32D is a bootstrap media format, not the final T32 filesystem.
 - Compiler-built C third stage
 - Third-stage Bootinfo handoff validation
 - C code executing through the complete BIOS -> BOOT -> NEXT chain
+- Interactive Stage3 C monitor 0.0.13
+- Stage3 `help`, `version`, `bootinfo`, `mem`, `time`, and `halt`
+- Scripted and edited monitor command parsing
 
 ### t32-runx
 
@@ -142,7 +159,10 @@ Current demonstrated features include:
 - modeless read-only CPU Stats window;
 - register and PC display;
 - machine state, instruction count, flags, and halt reason;
-- Help/About version identification.
+- Help/About version identification
+- Embedded default BIOS for disk-and-go startup
+- External BIOS override for firmware development/testing
+- Corrected interactive monitor prompt/input behavior
 
 A standalone C program using `puts("Hello Thomas")` has been compiled with the
 T32 toolchain, linked against the installed `libt32.a`, loaded directly by
@@ -160,16 +180,19 @@ T32 toolchain, linked against the installed `libt32.a`, loaded directly by
 
 ## Next Platform Work
 
-Likely next platform milestones include:
+1. Stage3 `run` and fixed-address external flat-binary loading.
+2. External HELLO/SORT program built outside the repository.
+3. Clean application return to Stage3.
+4. Small application-facing SVC ABI.
+5. Monotonic timer/counter.
+6. Deterministic SORT benchmark.
+7. Small versioned executable-image contract.
+8. Additional standalone validation/sample programs.
+9. Storage evolution beyond T32D, with ext2 as a target.
 
-- timer
-- RTC
-- interrupt delivery
-- formal SVC/supervisor service path
-- asynchronous/device-service-loop refinement
-- richer keyboard semantics where justified
-- storage/filesystem evolution beyond T32D
-- small operating/supervisor environment
+Continued `t32-cc`/`libt32` work should also add normal target headers such as
+`stdio.h`, `stdlib.h`, `string.h`, `stdint.h`, and `stddef.h`, allowing programs
+to inherit prototypes through conventional `#include` use.
 
 ## Architectural Boundaries
 
@@ -198,7 +221,7 @@ contracts belong in `libt32vm` and the T32 architecture.
 
 ## Still Planned
 
-- Timer and RTC devices
+- Monotonic timer/counter device
 - Interrupt-driven device operation
 - Mature SVC/supervisor ABI implementation
 - T32 filesystem beyond the bootstrap T32D format

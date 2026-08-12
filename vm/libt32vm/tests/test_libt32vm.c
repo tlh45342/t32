@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include <time.h>
 
 static int require_true(int condition, const char *name)
 {
@@ -21,11 +22,23 @@ static void put_u32le(uint8_t bytes[4], uint32_t value)
     bytes[3] = (uint8_t)(value >> 24);
 }
 
+static uint32_t get_u32le(const uint8_t bytes[4])
+{
+    return (uint32_t)bytes[0] |
+           ((uint32_t)bytes[1] << 8) |
+           ((uint32_t)bytes[2] << 16) |
+           ((uint32_t)bytes[3] << 24);
+}
+
 int main(void)
 {
     t32_machine_t *machine;
     uint8_t bytes[4];
     int ok = 1;
+    uint32_t rtc_before;
+    uint32_t rtc_after;
+    time_t host_before;
+    time_t host_after;
 
     printf("Running libt32vm smoke validation...\n");
 
@@ -71,6 +84,41 @@ int main(void)
     ok &= require_true(t32_reset_requested(machine),
                        "platform RESET request recorded");
 
+    ok &= require_true(t32_read_memory(machine, T32_RTC_BASE +
+                       T32_RTC_REG_ID, bytes, sizeof(bytes)),
+                       "RTC ID readable");
+    ok &= require_true(get_u32le(bytes) == T32_RTC_ID,
+                       "RTC ID reports T3R1");
+
+    ok &= require_true(t32_read_memory(machine, T32_RTC_BASE +
+                       T32_RTC_REG_STATUS, bytes, sizeof(bytes)),
+                       "RTC STATUS readable");
+    ok &= require_true((get_u32le(bytes) & T32_RTC_STATUS_VALID) != 0,
+                       "RTC STATUS reports valid time");
+
+    host_before = time(NULL);
+    ok &= require_true(t32_read_memory(machine, T32_RTC_BASE +
+                       T32_RTC_REG_EPOCH, bytes, sizeof(bytes)),
+                       "RTC EPOCH readable");
+    rtc_before = get_u32le(bytes);
+    host_after = time(NULL);
+    ok &= require_true(host_before >= 0 && host_after >= host_before &&
+                       (uint64_t)rtc_before >= (uint64_t)host_before &&
+                       (uint64_t)rtc_before <= (uint64_t)host_after,
+                       "RTC EPOCH tracks host UTC seconds");
+
+    ok &= require_true(t32_read_memory(machine, T32_RTC_BASE +
+                       T32_RTC_REG_EPOCH, bytes, sizeof(bytes)),
+                       "RTC EPOCH reread succeeds");
+    rtc_after = get_u32le(bytes);
+    ok &= require_true(rtc_after >= rtc_before,
+                       "RTC EPOCH is monotonic across immediate reads");
+
+    put_u32le(bytes, 0);
+    ok &= require_true(!t32_write_memory(machine, T32_RTC_BASE +
+                       T32_RTC_REG_EPOCH, bytes, sizeof(bytes)),
+                       "RTC registers are read-only");
+
     ok &= require_true(t32_read_memory(machine, T32_PLATFORM_BASE +
                        T32_PLATFORM_REG_RAM_SIZE, bytes, sizeof(bytes)),
                        "platform RAM_SIZE readable");
@@ -84,6 +132,6 @@ int main(void)
     if (!ok)
         return 1;
 
-    printf("libt32vm: PASS (15/15 cases)\n");
+    printf("libt32vm: PASS (23/23 cases)\n");
     return 0;
 }

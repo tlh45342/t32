@@ -57,3 +57,18 @@ by BIOS when constructing Bootinfo:
 `RAM_SIZE` reports the RAM capacity configured for the current T32 machine. It
 allows firmware to describe memory to later boot stages without hard-coding the
 VM's present default size.
+
+
+## Current RTC
+
+The RTC is implemented at `0x90003000`.
+
+```text
+0x00  ID       read-only; T3R1
+0x04  STATUS   read-only; valid-time status
+0x08  EPOCH    read-only; host UTC epoch seconds
+```
+
+RTC is the wall-clock source, not the benchmark clock. A separate monotonic
+timer/counter remains planned. Stage3 `time` and the complete boot-chain test
+validate guest RTC access.

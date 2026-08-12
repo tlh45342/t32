@@ -1,6 +1,9 @@
-# T32 Status
+# T32 Historical Status Snapshot
 
 **Snapshot:** August 2, 2026
+
+> Historical snapshot. For current status see root `STATUS.md` and
+> `docs/development/roadmap.md`.
 
 ## Summary
 

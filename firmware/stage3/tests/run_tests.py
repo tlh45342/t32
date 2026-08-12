@@ -42,7 +42,7 @@ def main() -> int:
     image = Path(sys.argv[2]).resolve()
     map_file = Path(sys.argv[3]).resolve()
 
-    print("Running T32 C STAGE3 0.0.4 validation...")
+    print("Running T32 Stage3 Monitor 0.0.13 validation...")
     require(runner.is_file(), "t32-run exists")
     require(image.is_file() and image.stat().st_size > 0, "next.bin exists and is non-empty")
     require(map_file.is_file() and map_file.stat().st_size > 0, "link map exists and is non-empty")
@@ -60,6 +60,7 @@ def main() -> int:
         f"load {info} 0x2000",
         "set r0 0x2000",
         "set pc 0x20000",
+        "key \\rversiox\\bn\\rhelp\\rmem\\rtime\\rbootinfo\\rhalt\\r",
         "run",
         "regs",
         "display",
@@ -72,10 +73,19 @@ def main() -> int:
         cwd=ROOT, check=False, timeout=15,
     )
     require(result.returncode == 0, "standalone stage-3 execution succeeds", result.stdout)
-    require("T32 C STAGE3 0.0.4" in result.stdout, "C stage-3 banner appears", result.stdout)
-    require("NEXT.BIN C strings + libt32 puts" in result.stdout, "NEXT.BIN identifies compiler-built payload", result.stdout)
-    require("Hello from C via puts()" in result.stdout, "C string literal writes through libt32 puts", result.stdout)
-    require("C main() returned 42" in result.stdout, "C main return path executes", result.stdout)
+    require("T32 Stage3 Monitor 0.0.13" in result.stdout, "C stage-3 banner appears", result.stdout)
+    require("time     show RTC UTC epoch seconds" in result.stdout,
+            "NEXT.BIN identifies interactive monitor payload", result.stdout)
+    require("T32 Stage3 Monitor 0.0.13" in result.stdout, "interactive C monitor starts", result.stdout)
+    require("help     show commands" in result.stdout, "help command executes", result.stdout)
+    require("Stage3 load address 0x00020000" in result.stdout, "mem command executes", result.stdout)
+    match = re.search(r"RTC epoch:\s*([0-9]+)", result.stdout)
+    require(match is not None, "time command reports RTC epoch", result.stdout)
+    if match is not None:
+        epoch = int(match.group(1))
+        require(abs(epoch - int(__import__("time").time())) <= 10,
+                "time command tracks host UTC seconds", result.stdout)
+    require("Unknown command" not in result.stdout, "blank line and edited command parse cleanly", result.stdout)
     require("Bootinfo v0.2 handoff OK" in result.stdout, "C stage accepts Bootinfo handoff", result.stdout)
     require("r0 =0x0000002a" in result.stdout.lower(), "C main return value remains in r0", result.stdout)
 
@@ -99,7 +109,7 @@ def main() -> int:
     require(bad_result.returncode == 0, "invalid-handoff monitor execution succeeds", bad_result.stdout)
     require("C STAGE3 HANDOFF INVALID" in bad_result.stdout, "stage-3 rejects invalid Bootinfo", bad_result.stdout)
 
-    print("t32-stage3: PASS (13/13 cases)")
+    print("t32-stage3: PASS")
     return 0
 
 

@@ -1,69 +1,33 @@
-# T32 C Stage 3 0.0.4
+# T32 C Stage 3 0.0.12
 
-`NEXT.BIN` is now a mixed assembly/C program that uses a real target runtime
-string service.
+Stage3 is now the first usable interactive T32 monitor.
 
-The build chain is:
+## Input editing milestone
 
-```text
-stage3.s                         machine-facing startup
-main.c --t32-cc--> build/main.s
-       --t32-as--> build/main.o
-libt32.a                         putchar + puts
-               \              /
-                t32-ld -Ttext 0x00020000
-                         |
-                      NEXT.BIN
-```
+The command line now supports printable ASCII echo, Enter to submit a line,
+blank Enter to reprompt, Backspace/DEL to remove the previous character from
+both the input buffer and visible console, and a fixed 63-character command
+limit.
 
-The C source is intentionally small:
+The parser keeps a single line length/cursor index so Left/Right/Home/End can
+be added later without replacing the command dispatcher.
 
-```c
-int main(void)
-{
-    int rc;
-    rc = puts("Hello from C via puts()");
-    return 42 + rc;
-}
-```
-
-This milestone adds the first compiler-supported string literal. A string
-literal is emitted as a zero-terminated byte sequence in `.data`; its address
-is passed in `r0` to `puts` using the existing T32 function-call ABI.
-
-`puts` lives in `libt32`, walks the target string through ordinary memory,
-calls `putchar` for each byte, appends a newline, and returns zero.
-
-The language step is deliberately narrow. T32 C still does not expose general
-pointer declarations, pointer arithmetic, dereference syntax, arrays, or
-`char *`. Internally, however, this is already a real pointer value: the C
-call passes the linked address of the string object to a separately linked
-runtime routine.
-
-## Build and test
+Current commands:
 
 ```text
-make clean
-make test
+help
+version
+bootinfo
+mem
+halt
 ```
 
-From the repository root:
+The full path remains:
 
 ```text
-make test-firmware
+BIOS -> BOOT.BIN -> NEXT.BIN / Stage3 -> C monitor -> libt32 console
 ```
 
-The full test proves:
-
-```text
-BIOS -> BOOT.BIN -> NEXT.BIN -> C main()
-                              -> puts(string address)
-                              -> libt32
-                              -> framebuffer
-```
-
-The expected guest text includes:
-
-```text
-Hello from C via puts()
-```
+This release also extends `libt32 putchar` with destructive Backspace behavior,
+keeping terminal mechanics in the runtime instead of hard-coding framebuffer
+editing into Stage3.

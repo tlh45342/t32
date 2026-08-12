@@ -165,3 +165,12 @@ The external `t32` repository contains the complete ISA validation suite and rem
 - Automatically attaches `./disk.img` as disk0 when present.
 - Keeps keyboard, mouse, timer, RTC, IRQ, networking, and SMP out of 0.0.1.
 - Adds a source/build contract test for the intentionally narrow shim.
+
+
+## 0.0.8
+
+- Adds BIOS mode A: current `firmware/bios/bios.bin` embedded at build time.
+- Adds BIOS mode B: external BIOS file override.
+- Adds Firmware -> Use Embedded BIOS (A).
+- Preserves Firmware -> external BIOS selection.
+- Starts with the embedded BIOS selected by default.

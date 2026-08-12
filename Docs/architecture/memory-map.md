@@ -5,12 +5,13 @@
 | Address | Use | Status |
 |---:|---|---|
 | `0x00001000` | BIOS / early firmware | Current boot convention |
-| `0x00002000` | 64-byte Bootinfo v0.1 record | Boot ABI v0.1 |
+| `0x00002000` | 72-byte Bootinfo v0.2 record | Boot ABI v0.2 |
 | `0x0000F000` | temporary BIOS/BOOT stack top | Provisional firmware convention |
 | `0x00010000` | BOOT.BIN load address and entry point | Boot ABI v0.1 |
 | `0x90000000` | 80x25 text framebuffer | Current platform MMIO |
 | `0x90001000` | disk0 controller | Current platform MMIO |
 | `0x90002000` | keyboard | Current platform MMIO |
+| `0x90003000` | RTC | Current platform MMIO |
 | `0x90004000` | platform control / discovery | Current platform MMIO |
 
 The Bootinfo structure and `r0` handoff are specified in
@@ -27,9 +28,8 @@ reset and exception vectors
 boot ROM mapping
 post-boot vector table
 general RAM ownership / usable ranges
-system timer
+system monotonic timer/counter
 interrupt controller
-RTC
 network controller
 reserved regions
 ```

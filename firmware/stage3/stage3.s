@@ -1,4 +1,4 @@
-; T32 C STAGE3 0.0.4 startup
+; T32 C STAGE3 0.0.13 startup
 ;
 ; Stage-3 ABI v0.1:
 ;   load/entry address 0x00020000
@@ -45,11 +45,11 @@ _start:
     jnz  r1, bad_handoff
 
     ; Show that the mixed-language stage has actually started.
-    movi r4, 0x90000280
+    movi r4, 0x90000320
     movi r0, msg_banner
     call print_string
 
-    movi r4, 0x90000320
+    movi r4, 0x900003C0
     movi r0, msg_loaded
     call print_string
 
@@ -61,31 +61,44 @@ _start:
     xor  r1, r9, r1
     jnz  r1, bad_c_return
 
-    movi r4, 0x900003C0
-    movi r0, msg_return
-    call print_string
-
-    movi r4, 0x90000460
-    movi r0, msg_handoff
-    call print_string
-
-    ; Preserve main()'s return code as the final visible register result.
+    ; Once C main() starts the interactive monitor it owns the console.
+    ; Do not paint fixed framebuffer rows after main returns; scrolling may
+    ; have moved or reused those rows.
     mov  r0, r9
     halt
 
 bad_handoff:
-    movi r4, 0x90000280
+    movi r4, 0x90000320
     movi r0, msg_bad_handoff
     call print_string
     movi r0, 1
     halt
 
 bad_c_return:
-    movi r4, 0x900003C0
+    movi r4, 0x90000460
     movi r0, msg_bad_return
     call print_string
     mov  r0, r9
     halt
+
+
+.global t32_rtc_epoch
+t32_rtc_epoch:
+    movi r2, 0x90003008
+    ldw  r0, [r2]
+    ret
+
+.global t32_getchar
+t32_getchar:
+    movi r2, 0x90002004
+t32_getchar_wait:
+    ldw  r1, [r2]
+    movi r3, 1
+    and  r1, r1, r3
+    jz   r1, t32_getchar_wait
+    movi r2, 0x90002008
+    ldw  r0, [r2]
+    ret
 
 print_string:
     ldb  r1, [r0]
@@ -98,16 +111,10 @@ print_string_done:
     ret
 
 msg_banner:
-    .ascii "T32 C STAGE3 0.0.4"
+    .ascii "T32 C STAGE3 0.0.13"
     .byte 0
 msg_loaded:
-    .ascii "NEXT.BIN C strings + libt32 puts"
-    .byte 0
-msg_return:
-    .ascii "C main() returned 42"
-    .byte 0
-msg_handoff:
-    .ascii "Bootinfo v0.2 handoff OK"
+    .ascii "NEXT.BIN interactive monitor"
     .byte 0
 msg_bad_handoff:
     .ascii "C STAGE3 HANDOFF INVALID"

@@ -6,7 +6,7 @@
 #   macOS:   $HOME/.local/bin
 
 PROJECT   := t32-cc
-VERSION   ?= 0.17.0
+VERSION   ?= 0.25.2
 SRC_DIR   := src
 BUILD_DIR := build
 TEST_DIR  := tests

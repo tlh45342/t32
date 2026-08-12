@@ -1,4 +1,4 @@
-# t32-runx 0.0.7
+# t32-runx 0.0.8
 
 `t32-runx` is the Windows-only, single-vCPU interactive developer host for T32.
 It reuses the canonical sibling `../libt32vm`; there is no duplicate CPU/MMIO
@@ -88,3 +88,31 @@ Stats command and the standard file-open command path.
 - no mouse
 - no timer/RTC/IRQ yet
 - no networking yet
+
+
+## 0.0.8 default BIOS policy
+
+`t32-runx` now has two firmware modes:
+
+```text
+A  embedded BIOS (default)
+B  external BIOS file override
+```
+
+Mode A requires no firmware file at runtime. During the build,
+`../../firmware/bios/bios.bin` is converted into a generated C byte array and
+linked into `t32-runx.exe`.
+
+The Firmware menu provides both:
+
+```text
+Use Embedded BIOS (A)
+Select External BIOS... (B)
+```
+
+Supplying a firmware filename as the first command-line argument continues to
+select the external/file mode for compatibility.
+
+The embedded BIOS is a convenience/default, not a replacement for firmware
+development. Rebuilding `t32-runx` after `bios.bin` changes refreshes the
+embedded image automatically.

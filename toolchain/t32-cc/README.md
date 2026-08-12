@@ -321,3 +321,238 @@ relocatable address into the normal argument register, and emits `call puts`.
 This is intentionally not a complete C pointer model yet. Pointer
 declarations, dereference, arrays, and general `char *` syntax remain separate
 compiler milestones.
+
+## 0.18.0 expression statements and explicit externals
+
+Stage 18 removes the compiler's special knowledge of `puts` and `putchar`.
+
+External target functions are now declared explicitly:
+
+```c
+extern int puts(int s);
+```
+
+The `int` parameter is a temporary ABI-level placeholder until the pointer/type
+milestone introduces `char *`. The important change is that the function name
+and arity now come from the source declaration rather than a hard-coded runtime
+table inside `t32-cc`.
+
+Stage 18 also adds expression statements, so this is legal:
+
+```c
+int main(void)
+{
+    puts("Hello");
+    return 0;
+}
+```
+
+The expression is evaluated using the ordinary expression/call machinery and
+its result is discarded.
+
+A referenced external declaration emits an unresolved `.extern` symbol for the
+assembler/linker. Declared-but-unused externals do not create unnecessary
+linker dependencies.
+
+The next type-system milestone will replace the transitional integer-shaped
+string parameter with genuine `char` and pointer types.
+
+
+## 0.19.0 int-pointer / lvalue groundwork
+
+Stage 19 introduces the first genuine pointer operations for local `int`
+objects:
+
+```c
+int x = 42;
+int *p = &x;
+*p = 73;
+return *p;
+```
+
+The compiler now distinguishes the address of a local object from the value
+stored there. `&x` materializes the stack address of `x`; dereference loads
+through a pointer with `LDW`; and `*p = value` stores through the pointer with
+`STW`. This is intentionally the first narrow lvalue/rvalue milestone: only
+local `int *` pointers are supported here. General pointer expressions,
+`char *`, pointer arithmetic, arrays, and pointer parameters remain subsequent
+stages.
+
+## 0.20.0 char and byte-pointer milestone
+
+`t32-cc 0.20.0` adds the first 8-bit C object type and typed byte pointers.
+
+Supported examples now include:
+
+```c
+char c = 65;
+char *p = &c;
+*p = 66;
+return *p;
+```
+
+A scalar `char` keeps a four-byte stack slot in the current simple stack-frame
+layout, but stores and loads its object value with `STB`/`LDB`; assignment is
+truncated to the low eight bits. This keeps stack layout intentionally simple
+while giving `char` real byte-width object semantics.
+
+Dereferencing `int *` continues to use `LDW`/`STW`. Dereferencing `char *`
+uses `LDB`/`STB`, so pointee type now directly controls generated T32 memory
+operations.
+
+External declarations can describe byte pointers:
+
+```c
+extern int puts(char *s);
+```
+
+and a string literal can initialize a `char *` local:
+
+```c
+char *message = "Hello Thomas";
+puts(message);
+```
+
+Pointer arithmetic, arrays, pointer parameters for user-defined functions, and
+general type conversions remain later milestones.
+
+## 0.22.0 typed pointer arithmetic
+
+`t32-cc 0.22.0` adds pointer-plus-integer and pointer-minus-integer arithmetic
+for the pointer types introduced in 0.19.0 and 0.20.0.
+
+```c
+char *cp;
+int *ip;
+
+cp = cp + 1;    /* address + 1 */
+ip = ip + 1;    /* address + 4 */
+```
+
+The pointee type controls scaling:
+
+```text
+char * +/- n  -> address +/- n
+int  * +/- n  -> address +/- (n * 4)
+```
+
+The resulting expression remains a pointer of the original pointee type, so a
+later dereference continues to select the correct T32 memory operation:
+`LDB/STB` for `char *`, and `LDW/STW` for `int *`.
+
+Stage 21 deliberately supports the pointer on the left side only. Pointer to
+pointer arithmetic and pointer differences remain unsupported; arrays are the
+next natural layer above this groundwork.
+
+
+## Stage 22: fixed-size local arrays
+
+Stage 22 adds fixed-size local `int` and `char` arrays, array-to-pointer decay in expressions, and indexed loads/stores. `int` subscripts scale by four bytes; `char` subscripts scale by one byte. Array lengths must currently be positive integer constants and array initializers are intentionally deferred.
+
+## 0.23.0 named structs and member access
+
+`t32-cc 0.23.0` introduces the first aggregate C object type.
+
+```c
+struct point {
+    int x;
+    int y;
+};
+
+int main(void)
+{
+    struct point p;
+
+    p.x = 10;
+    p.y = 32;
+
+    return p.x + p.y;
+}
+```
+
+Struct layout is computed at compile time. `char` members occupy one byte;
+`int` members are aligned to four-byte boundaries; and the total struct size is
+rounded to four bytes. Member access therefore becomes a typed fixed offset
+from the containing object's address.
+
+For example:
+
+```c
+struct record {
+    char tag;   /* offset 0 */
+    int value;  /* offset 4 */
+};
+```
+
+uses `LDB/STB` for `tag` and `LDW/STW` for `value`.
+
+Stage 23 deliberately supports named struct definitions, local struct objects,
+and the `.` operator only. Struct pointers / `->`, arrays of structs, nested
+structs, whole-struct assignment, struct initializers, `typedef`, and `sizeof`
+remain later milestones.
+
+## 0.24.0 struct pointers and `->`
+
+Stage 24 connects aggregate layout to the pointer machinery:
+
+```c
+struct point {
+    int x;
+    int y;
+};
+
+int main(void)
+{
+    struct point p;
+    struct point *q = &p;
+
+    q->x = 40;
+    q->y = 2;
+
+    return q->x + q->y;
+}
+```
+
+A `struct T *` local occupies one machine word. `->member` loads the pointer,
+adds the member's compile-time offset, then performs the member's typed memory
+operation (`LDB/STB` for `char`, `LDW/STW` for `int`).
+
+Stage 24 keeps the boundary deliberately small: `.` is for struct objects and
+`->` is for struct pointers. Arrays of structs, nested structs, whole-struct
+assignment, struct initializers, `typedef`, and `sizeof` remain later work.
+
+## 0.25.0 struct pointer parameters
+
+Stage 25 carries struct pointers across ordinary T32 C function boundaries.
+A function may now declare a named-struct pointer parameter and use `->` to
+read or modify the caller's object:
+
+```c
+int sum_point(struct point *p)
+{
+    return p->x + p->y;
+}
+```
+
+Struct pointers use the existing four-register calling convention (`r0`-`r3`)
+and occupy one four-byte parameter/local slot in the callee. Passing `&object`
+therefore composes the Stage 20 address-of machinery with Stage 24 `->` member
+access without introducing aggregate copying into the ABI.
+
+Stage 25 intentionally does not pass structs by value. Arrays of structs,
+nested structs, whole-struct assignment, struct initializers, `typedef`, and
+`sizeof` remain later milestones.
+
+## 0.25.1 struct dot/arrow regression fix
+
+0.25.1 fixes a regression in struct-member assignment introduced while adding
+struct-pointer parameter support. Ordinary `object.member = value` stores are
+again stack-relative, while `pointer->member = value` stores remain
+pointer-relative. The statement representation now records this distinction
+with an explicit `member_through_pointer` flag. A coexistence regression test
+covers both forms in the same program.
+
+
+## 0.25.2 string-literal terminator fix
+
+C string literals always include an implicit trailing zero byte. The string emitter now tracks whether that terminator was actually emitted before ending an eight-byte `.byte` chunk. This fixes literals with visible lengths of 8, 16, and other exact multiples of eight, which previously could omit the required NUL. Boundary regressions cover 7/8/9 and 15/16/17 visible characters.

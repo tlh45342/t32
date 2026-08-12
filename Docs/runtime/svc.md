@@ -48,3 +48,19 @@ disk0 into caller-supplied RAM. Its register convention is documented in
 
 This is a firmware bootstrap service, not the final application-facing SVC
 ABI. `TRAP` semantics remain unfrozen and are not changed by this milestone.
+
+
+## Near-term application service direction
+
+External application loading makes a small application-facing SVC ABI the next
+natural boundary:
+
+```text
+application -> libt32 -> SVC -> Stage3/supervisor -> BIOS/MMIO
+```
+
+Initial candidates are console output, exit/return-to-monitor, wall-clock time,
+monotonic ticks, and disk read. Applications should not need raw MMIO addresses
+or BIOS entry points when a stable service can hide those details. The existing
+BIOS `disk_read` service remains a bootstrap implementation service, not the
+application ABI.

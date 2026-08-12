@@ -1,4 +1,4 @@
-# libt32 0.0.4
+# libt32 0.0.7
 
 `libt32` is the ABI 0.1-conforming T32 static runtime library.
 
@@ -52,3 +52,24 @@ r0 = 0
 `puts` preserves the callee-saved register set, writes each byte through
 `putchar`, and appends a newline. `putchar` now treats byte `10` as newline and
 advances its library-owned framebuffer cursor to column zero of the next row.
+
+
+## I/O milestone: bounded console and scrolling
+
+libt32 0.0.7 makes the text-console cursor safe for sustained interactive use.
+
+`putchar` now guarantees that its library-owned cursor remains inside the
+80x25 framebuffer (`0x90000000` through `0x900007CF`). It supports:
+
+- ordinary character output with natural 80-column wrapping;
+- LF (`\n`) to column zero of the next row;
+- CR (`\r`) to column zero of the current row;
+- scrolling when output advances beyond the final row.
+
+Scrolling copies rows 1..24 to rows 0..23, clears row 24 with spaces, and leaves
+the cursor at row 24 column 0. The implementation is entirely guest-side T32
+code and keeps console state in guest memory.
+
+The regression suite includes a console-scroll program that deliberately emits
+enough lines to cross the bottom of the framebuffer and verifies that execution
+halts normally without an out-of-range MMIO write.

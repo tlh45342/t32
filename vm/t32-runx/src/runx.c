@@ -3,7 +3,7 @@
  *
  * Windows-only interactive application host for T32.
  *
- * 0.0.7 scope:
+ * 0.0.8 scope:
  *   - one VM / one vCPU
  *   - existing 80x25 T32 text display
  *   - polling keyboard through libt32vm
@@ -20,6 +20,7 @@
 #ifdef _WIN32
 
 #include "t32.h"
+#include "default_bios.h"
 
 #include <windows.h>
 #include <commdlg.h>
@@ -30,7 +31,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define T32_RUNX_VERSION "0.0.7"
+#define T32_RUNX_VERSION "0.0.8"
 #define T32_RUNX_LOAD_ADDRESS UINT32_C(0x00001000)
 #define T32_RUNX_PROGRAM_ADDRESS UINT32_C(0x00020000)
 #define T32_RUNX_SLICE_INSTRUCTIONS UINT64_C(20000)
@@ -48,9 +49,15 @@
 #define IDM_MACHINE_RESET    1003
 #define IDM_MACHINE_EXIT     1004
 #define IDM_FIRMWARE_SELECT  1101
+#define IDM_FIRMWARE_EMBEDDED 1102
 #define IDM_DISK_ATTACH0     1201
 #define IDM_DISK_DETACH0     1202
 #define IDM_STATUS_LAMP      1901
+
+typedef enum {
+    T32_RUNX_BIOS_A_EMBEDDED = 0,
+    T32_RUNX_BIOS_B_FILE = 1
+} runx_bios_mode_t;
 
 typedef struct {
     t32_machine_t *machine;
@@ -63,6 +70,7 @@ typedef struct {
     bool running;
     bool powered_off;
     bool direct_program;
+    runx_bios_mode_t bios_mode;
 
     HWND stats_window;
     HWND stats_text;
@@ -91,11 +99,6 @@ static void show_error(HWND owner, const char *message)
     MessageBoxA(owner, message, "t32-runx", MB_OK | MB_ICONERROR);
 }
 
-static void show_info(HWND owner, const char *message)
-{
-    MessageBoxA(owner, message, "t32-runx", MB_OK | MB_ICONINFORMATION);
-}
-
 static void show_about(HWND owner)
 {
     char message[256];
@@ -104,7 +107,9 @@ static void show_about(HWND owner)
              "T32 RunX\n"
              "Version %s\n\n"
              "Windows interactive developer host for T32.\n"
-             "One VM / one vCPU.",
+             "One VM / one vCPU.\n\n"
+             "BIOS A: embedded default\n"
+             "BIOS B: external file override",
              T32_RUNX_VERSION);
 
     MessageBoxA(owner, message, "About T32 RunX",
@@ -206,6 +211,23 @@ static void update_ui(HWND window)
     refresh_stats_window();
 }
 
+static bool load_embedded_bios(HWND owner)
+{
+    if (!g_runx.machine)
+        return false;
+
+    if (!t32_write_memory(g_runx.machine,
+                          T32_RUNX_LOAD_ADDRESS,
+                          t32_runx_default_bios,
+                          t32_runx_default_bios_size)) {
+        show_error(owner, "Could not load the embedded T32 BIOS.");
+        return false;
+    }
+
+    t32_set_pc(g_runx.machine, T32_RUNX_LOAD_ADDRESS);
+    return true;
+}
+
 static bool create_machine(HWND owner)
 {
     if (g_runx.machine) {
@@ -231,7 +253,11 @@ static bool create_machine(HWND owner)
             return false;
         }
         t32_set_pc(g_runx.machine, T32_RUNX_PROGRAM_ADDRESS);
-    } else if (g_runx.firmware_path[0]) {
+    } else if (g_runx.bios_mode == T32_RUNX_BIOS_B_FILE) {
+        if (!g_runx.firmware_path[0]) {
+            show_error(owner, "BIOS mode B requires an external BIOS file.");
+            return false;
+        }
         if (!t32_load_file(g_runx.machine,
                            g_runx.firmware_path,
                            g_runx.load_address)) {
@@ -243,6 +269,9 @@ static bool create_machine(HWND owner)
             return false;
         }
         t32_set_pc(g_runx.machine, g_runx.load_address);
+    } else {
+        if (!load_embedded_bios(owner))
+            return false;
     }
 
     g_runx.disk_attached = false;
@@ -265,11 +294,6 @@ static bool create_machine(HWND owner)
 
 static void machine_start(HWND window)
 {
-    if (!g_runx.firmware_path[0] && !g_runx.program_path[0]) {
-        show_info(window, "Select BIOS/firmware or load a program first.");
-        return;
-    }
-
     /*
      * STOP and guest POWER_OFF are hard/off states. Starting again creates a
      * fresh machine from the selected firmware and currently configured disk.
@@ -300,11 +324,6 @@ static void machine_stop(HWND window)
 
 static void machine_reset(HWND window)
 {
-    if (!g_runx.firmware_path[0] && !g_runx.program_path[0]) {
-        show_info(window, "Select BIOS/firmware or load a program first.");
-        return;
-    }
-
     if (!create_machine(window))
         return;
 
@@ -326,9 +345,23 @@ static void select_firmware(HWND window)
     strncpy(g_runx.firmware_path, path,
             sizeof(g_runx.firmware_path) - 1);
     g_runx.firmware_path[sizeof(g_runx.firmware_path) - 1] = '\0';
+    g_runx.bios_mode = T32_RUNX_BIOS_B_FILE;
     g_runx.direct_program = false;
 
     (void)create_machine(window);
+    InvalidateRect(window, NULL, TRUE);
+    update_ui(window);
+}
+
+static void use_embedded_firmware(HWND window)
+{
+    g_runx.bios_mode = T32_RUNX_BIOS_A_EMBEDDED;
+    g_runx.firmware_path[0] = '\0';
+    g_runx.direct_program = false;
+
+    if (!create_machine(window))
+        return;
+
     InvalidateRect(window, NULL, TRUE);
     update_ui(window);
 }
@@ -641,8 +674,10 @@ static HMENU create_application_menu(void)
     AppendMenuA(machine, MF_SEPARATOR, 0, NULL);
     AppendMenuA(machine, MF_STRING, IDM_MACHINE_EXIT, "E&xit");
 
+    AppendMenuA(firmware, MF_STRING, IDM_FIRMWARE_EMBEDDED,
+                "Use &Embedded BIOS (A)");
     AppendMenuA(firmware, MF_STRING, IDM_FIRMWARE_SELECT,
-                "&Select BIOS...");
+                "Select External BIOS... (&B)");
 
     AppendMenuA(disk, MF_STRING, IDM_DISK_ATTACH0,
                 "&Attach Disk 0...");
@@ -696,6 +731,9 @@ static LRESULT CALLBACK runx_window_proc(HWND window, UINT message,
             return 0;
         case IDM_MACHINE_EXIT:
             DestroyWindow(window);
+            return 0;
+        case IDM_FIRMWARE_EMBEDDED:
+            use_embedded_firmware(window);
             return 0;
         case IDM_FIRMWARE_SELECT:
             select_firmware(window);
@@ -759,11 +797,12 @@ int main(int argc, char **argv)
 
     memset(&g_runx, 0, sizeof(g_runx));
     g_runx.load_address = T32_RUNX_LOAD_ADDRESS;
+    g_runx.bios_mode = T32_RUNX_BIOS_A_EMBEDDED;
 
     if (argc == 2 &&
         (strcmp(argv[1], "--version") == 0 ||
          strcmp(argv[1], "-v") == 0)) {
-        MessageBoxA(NULL, "t32-runx 0.0.7", "t32-runx",
+        MessageBoxA(NULL, "t32-runx 0.0.8", "t32-runx",
                     MB_OK | MB_ICONINFORMATION);
         return 0;
     }
@@ -772,6 +811,7 @@ int main(int argc, char **argv)
         strncpy(g_runx.firmware_path, argv[1],
                 sizeof(g_runx.firmware_path) - 1);
         g_runx.firmware_path[sizeof(g_runx.firmware_path) - 1] = '\0';
+        g_runx.bios_mode = T32_RUNX_BIOS_B_FILE;
     }
 
     if (argc >= 3)
@@ -846,8 +886,7 @@ int main(int argc, char **argv)
     if (!g_runx.font)
         g_runx.font = (HFONT)GetStockObject(SYSTEM_FIXED_FONT);
 
-    if (g_runx.firmware_path[0])
-        (void)create_machine(window);
+    (void)create_machine(window);
 
     update_ui(window);
     ShowWindow(window, SW_SHOW);

@@ -1,6 +1,7 @@
+extern int puts(int s);
+
 int main(void)
 {
-    int rc;
-    rc = puts("Hi");
-    return rc;
+    puts("Hi");
+    return 0;
 }

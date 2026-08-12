@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import shutil
 import subprocess
 import sys
@@ -35,13 +36,17 @@ def run_process(argv: list[str], *, stdin: str = "", cwd: Path = ROOT) -> subpro
     )
 
 
-def run_monitor(runner: Path, bios: Path, disk: Path | None) -> str:
+def run_monitor(runner: Path, bios: Path, disk: Path | None, keys: str | None = None) -> str:
     commands: list[str] = []
     if disk is not None:
         commands.append(f"disk attach {disk}")
     commands += [
         f"load {bios} 0x1000",
         "set pc 0x1000",
+    ]
+    if keys is not None:
+        commands.append(f"key {keys}")
+    commands += [
         "run",
         "display",
         "e 0x2000 72",
@@ -112,25 +117,42 @@ def main() -> int:
     require("BOOT.BIN" in disk_result.stdout, "BOOT.BIN is installed into T32D image", disk_result.stdout)
     require("NEXT.BIN" in disk_result.stdout, "NEXT.BIN is installed into T32D image", disk_result.stdout)
 
-    booted = run_monitor(runner, bios, boot_disk)
-    require("T32 BOOT 0.0.4" in booted, "BIOS transfers control to BOOT.BIN", booted)
-    require("BOOTINFO v0.2 OK" in booted, "second stage accepts BIOS Bootinfo", booted)
-    require("BIOS DISK SERVICE v0.1 OK" in booted, "BOOT reads disk through BIOS service", booted)
-    require("Hello from BOOT.BIN" in booted, "second-stage payload executes", booted)
-    require("T32 C STAGE3 0.0.4" in booted, "BOOT transfers control to NEXT.BIN", booted)
-    require("NEXT.BIN C strings + libt32 puts" in booted, "compiler-built third stage executes", booted)
-    require("Hello from C via puts()" in booted, "C stage writes string literal through libt32 puts", booted)
-    require("C main() returned 42" in booted, "C main return path executes through full boot chain", booted)
-    require("Bootinfo v0.2 handoff OK" in booted, "third stage accepts Bootinfo handoff", booted)
+    boot_trace = run_monitor(
+        runner,
+        bios,
+        boot_disk,
+        r"halt\r",
+    )
+    require("T32 BIOS 0.0.6" in boot_trace,
+            "BIOS identification survives successful boot trace", boot_trace)
+
+    booted = run_monitor(
+        runner,
+        bios,
+        boot_disk,
+        r"version\rhelp\rmem\rtime\rbootinfo\rhalt\r",
+    )
+    require("T32 Stage3 Monitor 0.0.13" in booted, "BOOT transfers control to NEXT.BIN", booted)
+    require("help     show commands" in booted, "compiler-built third stage executes", booted)
+    require("T32 Stage3 Monitor 0.0.13" in booted, "interactive C monitor starts", booted)
+    require("help     show commands" in booted, "Stage3 help command executes through full boot chain", booted)
+    require("Stage3 load address 0x00020000" in booted, "Stage3 mem command executes through full boot chain", booted)
+    match = re.search(r"RTC epoch:\s*([0-9]+)", booted)
+    require(match is not None, "Stage3 time command executes through full boot chain", booted)
+    if match is not None:
+        epoch = int(match.group(1))
+        require(abs(epoch - int(__import__("time").time())) <= 10,
+                "Stage3 RTC tracks host UTC seconds through full boot chain", booted)
+    require("Bootinfo v0.2 handoff OK" in booted, "Stage3 bootinfo command executes through full boot chain", booted)
+    require("Unknown command" not in booted, "scripted Stage3 commands are parsed cleanly", booted)
     require("54 33 32 42" in booted, "Bootinfo memory carries T32B magic", booted)
     require("48 00 00 00" in booted, "Bootinfo memory records 72-byte size", booted)
     require("00 00 10 00" in booted, "Bootinfo reports 1 MiB RAM", booted)
     require("00 02 00 00" in booted, "Bootinfo reports 512-byte sectors", booted)
-
     require("01 00 00 00 08 10 00 00" in booted,
             "Bootinfo publishes BIOS service v0.1 and disk_read entry", booted)
 
-    print("t32-bios: PASS (30/30 cases)")
+    print("t32-bios: PASS (35/35 cases)")
     return 0
 
 

@@ -27,11 +27,16 @@ typedef enum {
     TOK_RPAREN,
     TOK_LBRACE,
     TOK_RBRACE,
+    TOK_LBRACKET,
+    TOK_RBRACKET,
     TOK_SEMICOLON,
     TOK_COMMA,
+    TOK_DOT,
+    TOK_ARROW,
     TOK_MINUS,
     TOK_PLUS,
     TOK_STAR,
+    TOK_AMPERSAND,
     TOK_SLASH,
     TOK_PERCENT,
     TOK_ASSIGN,
@@ -82,14 +87,14 @@ static void print_usage(FILE *stream, const char *program_name)
 {
     fprintf(stream,
         "Usage: %s [options] <input.c>\n\n"
-        "T32 C compiler driver - Stage 17\n\n"
+        "T32 C compiler driver - Stage 24\n\n"
         "Supported source form:\n"
         "  int main(void) { return <integer>; }\n"
         "  int main(void) { int <name> = <integer>; return <name>; }\n"
         "  int main(void) { int <name> = <integer>; <name> = <expr>; return <expr>; }\n\n"
         "Expressions support chained arithmetic, parentheses, and comparisons.\n"
         "Comparison operators are ==, !=, <, <=, >, and >= and produce integer 0 or 1.\n"
-        "Stage 17 adds for loops, break, and continue.\n\n"
+        "Stage 24 adds named structs, local struct objects, and member access.\n\n"
         "Options:\n"
         "  -S                 Compile to assembly and stop\n"
         "  -c                 Compile to relocatable object and stop\n"
@@ -434,16 +439,28 @@ static token_t lexer_next_token(lexer_t *lexer)
         return make_token(TOK_LBRACE, start, 1, start_line, start_column);
     case '}':
         return make_token(TOK_RBRACE, start, 1, start_line, start_column);
+    case '[':
+        return make_token(TOK_LBRACKET, start, 1, start_line, start_column);
+    case ']':
+        return make_token(TOK_RBRACKET, start, 1, start_line, start_column);
     case ';':
         return make_token(TOK_SEMICOLON, start, 1, start_line, start_column);
     case ',':
         return make_token(TOK_COMMA, start, 1, start_line, start_column);
+    case '.':
+        return make_token(TOK_DOT, start, 1, start_line, start_column);
     case '-':
+        if (lexer_peek(lexer) == '>') {
+            lexer_advance(lexer);
+            return make_token(TOK_ARROW, start, 2, start_line, start_column);
+        }
         return make_token(TOK_MINUS, start, 1, start_line, start_column);
     case '+':
         return make_token(TOK_PLUS, start, 1, start_line, start_column);
     case '*':
         return make_token(TOK_STAR, start, 1, start_line, start_column);
+    case '&':
+        return make_token(TOK_AMPERSAND, start, 1, start_line, start_column);
     case '/':
         return make_token(TOK_SLASH, start, 1, start_line, start_column);
     case '%':
@@ -489,9 +506,12 @@ static const char *token_kind_name(token_kind_t kind)
     case TOK_LBRACE: return "'{'";
     case TOK_RBRACE: return "'}'";
     case TOK_SEMICOLON: return "';'";
+    case TOK_DOT: return "'.'";
+    case TOK_ARROW: return "'->'";
     case TOK_MINUS: return "'-'";
     case TOK_PLUS: return "'+'";
     case TOK_STAR: return "'*'";
+    case TOK_AMPERSAND: return "'&'";
     case TOK_SLASH: return "'/'";
     case TOK_PERCENT: return "'%'";
     case TOK_ASSIGN: return "'='";
@@ -597,7 +617,11 @@ typedef enum {
     EXPR_OPERAND = 0,
     EXPR_BINARY,
     EXPR_CALL,
-    EXPR_STRING
+    EXPR_STRING,
+    EXPR_ADDRESS_OF,
+    EXPR_DEREF,
+    EXPR_ARRAY_SUBSCRIPT,
+    EXPR_STRUCT_MEMBER
 } expression_kind_t;
 
 #define MAX_EXPRESSION_NODES 64
@@ -613,6 +637,12 @@ typedef struct {
     size_t call_arg_count;
     unsigned string_id;
     char string_value[160];
+    int local_index;
+    int child;
+    int byte_access;
+    unsigned pointer_scale;
+    int array_local;
+    uint32_t member_offset;
 } expression_node_t;
 
 typedef struct {
@@ -630,7 +660,11 @@ typedef enum {
     STMT_FOR,
     STMT_BREAK,
     STMT_CONTINUE,
-    STMT_RETURN
+    STMT_RETURN,
+    STMT_EXPR,
+    STMT_STORE_INDIRECT,
+    STMT_STORE_ARRAY,
+    STMT_STORE_MEMBER
 } statement_kind_t;
 
 typedef struct {
@@ -639,6 +673,13 @@ typedef struct {
     expression_t for_init;     /* STMT_FOR initializer RHS */
     expression_t for_update;   /* STMT_FOR update RHS */
     int target_local;          /* STMT_ASSIGN: local-symbol index */
+    int pointer_local;         /* STMT_STORE_INDIRECT: pointer local */
+    int array_local;           /* STMT_STORE_ARRAY: array local */
+    expression_t array_index;  /* STMT_STORE_ARRAY: subscript */
+    int member_local;          /* STMT_STORE_MEMBER: struct local */
+    uint32_t member_offset;   /* STMT_STORE_MEMBER: member offset */
+    int member_is_char;       /* STMT_STORE_MEMBER: byte member */
+    int member_through_pointer; /* STMT_STORE_MEMBER: base is struct pointer */
     int for_init_local;        /* STMT_FOR initializer target */
     int for_update_local;      /* STMT_FOR update target */
     int then_first;            /* STMT_IF/STMT_WHILE/STMT_FOR body */
@@ -653,8 +694,61 @@ typedef struct {
     int has_initializer;
     int is_parameter;
     unsigned parameter_index;
+    int is_pointer;
+    int is_char;
+    int is_array;
+    uint32_t array_length;
+    uint32_t offset;
+    uint32_t storage_size;
+    int is_struct;
+    int struct_index;
     expression_t initializer;
 } local_t;
+
+
+static int token_matches_name(const token_t *token, const char *name);
+
+#define MAX_STRUCTS 16
+#define MAX_STRUCT_MEMBERS 32
+
+typedef struct {
+    char name[64];
+    int is_char;
+    uint32_t offset;
+    uint32_t size;
+} struct_member_t;
+
+typedef struct {
+    char name[64];
+    struct_member_t members[MAX_STRUCT_MEMBERS];
+    size_t member_count;
+    uint32_t size;
+} struct_def_t;
+
+static struct_def_t struct_defs[MAX_STRUCTS];
+static size_t struct_def_count = 0;
+
+static int find_struct_by_name(const token_t *token)
+{
+    size_t i;
+    for (i = 0; i < struct_def_count; ++i) {
+        if (token_matches_name(token, struct_defs[i].name))
+            return (int)i;
+    }
+    return -1;
+}
+
+static int find_struct_member(int struct_index, const token_t *token)
+{
+    size_t i;
+    if (struct_index < 0 || (size_t)struct_index >= struct_def_count)
+        return -1;
+    for (i = 0; i < struct_defs[struct_index].member_count; ++i) {
+        if (token_matches_name(token, struct_defs[struct_index].members[i].name))
+            return (int)i;
+    }
+    return -1;
+}
 
 typedef struct {
     char function_name[64];
@@ -667,13 +761,22 @@ typedef struct {
     int first_statement;
     int has_explicit_return;
     expression_t return_expression;
+    uint32_t frame_bytes;
 } program_t;
 
 #define MAX_FUNCTIONS 16
+#define MAX_EXTERNALS 16
+
+typedef struct {
+    char name[64];
+    size_t parameter_count;
+} external_t;
 
 typedef struct {
     program_t functions[MAX_FUNCTIONS];
     size_t function_count;
+    external_t externals[MAX_EXTERNALS];
+    size_t external_count;
     int main_index;
 } translation_unit_t;
 
@@ -762,6 +865,11 @@ static int parse_operand(
             return 0;
         }
 
+        if (program->locals[local_index].is_struct &&
+            !program->locals[local_index].is_pointer) {
+            parser_error(parser, "struct object requires member access");
+            return 0;
+        }
         operand->kind = OPERAND_LOCAL;
         operand->value = (uint32_t)local_index;
         parser_advance(parser);
@@ -846,6 +954,113 @@ static int parse_primary(
     }
 
     if (parser->current.kind == TOK_IDENTIFIER &&
+        parser_peek_token(parser).kind == TOK_ARROW) {
+        token_t pointer_name = parser->current;
+        int local_index = find_local(program, &pointer_name);
+        int member_index;
+        const struct_member_t *member;
+
+        if (local_index < 0 ||
+            !program->locals[local_index].is_struct ||
+            !program->locals[local_index].is_pointer) {
+            parser_error(parser, "arrow requires a struct pointer local");
+            return -1;
+        }
+
+        parser_advance(parser);
+        parser_advance(parser); /* '->' */
+
+        if (parser->current.kind != TOK_IDENTIFIER) {
+            parser_error(parser, "expected struct member name");
+            return -1;
+        }
+
+        member_index = find_struct_member(
+            program->locals[local_index].struct_index, &parser->current);
+        if (member_index < 0) {
+            parser_error(parser, "unknown struct member");
+            return -1;
+        }
+
+        member = &struct_defs[program->locals[local_index].struct_index]
+                      .members[member_index];
+
+        memset(&node, 0, sizeof(node));
+        node.kind = EXPR_STRUCT_MEMBER;
+        node.local_index = local_index;
+        node.member_offset = member->offset;
+        node.byte_access = member->is_char;
+        node.array_local = 1; /* Stage 24 marker: member base is pointer value. */
+        parser_advance(parser);
+        return expression_add_node(parser, expression, &node);
+    }
+
+    if (parser->current.kind == TOK_IDENTIFIER &&
+        parser_peek_token(parser).kind == TOK_DOT) {
+        token_t object_name = parser->current;
+        int local_index = find_local(program, &object_name);
+        int member_index;
+        const struct_member_t *member;
+
+        if (local_index < 0 ||
+            !program->locals[local_index].is_struct ||
+            program->locals[local_index].is_pointer) {
+            parser_error(parser, "dot member access requires a struct object");
+            return -1;
+        }
+
+        parser_advance(parser);
+        parser_advance(parser); /* '.' */
+
+        if (parser->current.kind != TOK_IDENTIFIER) {
+            parser_error(parser, "expected struct member name");
+            return -1;
+        }
+
+        member_index = find_struct_member(
+            program->locals[local_index].struct_index, &parser->current);
+        if (member_index < 0) {
+            parser_error(parser, "unknown struct member");
+            return -1;
+        }
+
+        member = &struct_defs[program->locals[local_index].struct_index]
+                      .members[member_index];
+
+        memset(&node, 0, sizeof(node));
+        node.kind = EXPR_STRUCT_MEMBER;
+        node.local_index = local_index;
+        node.member_offset = member->offset;
+        node.byte_access = member->is_char;
+        parser_advance(parser);
+        return expression_add_node(parser, expression, &node);
+    }
+
+    if (parser->current.kind == TOK_IDENTIFIER &&
+        parser_peek_token(parser).kind == TOK_LBRACKET) {
+        token_t name = parser->current;
+        int local_index = find_local(program, &name);
+        int index_root;
+        if (local_index < 0 || !program->locals[local_index].is_array) {
+            parser_error(parser, "subscript requires an array local");
+            return -1;
+        }
+        parser_advance(parser);
+        parser_advance(parser); /* '[' */
+        index_root = parse_equality(parser, program, expression);
+        if (index_root < 0)
+            return -1;
+        if (!parser_expect_kind(parser, TOK_RBRACKET, "']'"))
+            return -1;
+        memset(&node, 0, sizeof(node));
+        node.kind = EXPR_ARRAY_SUBSCRIPT;
+        node.array_local = local_index;
+        node.child = index_root;
+        node.byte_access = program->locals[local_index].is_char;
+        return expression_add_node(parser, expression, &node);
+    }
+
+    if (parser->current.kind == TOK_IDENTIFIER &&
         parser_peek_token(parser).kind == TOK_LPAREN) {
         token_t name = parser->current;
         size_t arg_count = 0;
@@ -889,12 +1104,120 @@ static int parse_primary(
     return expression_add_node(parser, expression, &node);
 }
 
+static int parse_unary(
+    parser_t *parser,
+    const program_t *program,
+    expression_t *expression)
+{
+    expression_node_t node;
+
+    if (parser->current.kind == TOK_AMPERSAND) {
+        int local_index;
+        parser_advance(parser);
+        if (parser->current.kind != TOK_IDENTIFIER) {
+            parser_error(parser, "address-of currently requires a local variable");
+            return -1;
+        }
+        local_index = find_local(program, &parser->current);
+        if (local_index < 0) {
+            parser_error(parser, "address-of undeclared local variable");
+            return -1;
+        }
+        memset(&node, 0, sizeof(node));
+        node.kind = EXPR_ADDRESS_OF;
+        node.local_index = local_index;
+        parser_advance(parser);
+        return expression_add_node(parser, expression, &node);
+    }
+
+    if (parser->current.kind == TOK_STAR) {
+        int child;
+        token_t pointer_name;
+        int local_index;
+
+        parser_advance(parser);
+        if (parser->current.kind != TOK_IDENTIFIER) {
+            parser_error(parser, "dereference currently requires a pointer local");
+            return -1;
+        }
+        pointer_name = parser->current;
+        local_index = find_local(program, &pointer_name);
+        if (local_index < 0 || !program->locals[local_index].is_pointer) {
+            parser_error(parser, "dereference requires a pointer local");
+            return -1;
+        }
+        child = parse_primary(parser, program, expression);
+        if (child < 0)
+            return -1;
+        memset(&node, 0, sizeof(node));
+        node.kind = EXPR_DEREF;
+        node.child = child;
+        node.byte_access = program->locals[local_index].is_char;
+        return expression_add_node(parser, expression, &node);
+    }
+
+    return parse_primary(parser, program, expression);
+}
+
+typedef enum {
+    EXPR_TYPE_INT = 0,
+    EXPR_TYPE_CHAR,
+    EXPR_TYPE_INT_PTR,
+    EXPR_TYPE_CHAR_PTR
+} expression_type_t;
+
+static int expression_type_is_pointer(expression_type_t type)
+{
+    return type == EXPR_TYPE_INT_PTR || type == EXPR_TYPE_CHAR_PTR;
+}
+
+static expression_type_t expression_node_type(
+    const program_t *program,
+    const expression_t *expression,
+    int node_index)
+{
+    const expression_node_t *node;
+
+    if (node_index < 0 || (size_t)node_index >= expression->node_count)
+        return EXPR_TYPE_INT;
+
+    node = &expression->nodes[node_index];
+
+    if (node->kind == EXPR_STRING)
+        return EXPR_TYPE_CHAR_PTR;
+
+    if (node->kind == EXPR_ADDRESS_OF) {
+        const local_t *local = &program->locals[node->local_index];
+        return local->is_char ? EXPR_TYPE_CHAR_PTR : EXPR_TYPE_INT_PTR;
+    }
+
+    if (node->kind == EXPR_DEREF || node->kind == EXPR_ARRAY_SUBSCRIPT ||
+        node->kind == EXPR_STRUCT_MEMBER)
+        return node->byte_access ? EXPR_TYPE_CHAR : EXPR_TYPE_INT;
+
+    if (node->kind == EXPR_OPERAND) {
+        if (node->operand.kind == OPERAND_LOCAL) {
+            const local_t *local =
+                &program->locals[node->operand.value];
+            if (local->is_pointer || local->is_array)
+                return local->is_char ? EXPR_TYPE_CHAR_PTR : EXPR_TYPE_INT_PTR;
+            return local->is_char ? EXPR_TYPE_CHAR : EXPR_TYPE_INT;
+        }
+        return EXPR_TYPE_INT;
+    }
+
+    if (node->kind == EXPR_BINARY && node->pointer_scale != 0u)
+        return expression_node_type(program, expression, node->left);
+
+    return EXPR_TYPE_INT;
+}
+
 static int parse_multiplicative(
     parser_t *parser,
     const program_t *program,
     expression_t *expression)
 {
-    int left = parse_primary(parser, program, expression);
+    int left = parse_unary(parser, program, expression);
 
     if (left < 0)
         return -1;
@@ -907,7 +1230,7 @@ static int parse_multiplicative(
         int right;
 
         parser_advance(parser);
-        right = parse_primary(parser, program, expression);
+        right = parse_unary(parser, program, expression);
         if (right < 0)
             return -1;
 
@@ -938,6 +1261,8 @@ static int parse_additive(
            parser->current.kind == TOK_MINUS) {
         token_kind_t operator_kind = parser->current.kind;
         expression_node_t node;
+        expression_type_t left_type;
+        expression_type_t right_type;
         int right;
 
         parser_advance(parser);
@@ -945,11 +1270,29 @@ static int parse_additive(
         if (right < 0)
             return -1;
 
+        left_type = expression_node_type(program, expression, left);
+        right_type = expression_node_type(program, expression, right);
+
         memset(&node, 0, sizeof(node));
         node.kind = EXPR_BINARY;
         node.operator_kind = operator_kind;
         node.left = left;
         node.right = right;
+
+        if (expression_type_is_pointer(left_type)) {
+            if (expression_type_is_pointer(right_type)) {
+                parser_error(parser,
+                    "Stage 24 does not yet support pointer-to-pointer arithmetic");
+                return -1;
+            }
+            node.pointer_scale =
+                left_type == EXPR_TYPE_INT_PTR ? 4u : 1u;
+        } else if (expression_type_is_pointer(right_type)) {
+            parser_error(parser,
+                "Stage 24 pointer arithmetic requires the pointer on the left");
+            return -1;
+        }
+
         left = expression_add_node(parser, expression, &node);
         if (left < 0)
             return -1;
@@ -1151,6 +1494,9 @@ static int parse_statement(
 
     memset(&statement, 0, sizeof(statement));
     statement.target_local = -1;
+    statement.pointer_local = -1;
+    statement.array_local = -1;
+    statement.member_local = -1;
     statement.for_init_local = -1;
     statement.for_update_local = -1;
     statement.then_first = -1;
@@ -1297,9 +1643,10 @@ static int parse_statement(
         return 1;
     }
 
-    if (token_is_identifier(&parser->current, "int")) {
+    if (token_is_identifier(&parser->current, "int") ||
+        token_is_identifier(&parser->current, "char")) {
         parser_error(parser,
-            "Stage 17 requires local declarations before executable statements");
+            "Stage 24 requires local declarations before executable statements");
         return 0;
     }
 
@@ -1321,24 +1668,225 @@ static int parse_statement(
         return 1;
     }
 
-    if (parser->current.kind != TOK_IDENTIFIER) {
-        parser_error(parser, "expected assignment, if, while, for, break, continue, or return statement");
+    if (parser->current.kind != TOK_IDENTIFIER &&
+        parser->current.kind != TOK_INTEGER &&
+        parser->current.kind != TOK_STRING &&
+        parser->current.kind != TOK_LPAREN &&
+        parser->current.kind != TOK_MINUS &&
+        parser->current.kind != TOK_STAR &&
+        parser->current.kind != TOK_AMPERSAND) {
+        parser_error(parser,
+            "expected expression, assignment, if, while, for, break, continue, or return statement");
         return 0;
     }
 
-    statement.target_local = find_local(program, &parser->current);
-    if (statement.target_local < 0) {
-        parser_error(parser, "assignment to undeclared local variable");
-        return 0;
+    /* Store through a pointer local: *p = expression; */
+    if (parser->current.kind == TOK_STAR) {
+        token_t pointer_name;
+        int pointer_local;
+        parser_advance(parser);
+        if (parser->current.kind != TOK_IDENTIFIER) {
+            parser_error(parser, "indirect assignment requires a pointer local");
+            return 0;
+        }
+        pointer_name = parser->current;
+        pointer_local = find_local(program, &pointer_name);
+        if (pointer_local < 0 || !program->locals[pointer_local].is_pointer) {
+            parser_error(parser, "indirect assignment requires a pointer local");
+            return 0;
+        }
+        statement.kind = STMT_STORE_INDIRECT;
+        statement.pointer_local = pointer_local;
+        parser_advance(parser);
+        if (!parser_expect_kind(parser, TOK_ASSIGN, "'='"))
+            return 0;
+        if (!parse_expression(parser, program, &statement.expression))
+            return 0;
+
+        if (!parser_expect_kind(parser, TOK_SEMICOLON, "';'"))
+            return 0;
+        index = statement_add(program, &statement);
+        if (index < 0) {
+            parser_error(parser, "too many statements");
+            return 0;
+        }
+        *statement_index_out = index;
+        return 1;
     }
 
-    statement.kind = STMT_ASSIGN;
-    parser_advance(parser);
+    /* Struct-pointer member assignment: pointer->member = expression; */
+    if (parser->current.kind == TOK_IDENTIFIER &&
+        parser_peek_token(parser).kind == TOK_ARROW) {
+        token_t pointer_name = parser->current;
+        int local_index = find_local(program, &pointer_name);
+        int member_index;
+        const struct_member_t *member;
 
-    if (!parser_expect_kind(parser, TOK_ASSIGN, "'='"))
-        return 0;
-    if (!parse_expression(parser, program, &statement.expression))
-        return 0;
+        if (local_index < 0 ||
+            !program->locals[local_index].is_struct ||
+            !program->locals[local_index].is_pointer) {
+            parser_error(parser, "arrow assignment requires a struct pointer local");
+            return 0;
+        }
+
+        statement.kind = STMT_STORE_MEMBER;
+        statement.member_local = local_index;
+        statement.member_through_pointer = 1;
+        parser_advance(parser);
+        parser_advance(parser); /* '->' */
+
+        if (parser->current.kind != TOK_IDENTIFIER) {
+            parser_error(parser, "expected struct member name");
+            return 0;
+        }
+
+        member_index = find_struct_member(
+            program->locals[local_index].struct_index, &parser->current);
+        if (member_index < 0) {
+            parser_error(parser, "unknown struct member");
+            return 0;
+        }
+
+        member = &struct_defs[program->locals[local_index].struct_index]
+                      .members[member_index];
+        statement.member_offset = member->offset;
+        statement.member_is_char = member->is_char;
+        parser_advance(parser);
+
+        if (!parser_expect_kind(parser, TOK_ASSIGN, "'='"))
+            return 0;
+        if (!parse_expression(parser, program, &statement.expression))
+            return 0;
+        if (!parser_expect_kind(parser, TOK_SEMICOLON, "';'"))
+            return 0;
+
+        index = statement_add(program, &statement);
+        if (index < 0) {
+            parser_error(parser, "too many statements");
+            return 0;
+        }
+        *statement_index_out = index;
+        return 1;
+    }
+
+    /* Struct member assignment: object.member = expression; */
+    if (parser->current.kind == TOK_IDENTIFIER &&
+        parser_peek_token(parser).kind == TOK_DOT) {
+        token_t object_name = parser->current;
+        int local_index = find_local(program, &object_name);
+        int member_index;
+        const struct_member_t *member;
+
+        if (local_index < 0 ||
+            !program->locals[local_index].is_struct ||
+            program->locals[local_index].is_pointer) {
+            parser_error(parser, "dot member assignment requires a struct object");
+            return 0;
+        }
+
+        statement.kind = STMT_STORE_MEMBER;
+        statement.member_local = local_index;
+        parser_advance(parser);
+        parser_advance(parser); /* '.' */
+
+        if (parser->current.kind != TOK_IDENTIFIER) {
+            parser_error(parser, "expected struct member name");
+            return 0;
+        }
+
+        member_index = find_struct_member(
+            program->locals[local_index].struct_index, &parser->current);
+        if (member_index < 0) {
+            parser_error(parser, "unknown struct member");
+            return 0;
+        }
+
+        member = &struct_defs[program->locals[local_index].struct_index]
+                      .members[member_index];
+        statement.member_offset = member->offset;
+        statement.member_is_char = member->is_char;
+        parser_advance(parser);
+
+        if (!parser_expect_kind(parser, TOK_ASSIGN, "'='"))
+            return 0;
+        if (!parse_expression(parser, program, &statement.expression))
+            return 0;
+        if (!parser_expect_kind(parser, TOK_SEMICOLON, "';'"))
+            return 0;
+
+        index = statement_add(program, &statement);
+        if (index < 0) {
+            parser_error(parser, "too many statements");
+            return 0;
+        }
+        *statement_index_out = index;
+        return 1;
+    }
+
+    /* Array element assignment: a[index] = expression; */
+    if (parser->current.kind == TOK_IDENTIFIER &&
+        parser_peek_token(parser).kind == TOK_LBRACKET) {
+        token_t array_name = parser->current;
+        int array_local = find_local(program, &array_name);
+        if (array_local < 0 || !program->locals[array_local].is_array) {
+            parser_error(parser, "subscript assignment requires an array local");
+            return 0;
+        }
+        statement.kind = STMT_STORE_ARRAY;
+        statement.array_local = array_local;
+        parser_advance(parser);
+        parser_advance(parser); /* '[' */
+        if (!parse_expression(parser, program, &statement.array_index))
+            return 0;
+        if (!parser_expect_kind(parser, TOK_RBRACKET, "']'"))
+            return 0;
+        if (!parser_expect_kind(parser, TOK_ASSIGN, "'='"))
+            return 0;
+        if (!parse_expression(parser, program, &statement.expression))
+            return 0;
+        if (!parser_expect_kind(parser, TOK_SEMICOLON, "';'"))
+            return 0;
+        index = statement_add(program, &statement);
+        if (index < 0) { parser_error(parser, "too many statements"); return 0; }
+        *statement_index_out = index;
+        return 1;
+    }
+
+    /*
+     * An identifier followed by '=' is an assignment statement. Everything
+     * else that can begin an expression is parsed as an expression statement;
+     * its computed value is deliberately discarded.
+     */
+    if (parser->current.kind == TOK_IDENTIFIER &&
+        parser_peek_token(parser).kind == TOK_ASSIGN) {
+        statement.target_local = find_local(program, &parser->current);
+        if (statement.target_local < 0) {
+            parser_error(parser, "assignment to undeclared local variable");
+            return 0;
+        }
+        if (program->locals[statement.target_local].is_array) {
+            parser_error(parser, "array objects are not assignable");
+            return 0;
+        }
+        if (program->locals[statement.target_local].is_struct &&
+            !program->locals[statement.target_local].is_pointer) {
+            parser_error(parser, "Stage 24 does not yet support whole-struct assignment");
+            return 0;
+        }
+
+        statement.kind = STMT_ASSIGN;
+        parser_advance(parser);
+
+        if (!parser_expect_kind(parser, TOK_ASSIGN, "'='"))
+            return 0;
+        if (!parse_expression(parser, program, &statement.expression))
+            return 0;
+    } else {
+        statement.kind = STMT_EXPR;
+        if (!parse_expression(parser, program, &statement.expression))
+            return 0;
+    }
+
     if (!parser_expect_kind(parser, TOK_SEMICOLON, "';'"))
         return 0;
 
@@ -1353,12 +1901,13 @@ static int parse_statement(
 }
 
 
-static int runtime_external_arity(const char *name)
+static int find_external(const translation_unit_t *unit, const char *name)
 {
-    if (strcmp(name, "putchar") == 0)
-        return 1;
-    if (strcmp(name, "puts") == 0)
-        return 1;
+    size_t i;
+    for (i = 0; i < unit->external_count; ++i) {
+        if (strcmp(unit->externals[i].name, name) == 0)
+            return (int)i;
+    }
     return -1;
 }
 
@@ -1385,12 +1934,13 @@ static int expression_validate_calls(
             continue;
 function_index = find_function(unit, node->call_name);
         if (function_index < 0) {
-            int arity = runtime_external_arity(node->call_name);
-            if (arity < 0) {
+            int external_index = find_external(unit, node->call_name);
+            if (external_index < 0) {
                 parser_error(parser, "call to undefined function");
                 return 0;
             }
-            if ((size_t)arity != node->call_arg_count) {
+            if (unit->externals[external_index].parameter_count !=
+                node->call_arg_count) {
                 parser_error(parser, "function argument count mismatch");
                 return 0;
             }
@@ -1417,7 +1967,7 @@ static int validate_program_calls(
     }
     for (i = 0; i < program->statement_count; ++i) {
         const statement_t *st = &program->statements[i];
-        if (st->kind == STMT_ASSIGN &&
+        if ((st->kind == STMT_ASSIGN || st->kind == STMT_EXPR) &&
             !expression_validate_calls(parser, unit, &st->expression)) return 0;
         if ((st->kind == STMT_IF || st->kind == STMT_WHILE) &&
             !expression_validate_calls(parser, unit, &st->expression)) return 0;
@@ -1433,6 +1983,189 @@ static int validate_program_calls(
     if (program->has_explicit_return &&
         !expression_validate_calls(parser, unit, &program->return_expression))
         return 0;
+    return 1;
+}
+
+static int parse_external_declaration(
+    parser_t *parser,
+    translation_unit_t *unit)
+{
+    external_t declaration;
+    token_t name;
+    size_t parameter_count = 0;
+
+    memset(&declaration, 0, sizeof(declaration));
+
+    if (!parser_expect_word(parser, "extern"))
+        return 0;
+    if (!parser_expect_word(parser, "int"))
+        return 0;
+
+    if (parser->current.kind != TOK_IDENTIFIER) {
+        parser_error(parser, "expected external function name");
+        return 0;
+    }
+    name = parser->current;
+    if (!copy_identifier(&name, declaration.name, sizeof(declaration.name))) {
+        parser_error(parser, "external function name is too long");
+        return 0;
+    }
+    parser_advance(parser);
+
+    if (!parser_expect_kind(parser, TOK_LPAREN, "'('"))
+        return 0;
+
+    if (token_is_identifier(&parser->current, "void")) {
+        parser_advance(parser);
+    } else if (parser->current.kind != TOK_RPAREN) {
+        for (;;) {
+            if (parameter_count >= 4) {
+                parser_error(parser,
+                    "Stage 24 supports at most four external parameters");
+                return 0;
+            }
+            if (!token_is_identifier(&parser->current, "int") &&
+                !token_is_identifier(&parser->current, "char")) {
+                parser_error(parser, "expected external parameter type");
+                return 0;
+            }
+            parser_advance(parser);
+            if (parser->current.kind == TOK_STAR)
+                parser_advance(parser);
+            if (parser->current.kind != TOK_IDENTIFIER) {
+                parser_error(parser, "expected external parameter name");
+                return 0;
+            }
+            parser_advance(parser);
+            parameter_count++;
+            if (parser->current.kind != TOK_COMMA)
+                break;
+            parser_advance(parser);
+        }
+    }
+
+    if (!parser_expect_kind(parser, TOK_RPAREN, "')'"))
+        return 0;
+    if (!parser_expect_kind(parser, TOK_SEMICOLON, "';'"))
+        return 0;
+
+    declaration.parameter_count = parameter_count;
+
+    if (find_external(unit, declaration.name) >= 0) {
+        parser_error(parser, "duplicate external declaration");
+        return 0;
+    }
+    if (unit->external_count >= MAX_EXTERNALS) {
+        parser_error(parser, "too many external declarations");
+        return 0;
+    }
+
+    unit->externals[unit->external_count++] = declaration;
+    return 1;
+}
+
+static int parse_struct_definition(parser_t *parser)
+{
+    struct_def_t *def;
+    token_t name;
+    uint32_t offset = 0;
+
+    if (!parser_expect_word(parser, "struct"))
+        return 0;
+    if (parser->current.kind != TOK_IDENTIFIER) {
+        parser_error(parser, "expected struct name");
+        return 0;
+    }
+    if (struct_def_count >= MAX_STRUCTS) {
+        parser_error(parser, "too many struct definitions");
+        return 0;
+    }
+
+    name = parser->current;
+    {
+        size_t i;
+        for (i = 0; i < struct_def_count; ++i) {
+            if (token_matches_name(&name, struct_defs[i].name)) {
+                parser_error(parser, "duplicate struct definition");
+                return 0;
+            }
+        }
+    }
+
+    def = &struct_defs[struct_def_count];
+    memset(def, 0, sizeof(*def));
+    if (!copy_identifier(&name, def->name, sizeof(def->name))) {
+        parser_error(parser, "struct name is too long");
+        return 0;
+    }
+    parser_advance(parser);
+
+    if (!parser_expect_kind(parser, TOK_LBRACE, "'{'"))
+        return 0;
+
+    while (parser->current.kind != TOK_RBRACE) {
+        struct_member_t *member;
+        token_t member_name;
+        int is_char;
+        size_t i;
+
+        if (!token_is_identifier(&parser->current, "int") &&
+            !token_is_identifier(&parser->current, "char")) {
+            parser_error(parser, "Stage 24 struct members must be int or char");
+            return 0;
+        }
+
+        is_char = token_is_identifier(&parser->current, "char");
+        parser_advance(parser);
+
+        if (parser->current.kind != TOK_IDENTIFIER) {
+            parser_error(parser, "expected struct member name");
+            return 0;
+        }
+        if (def->member_count >= MAX_STRUCT_MEMBERS) {
+            parser_error(parser, "too many struct members");
+            return 0;
+        }
+
+        member_name = parser->current;
+        for (i = 0; i < def->member_count; ++i) {
+            if (token_matches_name(&member_name, def->members[i].name)) {
+                parser_error(parser, "duplicate struct member");
+                return 0;
+            }
+        }
+
+        member = &def->members[def->member_count];
+        memset(member, 0, sizeof(*member));
+        if (!copy_identifier(&member_name, member->name, sizeof(member->name))) {
+            parser_error(parser, "struct member name is too long");
+            return 0;
+        }
+
+        member->is_char = is_char;
+        member->size = is_char ? 1u : 4u;
+        if (!is_char)
+            offset = (offset + 3u) & ~3u;
+        member->offset = offset;
+        offset += member->size;
+
+        def->member_count++;
+        parser_advance(parser);
+        if (!parser_expect_kind(parser, TOK_SEMICOLON, "';'"))
+            return 0;
+    }
+
+    if (def->member_count == 0u) {
+        parser_error(parser, "empty structs are not supported");
+        return 0;
+    }
+
+    parser_advance(parser); /* '}' */
+    if (!parser_expect_kind(parser, TOK_SEMICOLON, "';'"))
+        return 0;
+
+    def->size = (offset + 3u) & ~3u;
+    struct_def_count++;
     return 1;
 }
 
@@ -1464,27 +2197,63 @@ static int parse_function(parser_t *parser, program_t *program)
             local_t *parameter;
             token_t name;
             if (program->parameter_count >= 4) {
-                parser_error(parser, "Stage 17 supports at most four parameters");
+                parser_error(parser, "Stage 25 supports at most four parameters");
                 return 0;
             }
-            if (!parser_expect_word(parser, "int")) return 0;
-            if (parser->current.kind != TOK_IDENTIFIER) {
-                parser_error(parser, "expected parameter name");
-                return 0;
+            {
+                int declared_struct = token_is_identifier(&parser->current, "struct");
+                int struct_index = -1;
+                int declared_pointer = 0;
+
+                if (declared_struct) {
+                    parser_advance(parser);
+                    if (parser->current.kind != TOK_IDENTIFIER) {
+                        parser_error(parser, "expected struct type name");
+                        return 0;
+                    }
+                    struct_index = find_struct_by_name(&parser->current);
+                    if (struct_index < 0) {
+                        parser_error(parser, "unknown struct type");
+                        return 0;
+                    }
+                    parser_advance(parser);
+                    if (parser->current.kind != TOK_STAR) {
+                        parser_error(parser,
+                            "Stage 25 supports struct parameters only by pointer");
+                        return 0;
+                    }
+                    declared_pointer = 1;
+                    parser_advance(parser);
+                } else {
+                    if (!parser_expect_word(parser, "int")) return 0;
+                }
+
+                if (parser->current.kind != TOK_IDENTIFIER) {
+                    parser_error(parser, "expected parameter name");
+                    return 0;
+                }
+                name = parser->current;
+                if (find_local(program, &name) >= 0) {
+                    parser_error(parser, "duplicate parameter name");
+                    return 0;
+                }
+                parameter = &program->locals[program->local_count];
+                if (!copy_identifier(&name, parameter->name, sizeof(parameter->name))) {
+                    parser_error(parser, "parameter name is too long");
+                    return 0;
+                }
+                parameter->is_parameter = 1;
+                parameter->parameter_index = (unsigned)program->parameter_count;
+                parameter->has_initializer = 0;
+                parameter->is_pointer = declared_pointer;
+                parameter->is_char = 0;
+                parameter->is_array = 0;
+                parameter->is_struct = declared_struct;
+                parameter->struct_index = struct_index;
+                parameter->offset = program->frame_bytes;
+                parameter->storage_size = 4u;
             }
-            name = parser->current;
-            if (find_local(program, &name) >= 0) {
-                parser_error(parser, "duplicate parameter name");
-                return 0;
-            }
-            parameter = &program->locals[program->local_count];
-            if (!copy_identifier(&name, parameter->name, sizeof(parameter->name))) {
-                parser_error(parser, "parameter name is too long");
-                return 0;
-            }
-            parameter->is_parameter = 1;
-            parameter->parameter_index = (unsigned)program->parameter_count;
-            parameter->has_initializer = 0;
+            program->frame_bytes += 4u;
             program->parameter_count++;
             program->local_count++;
             parser_advance(parser);
@@ -1495,19 +2264,55 @@ static int parse_function(parser_t *parser, program_t *program)
     }
     if (!parser_expect_kind(parser, TOK_RPAREN, "')'")) return 0;
     if (program->is_main && program->parameter_count != 0) {
-        parser_error(parser, "Stage 17 main must have no parameters");
+        parser_error(parser, "Stage 25 main must have no parameters");
         return 0;
     }
     if (!parser_expect_kind(parser, TOK_LBRACE, "'{'")) return 0;
 
-    while (token_is_identifier(&parser->current, "int")) {
+    while (token_is_identifier(&parser->current, "int") ||
+           token_is_identifier(&parser->current, "char") ||
+           token_is_identifier(&parser->current, "struct")) {
         token_t name_token;
         local_t *local;
         if (program->local_count >= MAX_LOCALS) {
             parser_error(parser, "too many local variables");
             return 0;
         }
-        parser_advance(parser);
+        {
+            int declared_char = token_is_identifier(&parser->current, "char");
+            int declared_struct = token_is_identifier(&parser->current, "struct");
+            int struct_index = -1;
+
+            parser_advance(parser);
+            if (declared_struct) {
+                if (parser->current.kind != TOK_IDENTIFIER) {
+                    parser_error(parser, "expected struct type name");
+                    return 0;
+                }
+                struct_index = find_struct_by_name(&parser->current);
+                if (struct_index < 0) {
+                    parser_error(parser, "unknown struct type");
+                    return 0;
+                }
+                parser_advance(parser);
+            }
+
+            local = &program->locals[program->local_count];
+            local->is_pointer = 0;
+            local->is_char = declared_char;
+            local->is_array = 0;
+            local->array_length = 0;
+            local->is_struct = declared_struct;
+            local->struct_index = struct_index;
+            local->offset = program->frame_bytes;
+            local->storage_size = declared_struct
+                ? struct_defs[struct_index].size : 4u;
+        }
+        if (parser->current.kind == TOK_STAR) {
+            local->is_pointer = 1;
+            local->storage_size = 4u;
+            parser_advance(parser);
+        }
         if (parser->current.kind != TOK_IDENTIFIER) {
             parser_error(parser, "expected local variable name");
             return 0;
@@ -1517,13 +2322,30 @@ static int parse_function(parser_t *parser, program_t *program)
             parser_error(parser, "duplicate local variable");
             return 0;
         }
-        local = &program->locals[program->local_count];
         if (!copy_identifier(&name_token, local->name, sizeof(local->name))) {
             parser_error(parser, "local variable name is too long");
             return 0;
         }
         parser_advance(parser);
+        if (parser->current.kind == TOK_LBRACKET) {
+            uint32_t bytes;
+            if (local->is_struct && !local->is_pointer) { parser_error(parser, "Stage 24 arrays of structs are not yet supported"); return 0; }
+            if (local->is_pointer) { parser_error(parser, "Stage 24 does not support arrays of pointers"); return 0; }
+            parser_advance(parser);
+            if (parser->current.kind != TOK_INTEGER || parser->current.integer_value == 0u) {
+                parser_error(parser, "array length must be a positive integer constant");
+                return 0;
+            }
+            local->is_array = 1;
+            local->array_length = parser->current.integer_value;
+            bytes = local->array_length * (local->is_char ? 1u : 4u);
+            local->storage_size = (bytes + 3u) & ~3u;
+            parser_advance(parser);
+            if (!parser_expect_kind(parser, TOK_RBRACKET, "']'")) return 0;
+        }
         if (parser->current.kind == TOK_ASSIGN) {
+            if (local->is_struct && !local->is_pointer) { parser_error(parser, "Stage 24 does not support struct initializers"); return 0; }
+            if (local->is_array) { parser_error(parser, "Stage 24 does not support array initializers"); return 0; }
             local->has_initializer = 1;
             parser_advance(parser);
             if (!parse_expression(parser, program, &local->initializer)) return 0;
@@ -1531,6 +2353,7 @@ static int parse_function(parser_t *parser, program_t *program)
             local->has_initializer = 0;
         }
         if (!parser_expect_kind(parser, TOK_SEMICOLON, "';'")) return 0;
+        program->frame_bytes += local->storage_size;
         program->local_count++;
     }
 
@@ -1557,11 +2380,26 @@ static int parse_translation_unit(parser_t *parser, translation_unit_t *unit)
 {
     size_t i;
     memset(unit, 0, sizeof(*unit));
+    memset(struct_defs, 0, sizeof(struct_defs));
+    struct_def_count = 0;
     unit->main_index = -1;
     parser_advance(parser);
 
     while (parser->current.kind != TOK_EOF) {
         program_t *function;
+
+        if (token_is_identifier(&parser->current, "struct")) {
+            if (!parse_struct_definition(parser))
+                return 0;
+            continue;
+        }
+
+        if (token_is_identifier(&parser->current, "extern")) {
+            if (!parse_external_declaration(parser, unit))
+                return 0;
+            continue;
+        }
+
         if (unit->function_count >= MAX_FUNCTIONS) {
             parser_error(parser, "too many functions");
             return 0;
@@ -1594,15 +2432,35 @@ static int parse_translation_unit(parser_t *parser, translation_unit_t *unit)
     return !parser->failed;
 }
 
+static const program_t *current_program = NULL;
+
 static void emit_local_address(FILE *output, uint32_t local_index)
 {
-    uint32_t offset = local_index * 4u;
+    uint32_t offset = current_program && local_index < current_program->local_count
+        ? current_program->locals[local_index].offset : local_index * 4u;
 
     if (offset == 0u)
         return;
 
     fprintf(output, "    movi r10, 0x%08X\n", offset);
     fprintf(output, "    add  r10, r15, r10\n");
+}
+
+static void emit_local_address_to(
+    FILE *output,
+    uint32_t local_index,
+    unsigned reg)
+{
+    uint32_t offset = current_program && local_index < current_program->local_count
+        ? current_program->locals[local_index].offset : local_index * 4u;
+
+    if (offset == 0u) {
+        fprintf(output, "    mov  r%u, r15\n", reg);
+        return;
+    }
+
+    fprintf(output, "    movi r10, 0x%08X\n", offset);
+    fprintf(output, "    add  r%u, r15, r10\n", reg);
 }
 
 static void emit_load_local(
@@ -1633,10 +2491,69 @@ static void emit_store_local(
     fprintf(output, "    stw  r%u, [r10]\n", reg);
 }
 
+static void emit_load_local_value(
+    FILE *output,
+    uint32_t local_index,
+    unsigned reg)
+{
+    int byte_value = current_program &&
+        local_index < current_program->local_count &&
+        current_program->locals[local_index].is_char &&
+        !current_program->locals[local_index].is_pointer;
+
+    if (!byte_value) {
+        emit_load_local(output, local_index, reg);
+        return;
+    }
+
+    if (local_index == 0u) {
+        fprintf(output, "    ldb  r%u, [r15]\n", reg);
+        return;
+    }
+
+    emit_local_address(output, local_index);
+    fprintf(output, "    ldb  r%u, [r10]\n", reg);
+}
+
+static void emit_store_local_value(
+    FILE *output,
+    uint32_t local_index,
+    unsigned reg)
+{
+    int byte_value = current_program &&
+        local_index < current_program->local_count &&
+        current_program->locals[local_index].is_char &&
+        !current_program->locals[local_index].is_pointer;
+
+    if (!byte_value) {
+        emit_store_local(output, local_index, reg);
+        return;
+    }
+
+    if (local_index == 0u) {
+        fprintf(output, "    stb  r%u, [r15]\n", reg);
+        return;
+    }
+
+    emit_local_address(output, local_index);
+    fprintf(output, "    stb  r%u, [r10]\n", reg);
+}
+
+static void emit_truncate_char(FILE *output, unsigned reg)
+{
+    fprintf(output, "    movi r10, 0x000000FF\n");
+    fprintf(output, "    and  r%u, r%u, r10\n", reg, reg);
+}
+
 static void emit_operand(FILE *output, const operand_t *operand, unsigned reg)
 {
-    if (operand->kind == OPERAND_LOCAL)
-        emit_load_local(output, operand->value, reg);
+    if (operand->kind == OPERAND_LOCAL) {
+        if (current_program && operand->value < current_program->local_count &&
+            current_program->locals[operand->value].is_array)
+            emit_local_address_to(output, operand->value, reg);
+        else
+            emit_load_local_value(output, operand->value, reg);
+    }
     else
         fprintf(output, "    movi r%u, 0x%08X\n", reg, operand->value);
 }
@@ -1701,6 +2618,8 @@ static int expression_node_contains_call(
     if (node->kind == EXPR_BINARY)
         return expression_node_contains_call(expression, node->left) ||
                expression_node_contains_call(expression, node->right);
+    if (node->kind == EXPR_DEREF || node->kind == EXPR_ARRAY_SUBSCRIPT)
+        return expression_node_contains_call(expression, node->child);
 
     for (i = 0; i < node->call_arg_count; ++i) {
         if (expression_node_contains_call(expression, node->call_args[i]))
@@ -1725,7 +2644,11 @@ static int scratch_store(FILE *output, unsigned reg, unsigned *slot_out)
     }
 
     slot = expression_scratch_depth++;
-    emit_store_local(output, expression_scratch_base + slot, reg);
+    {
+        uint32_t offset = expression_scratch_base + slot * 4u;
+        if (offset == 0u) fprintf(output, "    stw  r%u, [r15]\n", reg);
+        else { fprintf(output, "    movi r10, 0x%08X\n", offset); fprintf(output, "    add  r10, r15, r10\n"); fprintf(output, "    stw  r%u, [r10]\n", reg); }
+    }
     if (slot_out)
         *slot_out = slot;
     return 1;
@@ -1733,7 +2656,11 @@ static int scratch_store(FILE *output, unsigned reg, unsigned *slot_out)
 
 static void scratch_load_slot(FILE *output, unsigned slot, unsigned reg)
 {
-    emit_load_local(output, expression_scratch_base + slot, reg);
+    {
+        uint32_t offset = expression_scratch_base + slot * 4u;
+        if (offset == 0u) fprintf(output, "    ldw  r%u, [r15]\n", reg);
+        else { fprintf(output, "    movi r10, 0x%08X\n", offset); fprintf(output, "    add  r10, r15, r10\n"); fprintf(output, "    ldw  r%u, [r10]\n", reg); }
+    }
 }
 
 static void scratch_release_to(unsigned depth)
@@ -1754,10 +2681,16 @@ static int program_contains_calls(const program_t *program)
     for (i = 0; i < program->statement_count; ++i) {
         const statement_t *st = &program->statements[i];
         if ((st->kind == STMT_ASSIGN ||
+             st->kind == STMT_EXPR ||
              st->kind == STMT_IF ||
              st->kind == STMT_WHILE ||
-             st->kind == STMT_RETURN) &&
+             st->kind == STMT_RETURN ||
+             st->kind == STMT_STORE_INDIRECT ||
+             st->kind == STMT_STORE_ARRAY ||
+             st->kind == STMT_STORE_MEMBER) &&
             expression_contains_call(&st->expression))
+            return 1;
+        if (st->kind == STMT_STORE_ARRAY && expression_contains_call(&st->array_index))
             return 1;
         if (st->kind == STMT_FOR &&
             (expression_contains_call(&st->for_init) ||
@@ -1792,6 +2725,63 @@ static int emit_expression_node(
     if (node->kind == EXPR_STRING) {
         fprintf(output, "    movi r%u, .Lstr_%u\n",
                 destination, node->string_id);
+        return 1;
+    }
+
+    if (node->kind == EXPR_ADDRESS_OF) {
+        emit_local_address_to(output, (uint32_t)node->local_index, destination);
+        return 1;
+    }
+
+    if (node->kind == EXPR_DEREF) {
+        if (!emit_expression_node(output, expression, node->child,
+                                  destination, next_register))
+            return 0;
+        fprintf(output, "    %s  r%u, [r%u]\n",
+                node->byte_access ? "ldb" : "ldw",
+                destination, destination);
+        return 1;
+    }
+
+    if (node->kind == EXPR_ARRAY_SUBSCRIPT) {
+        emit_local_address_to(output, (uint32_t)node->array_local, destination);
+        if (!emit_expression_node(output, expression, node->child, next_register, next_register + 1))
+            return 0;
+        if (!node->byte_access) {
+            fprintf(output, "    movi r10, 0x00000004\n");
+            fprintf(output, "    mul  r%u, r%u, r10\n", next_register, next_register);
+        }
+        fprintf(output, "    add  r%u, r%u, r%u\n", destination, destination, next_register);
+        fprintf(output, "    %s  r%u, [r%u]\n", node->byte_access ? "ldb" : "ldw", destination, destination);
+        return 1;
+    }
+
+    if (node->kind == EXPR_STRUCT_MEMBER) {
+        const local_t *object = &current_program->locals[node->local_index];
+        if (node->array_local) {
+            emit_operand(output,
+                         &(operand_t){ OPERAND_LOCAL, (uint32_t)node->local_index },
+                         destination);
+            if (node->member_offset != 0u) {
+                fprintf(output, "    movi r10, 0x%08X\n", node->member_offset);
+                fprintf(output, "    add  r%u, r%u, r10\n",
+                        destination, destination);
+            }
+            fprintf(output, "    %s  r%u, [r%u]\n",
+                    node->byte_access ? "ldb" : "ldw",
+                    destination, destination);
+        } else {
+            uint32_t offset = object->offset + node->member_offset;
+            if (offset == 0u) {
+                fprintf(output, "    %s  r%u, [r15]\n",
+                        node->byte_access ? "ldb" : "ldw", destination);
+            } else {
+                fprintf(output, "    movi r10, 0x%08X\n", offset);
+                fprintf(output, "    add  r10, r15, r10\n");
+                fprintf(output, "    %s  r%u, [r10]\n",
+                        node->byte_access ? "ldb" : "ldw", destination);
+            }
+        }
         return 1;
     }
 
@@ -1857,6 +2847,14 @@ static int emit_expression_node(
                 output, expression, node->right,
                 next_register, next_register + 1))
             return 0;
+    }
+
+    if ((node->operator_kind == TOK_PLUS ||
+         node->operator_kind == TOK_MINUS) &&
+        node->pointer_scale == 4u) {
+        fprintf(output, "    movi r10, 0x00000004\n");
+        fprintf(output, "    mul  r%u, r%u, r10\n",
+            next_register, next_register);
     }
 
     if (node->operator_kind == TOK_PLUS) {
@@ -1958,7 +2956,77 @@ static int emit_statement(
             program->locals[statement->target_local].name);
         if (!emit_expression(output, &statement->expression, 1, 2))
             return 0;
-        emit_store_local(output, (uint32_t)statement->target_local, 1);
+        if (program->locals[statement->target_local].is_char &&
+            !program->locals[statement->target_local].is_pointer)
+            emit_truncate_char(output, 1);
+        emit_store_local_value(output, (uint32_t)statement->target_local, 1);
+        return 1;
+    }
+
+    if (statement->kind == STMT_STORE_INDIRECT) {
+        int byte_access = program->locals[statement->pointer_local].is_char;
+        fprintf(output, "    ; store through %s pointer %s\n",
+            byte_access ? "char" : "int",
+            program->locals[statement->pointer_local].name);
+        if (!emit_expression(output, &statement->expression, 1, 2))
+            return 0;
+        emit_load_local(output, (uint32_t)statement->pointer_local, 2);
+        fprintf(output, "    %s  r1, [r2]\n", byte_access ? "stb" : "stw");
+        return 1;
+    }
+
+    if (statement->kind == STMT_STORE_ARRAY) {
+        const local_t *array = &program->locals[statement->array_local];
+        fprintf(output, "    ; store %s array element %s[index]\n", array->is_char ? "char" : "int", array->name);
+        if (!emit_expression(output, &statement->expression, 1, 2)) return 0;
+        if (array->is_char) emit_truncate_char(output, 1);
+        if (!emit_expression(output, &statement->array_index, 2, 3)) return 0;
+        if (!array->is_char) { fprintf(output, "    movi r10, 0x00000004\n"); fprintf(output, "    mul  r2, r2, r10\n"); }
+        emit_local_address_to(output, (uint32_t)statement->array_local, 3);
+        fprintf(output, "    add  r3, r3, r2\n");
+        fprintf(output, "    %s  r1, [r3]\n", array->is_char ? "stb" : "stw");
+        return 1;
+    }
+
+    if (statement->kind == STMT_STORE_MEMBER) {
+        const local_t *object = &program->locals[statement->member_local];
+        fprintf(output, "    ; store struct member %s + %u\n",
+                object->name, statement->member_offset);
+        if (!emit_expression(output, &statement->expression, 1, 2))
+            return 0;
+        if (statement->member_is_char)
+            emit_truncate_char(output, 1);
+        if (statement->member_through_pointer) {
+            emit_operand(output,
+                         &(operand_t){ OPERAND_LOCAL,
+                                      (uint32_t)statement->member_local },
+                         10);
+            if (statement->member_offset != 0u) {
+                fprintf(output, "    movi r9, 0x%08X\n",
+                        statement->member_offset);
+                fprintf(output, "    add  r10, r10, r9\n");
+            }
+            fprintf(output, "    %s  r1, [r10]\n",
+                    statement->member_is_char ? "stb" : "stw");
+        } else {
+            uint32_t offset = object->offset + statement->member_offset;
+            if (offset == 0u) {
+                fprintf(output, "    %s  r1, [r15]\n",
+                        statement->member_is_char ? "stb" : "stw");
+            } else {
+                fprintf(output, "    movi r10, 0x%08X\n", offset);
+                fprintf(output, "    add  r10, r15, r10\n");
+                fprintf(output, "    %s  r1, [r10]\n",
+                        statement->member_is_char ? "stb" : "stw");
+            }
+        }
+        return 1;
+    }
+
+    if (statement->kind == STMT_EXPR) {
+        fprintf(output, "    ; expression statement (result discarded)\n");
+        if (!emit_expression(output, &statement->expression, 0, 1))
+            return 0;
         return 1;
     }
 
@@ -2114,15 +3182,15 @@ static int emit_function(
 {
     size_t local_index;
     int has_calls = program_contains_calls(program);
-    uint32_t frame_slots = (uint32_t)program->local_count +
-        (has_calls ? MAX_CALL_SCRATCH_SLOTS : 0u);
-    uint32_t frame_size = frame_slots * 4u;
+    uint32_t frame_size = program->frame_bytes +
+        (has_calls ? MAX_CALL_SCRATCH_SLOTS * 4u : 0u);
     char epilogue_label[96];
 
     snprintf(epilogue_label, sizeof(epilogue_label),
              ".Lreturn_%s", program->function_name);
     current_function_epilogue = epilogue_label;
-    expression_scratch_base = (uint32_t)program->local_count;
+    current_program = program;
+    expression_scratch_base = program->frame_bytes;
     expression_scratch_depth = 0;
 
     fprintf(output, "%s:\n", program->function_name);
@@ -2150,16 +3218,23 @@ static int emit_function(
              local_index < program->local_count; ++local_index) {
             if (!program->locals[local_index].has_initializer) {
                 fprintf(output,
-                    "    ; uninitialized local int %s at [r15 + %zu]\n",
-                    program->locals[local_index].name, local_index * 4u);
+                    "    ; uninitialized local %s%s %s at [r15 + %zu]\n",
+                    program->locals[local_index].is_char ? "char" : "int",
+                    program->locals[local_index].is_pointer ? " *" : "",
+                    program->locals[local_index].name, (size_t)program->locals[local_index].offset);
                 continue;
             }
             fprintf(output,
-                "    ; initialize local int %s at [r15 + %zu]\n",
-                program->locals[local_index].name, local_index * 4u);
+                "    ; initialize local %s%s %s at [r15 + %zu]\n",
+                program->locals[local_index].is_char ? "char" : "int",
+                program->locals[local_index].is_pointer ? " *" : "",
+                program->locals[local_index].name, (size_t)program->locals[local_index].offset);
             if (!emit_expression(output, &program->locals[local_index].initializer, 1, 2))
                 return 0;
-            emit_store_local(output, (uint32_t)local_index, 1);
+            if (program->locals[local_index].is_char &&
+                !program->locals[local_index].is_pointer)
+                emit_truncate_char(output, 1);
+            emit_store_local_value(output, (uint32_t)local_index, 1);
         }
     }
 
@@ -2181,6 +3256,7 @@ static int emit_function(
         fprintf(output, "    addi r15, r15, %u\n", frame_size);
     fprintf(output, "    ret\n");
     current_function_epilogue = NULL;
+    current_program = NULL;
     return 1;
 }
 
@@ -2196,6 +3272,7 @@ static void emit_expression_strings(FILE *output, const expression_t *expression
         j = 0;
         for (;;) {
             size_t column = 0;
+            int emitted_terminator = 0;
             fprintf(output, "    .byte ");
             while (column < 8) {
                 unsigned value;
@@ -2209,12 +3286,14 @@ static void emit_expression_strings(FILE *output, const expression_t *expression
                 fprintf(output, "%u", value);
                 ++column;
 
-                if (node->string_value[j] == '\0')
+                if (node->string_value[j] == '\0') {
+                    emitted_terminator = 1;
                     break;
+                }
                 ++j;
             }
             fprintf(output, "\n");
-            if (node->string_value[j] == '\0')
+            if (emitted_terminator)
                 break;
         }
     }
@@ -2254,10 +3333,12 @@ static int expression_uses_call_name(
 static int program_uses_call_name(const program_t *program, const char *name)
 {
     size_t i;
-    for (i = 0; i < program->local_count; ++i)
+
+    for (i = 0; i < program->local_count; ++i) {
         if (program->locals[i].has_initializer &&
             expression_uses_call_name(&program->locals[i].initializer, name))
             return 1;
+    }
 
     for (i = 0; i < program->statement_count; ++i) {
         const statement_t *st = &program->statements[i];
@@ -2274,9 +3355,10 @@ static int program_uses_call_name(const program_t *program, const char *name)
 static int unit_uses_call_name(const translation_unit_t *unit, const char *name)
 {
     size_t i;
-    for (i = 0; i < unit->function_count; ++i)
+    for (i = 0; i < unit->function_count; ++i) {
         if (program_uses_call_name(&unit->functions[i], name))
             return 1;
+    }
     return 0;
 }
 
@@ -2291,15 +3373,16 @@ static int emit_assembly(const char *path, const translation_unit_t *unit)
     }
     fprintf(output,
         "; generated by t32-cc %s\n"
-        "; Stage 17 ABI 0.1 translation unit\n\n"
+        "; Stage 24 ABI 0.1 translation unit\n\n"
         ".section .text\n"
         ".global main\n",
         T32CC_VERSION);
 
-    if (unit_uses_call_name(unit, "putchar"))
-        fprintf(output, ".extern putchar\n");
-    if (unit_uses_call_name(unit, "puts"))
-        fprintf(output, ".extern puts\n");
+    for (i = 0; i < unit->external_count; ++i) {
+        if (find_function(unit, unit->externals[i].name) < 0 &&
+            unit_uses_call_name(unit, unit->externals[i].name))
+            fprintf(output, ".extern %s\n", unit->externals[i].name);
+    }
     fprintf(output, "\n");
 
     for (i = 0; i < unit->function_count; ++i) {

@@ -1,5 +1,52 @@
 # T32 Roadmap
 
+## Current execution roadmap — August 11, 2026
+
+The platform now has a validated BIOS -> BOOT.BIN -> compiler-built Stage3
+monitor chain, keyboard/display, block storage, Bootinfo, BIOS disk service, and
+RTC.
+
+### Sprint A — external application execution
+- add Stage3 `run`;
+- load a flat binary at a documented application address;
+- prove HELLO.BIN;
+- return cleanly to Stage3;
+- build externally from `G:\X2`.
+
+### Sprint B — first workload
+- build deterministic `SORT.BIN`;
+- verify sorted output;
+- keep it independently buildable;
+- later promote a clean version to `samples/`.
+
+### Sprint C — application services
+- define a small versioned SVC ABI;
+- provide `libt32` wrappers;
+- start with console, exit, time/ticks, and disk read.
+
+### Sprint D — timing
+- keep RTC for UTC wall clock;
+- add a monotonic timer/counter;
+- benchmark SORT reproducibly.
+
+### Sprint E — executable/filesystem evolution
+- introduce a tiny versioned executable header when justified;
+- add hello/sort/memory/clock/disk programs;
+- evolve beyond T32D toward a real filesystem, with ext2 as a target.
+
+### Parallel toolchain work
+- continue `t32-cc`;
+- add target `stdio.h`, `stdlib.h`, `string.h`, `stdint.h`, and `stddef.h`;
+- support normal installed include search paths.
+
+### Later machine work
+- machine JSON/configuration;
+- `t32-node` multi-VM lifecycle;
+- Foundry reporting/control integration;
+- networking and richer interrupt-driven devices.
+
+## Historical / conformance roadmap
+
 ## Phase 1 — Core ISA conformance
 
 Expand validation in this order:

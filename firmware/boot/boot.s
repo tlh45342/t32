@@ -236,21 +236,13 @@ bootinfo_valid:
 ;   Displays the BOOT/Bootinfo/service checkpoint without changing the
 ;   stage-3 loader's callee-saved state.
 show_boot_status:
-    ; Clear display.
-    movi r4, 0x90000000
-    movi r0, 32
-    movi r1, 2000
-show_clear_loop:
-    stb  r0, [r4]
-    addi r4, r4, 1
-    subi r1, r1, 1
-    jnz  r1, show_clear_loop
-
-    movi r4, 0x90000000
+    ; Preserve the BIOS identification line at row 0.
+    ; BOOT owns rows 1-4 of the startup trace.
+    movi r4, 0x900000A0
     movi r0, msg_banner
     call print_string
 
-    movi r4, 0x900000A0
+    movi r4, 0x90000140
     movi r0, msg_bootinfo_ok
     call print_string
 
@@ -258,12 +250,12 @@ show_clear_loop:
     movi r2, 2
     and  r1, r1, r2
     jz   r1, show_skip_service_banner
-    movi r4, 0x90000140
+    movi r4, 0x900001E0
     movi r0, msg_bios_service_ok
     call print_string
 
 show_skip_service_banner:
-    movi r4, 0x900001E0
+    movi r4, 0x90000280
     movi r0, msg_hello
     call print_string
     ret

@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #define T32_STACK_POINTER 15u
 #define T32_CPUID_VALUE 0x54333201u /* "T32", implementation revision 1 */
@@ -249,6 +250,59 @@ static bool disk_mmio_write(t32_machine_t *machine, uint32_t address,
 }
 
 
+
+static bool rtc_range_valid(uint32_t address, size_t length, size_t *offset)
+{
+    uint64_t start = address;
+    uint64_t base = T32_RTC_BASE;
+    uint64_t end = start + (uint64_t)length;
+    uint64_t rtc_end = base + (uint64_t)T32_RTC_MMIO_SIZE;
+
+    if (start < base || end < start || end > rtc_end)
+        return false;
+    if (offset)
+        *offset = (size_t)(start - base);
+    return true;
+}
+
+static bool rtc_read(const t32_machine_t *machine, uint32_t address,
+                     void *buffer, size_t length)
+{
+    size_t offset;
+    uint32_t value = 0;
+    uint8_t bytes[4];
+    time_t now;
+
+    (void)machine;
+
+    if (!buffer || !rtc_range_valid(address, length, &offset))
+        return false;
+    if (length != 4 || (offset & 3u) != 0)
+        return false;
+
+    switch ((uint32_t)offset) {
+    case T32_RTC_REG_ID:
+        value = T32_RTC_ID;
+        break;
+    case T32_RTC_REG_STATUS:
+        now = time(NULL);
+        value = now >= 0 && (uint64_t)now <= UINT32_MAX
+              ? T32_RTC_STATUS_VALID : 0;
+        break;
+    case T32_RTC_REG_EPOCH:
+        now = time(NULL);
+        if (now < 0 || (uint64_t)now > UINT32_MAX)
+            return false;
+        value = (uint32_t)now;
+        break;
+    default:
+        return false;
+    }
+
+    encode_u32_le(bytes, value);
+    memcpy(buffer, bytes, sizeof(bytes));
+    return true;
+}
 
 static bool platform_range_valid(uint32_t address, size_t length,
                                  size_t *offset)
@@ -740,6 +794,9 @@ bool t32_read_memory(const t32_machine_t *machine, uint32_t address,
     if (keyboard_range_valid(address, length, NULL))
         return keyboard_read((t32_machine_t *)machine, address, buffer, length);
 
+    if (rtc_range_valid(address, length, NULL))
+        return rtc_read(machine, address, buffer, length);
+
     if (platform_range_valid(address, length, NULL))
         return platform_read((t32_machine_t *)machine, address, buffer, length);
 
@@ -768,6 +825,9 @@ bool t32_write_memory(t32_machine_t *machine, uint32_t address,
 
     if (disk_range_valid(address, length, NULL))
         return disk_mmio_write(machine, address, buffer, length);
+
+    if (rtc_range_valid(address, length, NULL))
+        return false;
 
     if (platform_range_valid(address, length, NULL))
         return platform_write(machine, address, buffer, length);

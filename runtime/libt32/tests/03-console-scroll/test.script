@@ -1,0 +1,10 @@
+logfile console-scroll.log
+reset
+load build/tests/console-scroll.bin 0x00001000
+set pc 0x00001000
+run
+regs
+status
+display raw
+logfile off
+quit
