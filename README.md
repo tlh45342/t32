@@ -1,536 +1,429 @@
-# t32-cc 0.16.0 Division and Remainder Patch
+# T32
 
-Changed-files-only update for `toolchain/t32-cc`.
+*A small, understandable 32-bit computer architecture and software
+platform built from the instruction set upward.*
 
-## New language forms
+![T32 running C-built code in t32-runx](images/t32-runx-hello-c.png)
 
-`t32-cc` now supports one binary `+`, `-`, `*`, `/`, or `%` expression. Each
-operand may be an integer literal (including a negative literal) or the one
-declared local integer.
+## What is T32?
 
-Examples:
+**T32** is an open-source project for building and understanding a
+complete computer platform one layer at a time.
 
-```c
-return 42 / 6;
-return x / 2;
-return 42 / x;
-x = x / 2;
+The project begins with a deliberately small 32-bit instruction set and
+grows upward through the assembler, linker, C compiler, runtime library,
+virtual machine, firmware, storage, boot process, system services, and
+eventually an operating environment.
 
-return 20 % 6;
-return x % 6;
-x = x % 6;
+T32 is not intended merely to be another emulator. Its purpose is to
+make the relationships between the layers of a computer visible,
+testable, and understandable. The project favors clarity over
+cleverness, explicit contracts over hidden behavior, and executable
+validation wherever practical.
+
+A T32 program can now be written in C, compiled with the T32 toolchain,
+linked against the T32 runtime, placed on a T32 disk image, booted
+through T32 firmware, and executed by the T32 virtual machine.
+
+------------------------------------------------------------------------
+
+## Where We Are
+
+T32 has progressed from an ISA experiment into a small bootable computer
+platform.
+
+``` text
+T32 virtual machine
+        |
+       BIOS
+        |
+    BOOT.BIN
+        |
+ NEXT.BIN / Stage3
+        |
+ interactive C monitor
 ```
 
-Addition, subtraction, and multiplication support from earlier stages is
-preserved unchanged.
+The complete **BIOS -\> BOOT.BIN -\> NEXT.BIN** chain is validated.
+Current platform milestones include BIOS 0.0.6, BOOT 0.0.4, Bootinfo
+v0.2, BIOS disk service v0.1, compiler-built Stage3, `libt32`, T32D boot
+media, keyboard, an 80x25 text display, and a guest-visible RTC.
 
-## Division model
+Current capabilities include:
 
-`/` lowers directly to T32 signed `DIV`:
+-   32-bit T32 Instruction Set Architecture
+-   ISA, ABI, algorithm, firmware, runtime, and integration validation
+-   assembler (`t32-as`)
+-   linker (`t32-ld`)
+-   archive manager (`t32-ar`)
+-   symbol inspector (`t32-nm`)
+-   developing C compiler (`t32-cc`)
+-   ABI and calling convention
+-   startup code and static target runtime (`libt32`)
+-   command-line VM (`t32-run`)
+-   Windows graphical developer VM (`t32-runx`)
+-   memory-mapped 80x25 text display
+-   keyboard input
+-   virtual block storage
+-   T32D disk images and `t32-disk`
+-   BIOS and multi-stage disk boot
+-   Bootinfo handoff and BIOS disk services
+-   real-time clock
+-   compiler-built interactive Stage3 monitor
 
-```asm
-div rd, ra, rb
+The Stage3 monitor currently provides commands including:
+
+``` text
+help
+version
+bootinfo
+mem
+time
+halt
 ```
 
-The current T32 VM defines signed division as truncating toward zero and faults
-on division by zero and on `INT32_MIN / -1`.
+T32 is still intentionally small, but its pieces now cooperate as a
+computer system rather than as isolated demonstrations.
 
-## Remainder model
+------------------------------------------------------------------------
 
-T32 currently has no dedicated remainder instruction. `%` is therefore lowered
-using the C identity that follows truncation-toward-zero division:
+## A Small C Example
 
-```text
-a % b = a - (a / b) * b
-```
+T32 C code is becoming increasingly ordinary:
 
-The generated T32 sequence uses a scratch register for the quotient/product and
-leaves the remainder in the requested destination register.
+``` c
+extern int puts(char *s);
 
-## Expression model
-
-Stage 8 still intentionally permits exactly one binary arithmetic operator per
-expression:
-
-```text
-operand
-operand + operand
-operand - operand
-operand * operand
-operand / operand
-operand % operand
-```
-
-This completes the initial integer arithmetic family before the compiler moves
-to a real precedence-aware expression parser.
-
-## Deliberately deferred
-
-- chained expressions
-- mixed arithmetic expressions
-- parentheses
-- operator precedence and associativity
-- multiple locals
-- compile-time diagnosis of division by zero
-
-## Test
-
-From `O:\Foundry\t32\toolchain\t32-cc`:
-
-```bat
-make clean
-make
-make install
-make test
-```
-
-The Stage 8 suite preserves all earlier compiler tests and adds signed division,
-synthesized remainder, assignment, negative-operand, and chain-rejection
-coverage.
-
-
-## Stage 9: structured expressions
-
-Version 0.8.0 replaces the one-binary-operator recognizer with a
-precedence-aware recursive expression parser.
-
-```c
-return 2 + 3 * 4;      /* 14 */
-return (2 + 3) * 4;    /* 20 */
-x = x * 2 + 1;
-```
-
-`*`, `/`, and `%` bind more tightly than `+` and `-`. Operators at the same
-precedence associate left-to-right. Parentheses create nested subexpressions
-and override the normal precedence rules.
-
-Code generation remains deliberately transparent: the expression tree is
-evaluated with a small temporary-register stack. Register spilling/allocation
-is a later compiler milestone.
-
-
-## Stage 10: comparisons
-
-Version 0.9.0 adds comparison expressions that produce ordinary integer
-Boolean values (`0` or `1`):
-
-```c
-return 2 + 3 * 4 == 14;
-return -5 < 3;
-x = x >= 5;
-```
-
-The parser now adds C-style relational and equality precedence levels above
-the arithmetic expression grammar. Comparisons are values, so they may be
-returned, assigned, parenthesized, or used inside a larger arithmetic
-expression.
-
-Signed `<`, `<=`, `>`, and `>=` are lowered with explicit arithmetic and
-bitwise operations that account for subtraction overflow. This intentionally
-does not require a new conditional branch instruction or a decision about
-exposing T32 condition flags to generated code.
-
-
-## Stage 11: if / else
-
-Version 0.10.0 introduces the first source-level control flow:
-
-```c
 int main(void)
 {
-    int x = 5;
+    char *message = "Hello Thomas";
 
-    if (x < 10) {
-        x = x + 1;
-    } else {
-        x = x - 1;
-    }
-
-    return x;
-}
-```
-
-The condition is an ordinary integer expression. As in C, zero is false and
-any nonzero value is true. The compiler evaluates the condition and emits T32's register-based `JZ`
-to branch when the result is zero, with `JMP` used where needed to skip an
-`else` arm.
-
-Single-statement bodies, braced bodies, nested `if`, and `else if` all share
-the same internal statement representation. `return` is deliberately still
-restricted to the final top-level statement in `main`; general early returns
-are a later control-flow milestone.
-
-
-## Stage 12: while loops
-
-Version 0.11.0 adds the first repetition construct:
-
-```c
-int main(void)
-{
-    int x = 0;
-
-    while (x < 5)
-        x = x + 1;
-
-    return x;
-}
-```
-
-A `while` condition is an ordinary integer expression. Zero exits the loop;
-any nonzero value executes the body. The compiler emits a loop-head label,
-evaluates the condition, uses T32 `JZ` to branch to the exit label when false,
-executes the body, and uses `JMP` to return to the loop head.
-
-Single-statement and braced bodies are supported, as are nested loops and
-existing `if` / `else` statements inside a loop. `break`, `continue`,
-`do/while`, and `for` remain later milestones.
-
-
-## Stage 13: multiple locals
-
-Version 0.12.0 replaces the single-local shortcut with a small local-symbol
-table and a fixed stack-frame layout.
-
-```c
-int main(void)
-{
-    int x = 0;
-    int sum = 0;
-
-    while (x < 10) {
-        sum = sum + x;
-        x = x + 1;
-    }
-
-    return sum;
-}
-```
-
-Each local receives a stable four-byte slot. The complete frame is allocated
-once on entry and released once before `return`. Expressions resolve an
-identifier to its slot index, and assignments store back to that same slot.
-
-This stage deliberately keeps declarations at the beginning of `main` and
-keeps initializers literal-only. General scope, shadowing, and expression
-initializers are separate milestones.
-
-
-## Stage 14: expression initializers
-
-Version 0.13.0 allows a local initializer to be a normal expression:
-
-```c
-int x = 5;
-int y = x + 3;
-int z = (x * y) + 2;
-```
-
-Locals become visible after their initializer has been parsed. This gives a
-simple declaration-order rule: later declarations can depend on earlier ones,
-while self-reference and forward-reference are rejected.
-
-The stack frame is allocated once, then each initializer is evaluated and
-stored into its fixed local slot in declaration order.
-
-
-## Stage 15: for / break / continue
-
-Version 0.14.0 adds the conventional counted-loop form:
-
-```c
-for (x = 0; x < 10; x = x + 1) {
-    sum = sum + x;
-}
-```
-
-The initializer and update clauses are assignments to previously declared
-locals, while the condition uses the normal expression grammar.
-
-`break` and `continue` are resolved against the innermost active loop. A
-`continue` inside `while` returns directly to the condition. A `continue`
-inside `for` jumps to the update clause first, preserving normal C loop
-semantics.
-
-
-## 0.14.1 compatibility cleanup
-
-Automatic locals no longer require an initializer, so ordinary C such as
-`int x; x = 5;` is accepted. Storage is reserved for the local, but no
-initialization value is invented.
-
-`main` also follows the C rule that reaching its closing brace returns zero.
-These are deliberately patch-level compatibility changes before 0.15.0
-introduces general functions and parameters.
-
-
-## Stage 16: functions and parameters
-
-Version 0.15.0 introduces multiple integer functions and the first compiler-driven use of the T32 calling convention. The first four integer arguments are passed in `r0-r3`; integer results return in `r0`. Parameters are copied into each callee's fixed stack frame so the existing local/expression machinery can use them naturally. Function calls are intentionally complete expressions in this stage; more compositional/nested calls are reserved for the function-maturity stage.
-
-
-## Stage 17: function maturity
-
-Version 0.16.0 removes the Stage 16 restriction that a call had to occupy an
-entire expression. Calls can now participate naturally in expressions:
-
-```c
-return add(1, 2) + 3;
-return 10 + add(3, 4);
-return add(twice(5), twice(7));
-```
-
-Argument values are staged in compiler-owned stack scratch slots before the
-ABI registers are loaded, so nested calls do not destroy arguments that were
-already evaluated.
-
-Early returns now lower to a shared per-function epilogue:
-
-```c
-int choose(int x)
-{
-    if (x < 10)
-        return 7;
-    return 9;
-}
-```
-
-This also provides the control-flow foundation needed for straightforward
-recursive functions.
-
-## 0.16.1 runtime external: putchar
-
-The compiler now recognizes `putchar(int)` as the first known libt32 external
-function. Calls use the existing r0-r3 argument ABI and return in r0. This is a
-narrow runtime-linkage extension; string literals and pointers remain deferred.
-
-## 0.17.0 string literal / puts milestone
-
-`t32-cc` now accepts a string literal as an expression value, primarily to
-support runtime calls such as:
-
-```c
-int rc;
-rc = puts("Hello from T32");
-```
-
-The compiler emits the literal as zero-terminated bytes in `.data`, loads its
-relocatable address into the normal argument register, and emits `call puts`.
-`puts(int)` and `putchar(int)` are known libt32 externals.
-
-This is intentionally not a complete C pointer model yet. Pointer
-declarations, dereference, arrays, and general `char *` syntax remain separate
-compiler milestones.
-
-## 0.18.0 expression statements and explicit externals
-
-Stage 18 removes the compiler's special knowledge of `puts` and `putchar`.
-
-External target functions are now declared explicitly:
-
-```c
-extern int puts(int s);
-```
-
-The `int` parameter is a temporary ABI-level placeholder until the pointer/type
-milestone introduces `char *`. The important change is that the function name
-and arity now come from the source declaration rather than a hard-coded runtime
-table inside `t32-cc`.
-
-Stage 18 also adds expression statements, so this is legal:
-
-```c
-int main(void)
-{
-    puts("Hello");
+    puts(message);
     return 0;
 }
 ```
 
-The expression is evaluated using the ordinary expression/call machinery and
-its result is discarded.
+The screenshot at the top of this README shows C-built code executing in
+`t32-runx`, with the T32 CPU state available for inspection.
 
-A referenced external declaration emits an unresolved `.extern` symbol for the
-assembler/linker. Declared-but-unused externals do not create unnecessary
-linker dependencies.
+------------------------------------------------------------------------
 
-The next type-system milestone will replace the transitional integer-shaped
-string parameter with genuine `char` and pointer types.
+## Tools
 
+  Tool         Purpose
+  ------------ ------------------------------------------------
+  `t32-as`     T32 assembler
+  `t32-ld`     T32 linker
+  `t32-ar`     static archive manager
+  `t32-nm`     object and symbol inspector
+  `t32-cc`     developing T32 C compiler
+  `t32-disk`   create, inspect, and populate T32D disk images
+  `t32-run`    command-line T32 virtual machine
+  `t32-runx`   Windows graphical T32 developer VM
 
-## 0.19.0 int-pointer / lvalue groundwork
+The target environment also includes `crt0`, `libt32`, BIOS firmware,
+BOOT.BIN, and Stage3.
 
-Stage 19 introduces the first genuine pointer operations for local `int`
-objects:
+### t32-run
 
-```c
-int x = 42;
-int *p = &x;
-*p = 73;
-return *p;
+`t32-run` is the command-line reference/developer VM. It is designed for
+scripted execution, automated validation, register and memory
+inspection, firmware work, and repeatable machine tests.
+
+### t32-runx
+
+`t32-runx` is the Windows graphical T32 developer VM. It provides the
+T32 display in a native window and supports interactive keyboard use,
+disk attachment, firmware controls, machine start/stop/reset, and
+CPU-state inspection.
+
+`t32-runx` includes an embedded default BIOS for convenient normal
+startup while retaining external BIOS selection for firmware
+development.
+
+Both `t32-run` and `t32-runx` are intentionally **single-vCPU**
+machines. Multi-vCPU and larger VM lifecycle concerns belong to the
+later `t32-node` and Foundry architecture.
+
+------------------------------------------------------------------------
+
+## Storage and Boot
+
+T32 currently uses **T32D**, an intentionally simple native disk format
+for bootstrapping and firmware development.
+
+``` text
+T32D disk image
+    |
+    +-- BOOT.BIN
+    |
+    +-- NEXT.BIN
 ```
 
-The compiler now distinguishes the address of a local object from the value
-stored there. `&x` materializes the stack address of `x`; dereference loads
-through a pointer with `LDW`; and `*p = value` stores through the pointer with
-`STW`. This is intentionally the first narrow lvalue/rvalue milestone: only
-local `int *` pointers are supported here. General pointer expressions,
-`char *`, pointer arithmetic, arrays, and pointer parameters remain subsequent
-stages.
+The BIOS recognizes T32 media and transfers control to BOOT.BIN.
+BOOT.BIN uses the firmware disk service to locate and load the next
+stage.
 
-## 0.20.0 char and byte-pointer milestone
+T32D is deliberately not the final filesystem design. A later firmware
+generation is expected to understand conventional partitioning and a
+real filesystem such as **ext2**. One planned convention is:
 
-`t32-cc 0.20.0` adds the first 8-bit C object type and typed byte pointers.
-
-Supported examples now include:
-
-```c
-char c = 65;
-char *p = &c;
-*p = 66;
-return *p;
+``` text
+GPT disk
+    |
+    +-- T32 boot/system partition
+            |
+            +-- ext2
+                    |
+                    +-- /EFI/T32/BOOT.BIN
 ```
 
-A scalar `char` keeps a four-byte stack slot in the current simple stack-frame
-layout, but stores and loads its object value with `STB`/`LDB`; assignment is
-truncated to the low eight bits. This keeps stack layout intentionally simple
-while giving `char` real byte-width object semantics.
+The important contract is that the in-memory boot interface can remain
+stable even as the way firmware finds BOOT.BIN becomes more capable.
 
-Dereferencing `int *` continues to use `LDW`/`STW`. Dereferencing `char *`
-uses `LDB`/`STB`, so pointee type now directly controls generated T32 memory
-operations.
+------------------------------------------------------------------------
 
-External declarations can describe byte pointers:
+## The C Compiler
 
-```c
-extern int puts(char *s);
+`t32-cc` is being grown incrementally, with each language feature
+validated before another layer is added.
+
+The compiler has progressed through arithmetic, precedence, comparisons,
+structured control flow, loops, multiple locals, functions, parameters,
+nested calls, external functions, string literals, pointers, `char`,
+typed pointer arithmetic, fixed-size local arrays, named structures,
+member access, and structure pointers using `->`.
+
+Important future compiler/runtime work includes broader C type support,
+additional aggregate behavior, conventional target headers, and
+eventually variadic functions.
+
+The target environment should ultimately allow normal source such as:
+
+``` c
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 ```
 
-and a string literal can initialize a `char *` local:
+without applications manually reproducing T32 runtime prototypes.
 
-```c
-char *message = "Hello Thomas";
-puts(message);
+------------------------------------------------------------------------
+
+## System-Service Direction
+
+Applications should not need to know raw MMIO addresses or BIOS
+implementation details.
+
+The intended layering is:
+
+``` text
+application
+    |
+  libt32
+    |
+  SVC ABI
+    |
+Stage3 / future supervisor
+    |
+BIOS services and MMIO
 ```
 
-Pointer arithmetic, arrays, pointer parameters for user-defined functions, and
-general type conversions remain later milestones.
+Likely early application-facing services include console output,
+application exit/return, wall-clock access, monotonic timing, and disk
+reads.
 
-## 0.22.0 typed pointer arithmetic
+The existing BIOS service table remains a firmware/bootstrap interface
+rather than becoming the permanent application ABI.
 
-`t32-cc 0.22.0` adds pointer-plus-integer and pointer-minus-integer arithmetic
-for the pointer types introduced in 0.19.0 and 0.20.0.
+------------------------------------------------------------------------
 
-```c
-char *cp;
-int *ip;
+## Architectural Work Ahead
 
-cp = cp + 1;    /* address + 1 */
-ip = ip + 1;    /* address + 4 */
+T32 deliberately leaves architectural decisions open until real software
+provides evidence that they are needed.
+
+One example is architectural status access. T32 maintains arithmetic
+condition state, but the final form of instructions such as `MRS` /
+`MSR` has not yet been frozen. That decision becomes increasingly
+relevant as interrupts, exceptions, supervisor services, privilege, and
+future task switching mature.
+
+Near- and longer-term work includes:
+
+-   loading and executing standalone applications from Stage3
+-   returning applications cleanly to the monitor/supervisor
+-   an application-facing SVC ABI
+-   monotonic timing and benchmarking
+-   a small executable-image contract
+-   broader C library and target headers
+-   ext2 filesystem support
+-   GPT-aware firmware
+-   interrupts and richer exception handling
+-   networking
+-   machine configuration files
+-   `t32-node`
+-   Foundry integration
+-   eventually a small operating environment
+
+Independent `t32-runx` instances can already run side by side, making
+future virtual networking between T32 machines a natural progression.
+
+------------------------------------------------------------------------
+
+## Repository Layout
+
+``` text
+docs/
+    Architecture, ABI, runtime, boot, and project documentation.
+
+firmware/
+    BIOS, BOOT.BIN, Stage3, and related firmware.
+
+runtime/
+    crt0, libt32, headers, and target runtime support.
+
+tests/
+    ISA, ABI, algorithm, architecture, and platform tests.
+
+toolchain/
+    t32-as, t32-ar, t32-cc, t32-ld, and t32-nm.
+
+tools/
+    Host utilities including t32-disk.
+
+validation/
+    Higher-level behavioral and integration validation.
+
+vm/
+    libt32vm, t32-run, t32-runx, and developing node components.
 ```
 
-The pointee type controls scaling:
+------------------------------------------------------------------------
 
-```text
-char * +/- n  -> address +/- n
-int  * +/- n  -> address +/- (n * 4)
+## Building and Installing
+
+T32 uses recursive Makefiles so components can be developed
+independently while the repository root provides a whole-platform
+workflow.
+
+From the repository root:
+
+``` text
+make
+make test
+make install
 ```
 
-The resulting expression remains a pointer of the original pointee type, so a
-later dereference continues to select the correct T32 memory operation:
-`LDB/STB` for `char *`, and `LDW/STW` for `int *`.
+`make` builds the normal platform components. `make test` runs the
+project validation path. `make install` installs the normal host-side
+tools and installable components.
 
-Stage 21 deliberately supports the pointer on the left side only. Pointer to
-pointer arithmetic and pointer differences remain unsupported; arrays are the
-next natural layer above this groundwork.
+On the current Windows development environment, installed executables
+normally live under:
 
-
-## Stage 22: fixed-size local arrays
-
-Stage 22 adds fixed-size local `int` and `char` arrays, array-to-pointer decay in expressions, and indexed loads/stores. `int` subscripts scale by four bytes; `char` subscripts scale by one byte. Array lengths must currently be positive integer constants and array initializers are intentionally deferred.
-
-## 0.23.0 named structs and member access
-
-`t32-cc 0.23.0` introduces the first aggregate C object type.
-
-```c
-struct point {
-    int x;
-    int y;
-};
-
-int main(void)
-{
-    struct point p;
-
-    p.x = 10;
-    p.y = 32;
-
-    return p.x + p.y;
-}
+``` text
+%USERPROFILE%\.local\bin
 ```
 
-Struct layout is computed at compile time. `char` members occupy one byte;
-`int` members are aligned to four-byte boundaries; and the total struct size is
-rounded to four bytes. Member access therefore becomes a typed fixed offset
-from the containing object's address.
+That directory should be present in `PATH`.
 
-For example:
+A typical Windows workflow is:
 
-```c
-struct record {
-    char tag;   /* offset 0 */
-    int value;  /* offset 4 */
-};
+``` bat
+cd O:\Foundry\t32
+make
+make test
+make install
 ```
 
-uses `LDB/STB` for `tag` and `LDW/STW` for `value`.
+Individual components can also be built and tested independently:
 
-Stage 23 deliberately supports named struct definitions, local struct objects,
-and the `.` operator only. Struct pointers / `->`, arrays of structs, nested
-structs, whole-struct assignment, struct initializers, `typedef`, and `sizeof`
-remain later milestones.
-
-## 0.24.0 struct pointers and `->`
-
-Stage 24 connects aggregate layout to the pointer machinery:
-
-```c
-struct point {
-    int x;
-    int y;
-};
-
-int main(void)
-{
-    struct point p;
-    struct point *q = &p;
-
-    q->x = 40;
-    q->y = 2;
-
-    return q->x + q->y;
-}
+``` bat
+cd toolchain\t32-cc
+make
+make test
 ```
 
-A `struct T *` local occupies one machine word. `->member` loads the pointer,
-adds the member's compile-time offset, then performs the member's typed memory
-operation (`LDB/STB` for `char`, `LDW/STW` for `int`).
+or:
 
-Stage 24 keeps the boundary deliberately small: `.` is for struct objects and
-`->` is for struct pointers. Arrays of structs, nested structs, whole-struct
-assignment, struct initializers, `typedef`, and `sizeof` remain later work.
+``` bat
+cd vm\t32-run
+make
+make test
+```
 
-## 0.24.1 struct-member regression fix
+The project is developed primarily on Windows today. Portable components
+are kept portable where practical, but `t32-runx` is intentionally a
+Windows-native developer application rather than an attempt to solve
+every desktop platform at once.
 
-0.24.1 is a surgical correction to the 0.24.0 `struct *` / `->` milestone.
+------------------------------------------------------------------------
 
-The 0.24.0 implementation temporarily reused the statement `pointer_local`
-field as a Boolean marker for `->`. That field uses `-1` as its normal
-"not-a-pointer-local" sentinel, and nonzero values are true in C. As a result,
-ordinary `object.member = value` stores could incorrectly enter the
-pointer-member code-generation path.
+## Development Philosophy
 
-0.24.1 gives struct-member expressions and stores a dedicated
-`member_base_is_pointer` flag. `.` and `->` now share member layout/type
-metadata without sharing unrelated parser sentinel fields.
+T32 follows a few simple principles:
+
+-   build from the foundation upward;
+-   keep the machine understandable;
+-   prefer clarity over cleverness;
+-   define explicit interfaces between layers;
+-   validate important behavior with executable tests;
+-   let real compiler, firmware, and application requirements drive ISA
+    growth;
+-   keep VM, firmware, compiler, runtime, and storage responsibilities
+    separated;
+-   preserve the reasoning behind architectural decisions.
+
+Simple early implementations are allowed to mature rather than
+pretending the first design is final. T32D before ext2 is one example: a
+tiny native boot path allows the firmware and VM contracts to become
+solid before a real filesystem is introduced.
+
+------------------------------------------------------------------------
+
+## Why T32 Exists
+
+Most programming starts near the top of the software stack. T32
+intentionally starts at the other end.
+
+A machine instruction becomes an instruction set. The instruction set
+gets an assembler. The assembler gets a linker. The machine gets a
+runtime. The runtime gets a compiler. The VM gains display, keyboard,
+storage, and time. Firmware learns to boot from disk. C becomes part of
+the boot chain.
+
+Each layer makes the next one possible.
+
+That progression is the point of T32 as much as the finished machine is.
+
+The long-term goal is a small but increasingly complete computing
+environment whose path from instruction encoding to application
+execution can be inspected, understood, modified, and tested.
+
+------------------------------------------------------------------------
+
+## Contributing
+
+Bug reports, documentation corrections, experiments, tests, and
+thoughtful extensions are welcome.
+
+Changes should favor understandable behavior and preserve or improve
+validation. New architecture should be introduced because the platform
+needs it, not merely because larger architectures have it.
+
+------------------------------------------------------------------------
+
+## License
+
+T32 is released under the **MIT License**.
+
+See the repository `LICENSE` file for the complete license text.
+
+------------------------------------------------------------------------
+
+## Author
+
+**Tom Hamilton**
